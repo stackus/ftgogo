@@ -1,0 +1,445 @@
+{
+	"info": {
+		"_postman_id": "0819f97a-5166-45a2-8c25-8c9447016858",
+		"name": "FTGOGO",
+		"description": "Collection of REST calls for the services within the ftogogo application.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Accounts",
+			"item": [
+				{
+					"name": "Get Account",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{HOST}}{{ACCOUNTS_PORT}}/api/accounts/{{consumerID}}",
+							"host": [
+								"{{HOST}}{{ACCOUNTS_PORT}}"
+							],
+							"path": [
+								"api",
+								"accounts",
+								"{{consumerID}}"
+							]
+						},
+						"description": "Get a previously generated consumer (Register Consumer)"
+					},
+					"response": []
+				},
+				{
+					"name": "Disable Account",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"url": {
+							"raw": "{{HOST}}{{ACCOUNTS_PORT}}/api/accounts/{{consumerID}}/disable",
+							"host": [
+								"{{HOST}}{{ACCOUNTS_PORT}}"
+							],
+							"path": [
+								"api",
+								"accounts",
+								"{{consumerID}}",
+								"disable"
+							]
+						},
+						"description": "Get a previously generated consumer (Register Consumer)"
+					},
+					"response": []
+				},
+				{
+					"name": "Enable Account",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"url": {
+							"raw": "{{HOST}}{{ACCOUNTS_PORT}}/api/accounts/{{consumerID}}/enable",
+							"host": [
+								"{{HOST}}{{ACCOUNTS_PORT}}"
+							],
+							"path": [
+								"api",
+								"accounts",
+								"{{consumerID}}",
+								"enable"
+							]
+						},
+						"description": "Get a previously generated consumer (Register Consumer)"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Consumer",
+			"item": [
+				{
+					"name": "Register Consumer",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();\r",
+									"pm.environment.set(\"consumerID\", jsonData.id);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"{{$randomFullName}}\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{HOST}}{{CONSUMER_PORT}}/api/consumers",
+							"host": [
+								"{{HOST}}{{CONSUMER_PORT}}"
+							],
+							"path": [
+								"api",
+								"consumers"
+							]
+						},
+						"description": "Register a new consumer"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Consumer",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{HOST}}{{CONSUMER_PORT}}/api/consumers/{{consumerID}}",
+							"host": [
+								"{{HOST}}{{CONSUMER_PORT}}"
+							],
+							"path": [
+								"api",
+								"consumers",
+								"{{consumerID}}"
+							]
+						},
+						"description": "Get a previously generated consumer (Register Consumer)"
+					},
+					"response": []
+				},
+				{
+					"name": "Rename Consumer",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"{{$randomFullName}}\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{HOST}}{{CONSUMER_PORT}}/api/consumers/{{consumerID}}/rename",
+							"host": [
+								"{{HOST}}{{CONSUMER_PORT}}"
+							],
+							"path": [
+								"api",
+								"consumers",
+								"{{consumerID}}",
+								"rename"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Kitchen",
+			"item": [
+				{
+					"name": "Get Restaurant",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{HOST}}{{KITCHEN_PORT}}/api/restaurants/{{restaurantID}}",
+							"host": [
+								"{{HOST}}{{KITCHEN_PORT}}"
+							],
+							"path": [
+								"api",
+								"restaurants",
+								"{{restaurantID}}"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Order",
+			"item": [
+				{
+					"name": "Create Order",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();\r",
+									"pm.environment.set(\"orderID\", jsonData.id);"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"pm.environment.set('item1Count', Math.floor(Math.random() * 5)+1);\r",
+									"pm.environment.set('item2Count', Math.floor(Math.random() * 5)+1);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"consumer_id\": \"{{consumerID}}\",\r\n    \"restaurant_id\": \"{{restaurantID}}\",\r\n    \"line_items\": {\r\n        \"item1\": {{item1Count}},\r\n        \"item2\": {{item2Count}}\r\n    },\r\n    \"delivery_time\": \"{{$isoTimestamp}}\",\r\n    \"delivery_address\": {\r\n        \"street1\": \"123 Main St.\",\r\n        \"street2\": \"\",\r\n        \"city\": \"Hometown\",\r\n        \"state\": \"OM\",\r\n        \"zip\": \"99999\"\r\n    }\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{HOST}}{{ORDER_PORT}}/api/orders",
+							"host": [
+								"{{HOST}}{{ORDER_PORT}}"
+							],
+							"path": [
+								"api",
+								"orders"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Order",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{HOST}}{{ORDER_PORT}}/api/orders/{{orderID}}",
+							"host": [
+								"{{HOST}}{{ORDER_PORT}}"
+							],
+							"path": [
+								"api",
+								"orders",
+								"{{orderID}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Swagger Spec",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{HOST}}{{ORDER_PORT}}/api/orders/{{orderID}}",
+							"host": [
+								"{{HOST}}{{ORDER_PORT}}"
+							],
+							"path": [
+								"api",
+								"orders",
+								"{{orderID}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Restaurant",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{HOST}}{{KITCHEN_PORT}}/api/restaurants/{{restaurantID}}",
+							"host": [
+								"{{HOST}}{{KITCHEN_PORT}}"
+							],
+							"path": [
+								"api",
+								"restaurants",
+								"{{restaurantID}}"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Restaurant",
+			"item": [
+				{
+					"name": "Create Restaurant",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();\r",
+									"pm.environment.set(\"restaurantID\", jsonData.id);"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"pm.environment.set('item1Price', Math.floor(Math.random() * 300)+1)\r",
+									"pm.environment.set('item2Price', Math.floor(Math.random() * 300)+1)"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"{{$randomCompanyName}}\",\r\n    \"address\": {\r\n        \"city\": \"Springfield\",\r\n        \"state\": \"ZZ\",\r\n        \"street1\": \"123 Main St.\",\r\n        \"street2\": \"Suite 202\",\r\n        \"zip\": \"99999\"\r\n    },\r\n    \"menu\": {\r\n        \"menu_items\": [\r\n            {\r\n                \"id\": \"item1\",\r\n                \"name\": \"{{$randomProductName}}\",\r\n                \"price\": {{item1Price}}\r\n            },\r\n            {\r\n                \"id\": \"item2\",\r\n                \"name\": \"{{$randomProductName}}\",\r\n                \"price\": {{item2Price}}\r\n            }\r\n        ]\r\n    }\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{HOST}}{{RESTAURANT_PORT}}/api/restaurants",
+							"host": [
+								"{{HOST}}{{RESTAURANT_PORT}}"
+							],
+							"path": [
+								"api",
+								"restaurants"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Restaurant",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();\r",
+									"pm.environment.set(\"restaurantID\", jsonData.id);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"{{$randomNoun}}\",\r\n    \"menu\": [\r\n        {\r\n            \"id\": \"item1\",\r\n            \"name\": \"item1 name\",\r\n            \"price\": 100\r\n        }\r\n    ]\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{HOST}}{{RESTAURANT_PORT}}/api/restaurants",
+							"host": [
+								"{{HOST}}{{RESTAURANT_PORT}}"
+							],
+							"path": [
+								"api",
+								"restaurants"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "CONSUMER_PORT",
+			"value": ":8002"
+		},
+		{
+			"key": "HOST",
+			"value": "https://127.0.0.1"
+		},
+		{
+			"key": "RESTAURANT_PORT",
+			"value": ":8006"
+		},
+		{
+			"key": "KITCHEN_PORT",
+			"value": ":8004"
+		},
+		{
+			"key": "ORDER_PORT",
+			"value": ":8005"
+		},
+		{
+			"key": "ACCOUNTS_PORT",
+			"value": ":8001"
+		}
+	]
+}

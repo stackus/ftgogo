@@ -1,0 +1,11 @@
+output: web_server_api.gen.go
+package: main
+generate:
+  - types
+  - chi-server
+  - spec
+import-mapping:
+  ../../../serviceapis/commonapi/spec.yaml: serviceapis/commonapi
+  ../../../serviceapis/restaurantapi/spec.yaml: serviceapis/restaurantapi
+  ../../internal/application/queries/spec.yaml: github.com/stackus/ftgogo/delivery/internal/application/queries
+  ../../../shared-go/web/spec.yaml: shared-go/web

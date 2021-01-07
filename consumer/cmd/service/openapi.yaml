@@ -1,0 +1,81 @@
+openapi: "3.0.0"
+info:
+  version: "1.0.0"
+  title: Consumer Service API
+  description: The consumer-service API is part of the FTGOGO demonstration application
+  contact:
+    name: FTGOGO Issues
+    url: https://github.com/stackus/ftgogo/issues
+servers:
+  - url: https://{host}:{port}/api
+    variables:
+      host:
+        default: localhost
+      port:
+        default: "8002"
+paths:
+  /consumers:
+    post:
+      summary: Register a new consumer for delivery
+      operationId: registerConsumer
+      requestBody:
+        description: register consumer request
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name]
+              properties:
+                name:
+                  type: string
+      responses:
+        '201':
+          $ref: '#/components/responses/ConsumerIDResponse'
+        default:
+          $ref: '../../../shared-go/web/spec.yaml#/components/responses/ErrorResponse'
+  /consumers/{consumerID}:
+    get:
+      summary: Get basic information for an consumer by ID
+      operationId: getConsumer
+      parameters:
+        - $ref: '#/components/parameters/ConsumerID'
+      responses:
+        '200':
+          $ref: '#/components/responses/ConsumerResponse'
+        default:
+          $ref: '../../../shared-go/web/spec.yaml#/components/responses/ErrorResponse'
+
+components:
+  parameters:
+    ConsumerID:
+      in: path
+      name: consumerID
+      description: consumer id (uuid)
+      required: true
+      schema:
+        type: string
+        format: uuid
+  responses:
+    ConsumerIDResponse:
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            required: [id]
+            properties:
+              id:
+                type: string
+    ConsumerResponse:
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            required: [consumer_id, name]
+            properties:
+              consumer_id:
+                type: string
+              name:
+                type: string

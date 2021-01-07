@@ -1,0 +1,47 @@
+components:
+  schemas:
+    OrderHistory:
+      type: object
+      required: [ order_id, status, restaurant_id, restaurant_name ]
+      properties:
+        order_id:
+          type: string
+          format: uuid
+        status:
+          type: string
+        restaurant_id:
+          type: string
+          format: uuid
+        restaurant_name:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+    OrderHistoryFilters:
+      type: object
+      properties:
+        since:
+          type: string
+          format: date-time
+        keywords:
+          type: array
+          items:
+            type: string
+        status:
+          type: string
+          enum: [ ApprovalPending, Approved, Rejected, CancelPending, Cancelled, RevisionPending ]
+  responses:
+    GetConsumerOrderHistoryResponse:
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            required: [ orders, next ]
+            properties:
+              orders:
+                type: array
+                items:
+                  $ref: '#/components/schemas/OrderHistory'
+              next:
+                type: string

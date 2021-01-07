@@ -1,0 +1,17 @@
+components:
+  schemas:
+    DeliveryStatus:
+      type: object
+      required: [ id, status, assigned_courier, courier_actions ]
+      properties:
+        id:
+          type: string
+          format: uuid
+        status:
+          type: string
+        assigned_courier:
+          type: string
+        courier_actions:
+          type: array
+          items:
+            type: string

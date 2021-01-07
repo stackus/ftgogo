@@ -1,0 +1,270 @@
+version: "3.8"
+x-environment: &default-environment
+  GET_HOSTS_FROM: dns
+  ENVIRONMENT: development
+  LOG_LEVEL: TRACE
+  EVENT_DRIVER: nats
+  NATS_URL: stan:4222
+  NATS_CLUSTER_ID: test-cluster
+
+services:
+  postgres:
+    container_name: postgres
+    hostname: postgres
+    image: postgres:alpine
+    restart: always
+    environment:
+      GET_HOST_FROM: dns
+      POSTGRES_PASSWORD: itsasecret
+    networks:
+      - mononet
+    ports:
+      - '5432:5432'
+    volumes:
+      - 'pgdata:/var/lib/postgresql/data'
+      - './local-data/init-postgres.sql:/docker-entrypoint-initdb.d/init-postgres.sql'
+
+  stan:
+    container_name: stan
+    hostname: stan
+    image: nats-streaming:latest
+    command: -store file -dir /data
+    environment:
+      GET_HOST_FROM: dns
+    networks:
+      - mononet
+    ports:
+      - '8222:8222'
+    volumes:
+      - 'standata:/data'
+
+  account-service:
+    container_name: accountservice
+    hostname: accountservice
+    restart: on-failure
+    build:
+      context: .
+      args:
+        service: account
+    environment:
+      <<: *default-environment
+      SERVICE_ID: account-service
+      PG_CONN: host=postgres dbname=accounting user=accounting_user password=accounting_pass pool_max_conns=10
+    depends_on:
+      - postgres
+      - stan
+    networks:
+      - mononet
+    ports:
+      - '8001:80'
+  account-cdc:
+    container_name: accountcdc
+    hostname: accountcdc
+    restart: on-failure
+    build:
+      context: .
+      args:
+        service: account
+        cmd: cdc
+    environment:
+      <<: *default-environment
+      SERVICE_ID: account-cdc
+      PG_CONN: host=postgres dbname=accounting user=accounting_user password=accounting_pass pool_max_conns=10
+    depends_on:
+      - postgres
+      - stan
+    networks:
+      - mononet
+  consumer-service:
+    container_name: consumerservice
+    hostname: consumerservice
+    restart: on-failure
+    build:
+      context: .
+      args:
+        service: consumer
+    environment:
+      <<: *default-environment
+      SERVICE_ID: consumer-service
+      PG_CONN: host=postgres dbname=consumer user=consumer_user password=consumer_pass pool_max_conns=10
+    depends_on:
+      - postgres
+      - stan
+    networks:
+      - mononet
+    ports:
+      - '8002:80'
+  consumer-cdc:
+    container_name: consumercdc
+    hostname: consumercdc
+    restart: on-failure
+    build:
+      context: .
+      args:
+        service: consumer
+        cmd: cdc
+    environment:
+      <<: *default-environment
+      SERVICE_ID: consumer-cdc
+      PG_CONN: host=postgres dbname=consumer user=consumer_user password=consumer_pass pool_max_conns=10
+    depends_on:
+      - postgres
+      - stan
+    networks:
+      - mononet
+  delivery-service:
+    container_name: deliveryservice
+    hostname: deliveryservice
+    restart: on-failure
+    build:
+      context: .
+      args:
+        service: delivery
+    environment:
+      <<: *default-environment
+      SERVICE_ID: delivery-service
+      PG_CONN: host=postgres dbname=delivery user=delivery_user password=delivery_pass pool_max_conns=10
+    depends_on:
+      - postgres
+      - stan
+    networks:
+      - mononet
+    ports:
+      - '8003:80'
+  kitchen-service:
+    container_name: kitchenservice
+    hostname: kitchenservice
+    restart: on-failure
+    build:
+      context: .
+      args:
+        service: kitchen
+    environment:
+      <<: *default-environment
+      SERVICE_ID: kitchen-service
+      PG_CONN: host=postgres dbname=kitchen user=kitchen_user password=kitchen_pass pool_max_conns=10
+    depends_on:
+      - postgres
+      - stan
+    networks:
+      - mononet
+    ports:
+      - '8004:80'
+  kitchen-cdc:
+    container_name: kitchencdc
+    hostname: kitchencdc
+    restart: on-failure
+    build:
+      context: .
+      args:
+        service: kitchen
+        cmd: cdc
+    environment:
+      <<: *default-environment
+      SERVICE_ID: kitchen-cdc
+      PG_CONN: host=postgres dbname=kitchen user=kitchen_user password=kitchen_pass pool_max_conns=10
+    depends_on:
+      - postgres
+      - stan
+    networks:
+      - mononet
+  order-service:
+    container_name: orderservice
+    hostname: orderservice
+    restart: on-failure
+    build:
+      context: .
+      args:
+        service: order
+    environment:
+      <<: *default-environment
+      SERVICE_ID: order-service
+      PG_CONN: host=postgres dbname=ordering user=ordering_user password=ordering_pass pool_max_conns=10
+    depends_on:
+      - postgres
+      - stan
+    networks:
+      - mononet
+    ports:
+      - '8005:80'
+  order-history-service:
+    container_name: orderhistoryservice
+    hostname: orderhistoryservice
+    restart: on-failure
+    build:
+      context: .
+      args:
+        service: order-history
+    environment:
+      <<: *default-environment
+      SERVICE_ID: order-history-service
+      PG_CONN: host=postgres dbname=order_history user=order_history_user password=order_history_pass pool_max_conns=10
+    depends_on:
+      - postgres
+      - stan
+    networks:
+      - mononet
+    ports:
+      - '8015:80'
+  order-cdc:
+    container_name: ordercdc
+    hostname: ordercdc
+    restart: on-failure
+    build:
+      context: .
+      args:
+        service: order
+        cmd: cdc
+    environment:
+      <<: *default-environment
+      SERVICE_ID: order-cdc
+      PG_CONN: host=postgres dbname=ordering user=ordering_user password=ordering_pass pool_max_conns=10
+    depends_on:
+      - postgres
+      - stan
+    networks:
+      - mononet
+  restaurant-service:
+    container_name: restaurantservice
+    hostname: restaurantservice
+    restart: on-failure
+    build:
+      context: .
+      args:
+        service: restaurant
+    environment:
+      <<: *default-environment
+      SERVICE_ID: restaurant-service
+      PG_CONN: host=postgres dbname=restaurant user=restaurant_user password=restaurant_pass pool_max_conns=10
+    depends_on:
+      - postgres
+      - stan
+    networks:
+      - mononet
+    ports:
+      - '8006:80'
+  restaurant-cdc:
+    container_name: restaurantcdc
+    hostname: restaurantcdc
+    restart: on-failure
+    build:
+      context: .
+      args:
+        service: restaurant
+        cmd: cdc
+    environment:
+      <<: *default-environment
+      SERVICE_ID: restaurant-cdc
+      PG_CONN: host=postgres dbname=restaurant user=restaurant_user password=restaurant_pass pool_max_conns=10
+    depends_on:
+      - postgres
+      - stan
+    networks:
+      - mononet
+
+networks:
+  mononet:
+
+volumes:
+  pgdata:
+  standata:

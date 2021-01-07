@@ -1,0 +1,74 @@
+version: "3.8"
+services:
+  zookeeper:
+    container_name: zookeeper
+    image: wurstmeister/zookeeper
+    ports:
+      - 2181:2181
+    networks:
+      - mononet
+  kafka:
+    container_name: kafka
+    image: wurstmeister/kafka
+    hostname: kafka
+    ports:
+      - 9092:9092
+    depends_on:
+      - zookeeper
+    environment:
+      KAFKA_ADVERTISED_HOST_NAME: kafka
+      KAFKA_ADVERTISED_PORT: 9092
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+    networks:
+      - mononet
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+  account-service:
+    environment:
+      EVENT_DRIVER: kafka
+      KAFKA_BROKERS: kafka:9092
+    depends_on:
+      - kafka
+      - zookeeper
+  consumer-service:
+    environment:
+      EVENT_DRIVER: kafka
+      KAFKA_BROKERS: kafka:9092
+    depends_on:
+      - kafka
+      - zookeeper
+  delivery-service:
+    environment:
+      EVENT_DRIVER: kafka
+      KAFKA_BROKERS: kafka:9092
+    depends_on:
+      - kafka
+      - zookeeper
+  kitchen-service:
+    environment:
+      EVENT_DRIVER: kafka
+      KAFKA_BROKERS: kafka:9092
+    depends_on:
+      - kafka
+      - zookeeper
+  order-service:
+    environment:
+      EVENT_DRIVER: kafka
+      KAFKA_BROKERS: kafka:9092
+    depends_on:
+      - kafka
+      - zookeeper
+  order-history-service:
+    environment:
+      EVENT_DRIVER: kafka
+      KAFKA_BROKERS: kafka:9092
+    depends_on:
+      - kafka
+      - zookeeper
+  restaurant-service:
+    environment:
+      EVENT_DRIVER: kafka
+      KAFKA_BROKERS: kafka:9092
+    depends_on:
+      - kafka
+      - zookeeper

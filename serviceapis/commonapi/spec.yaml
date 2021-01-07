@@ -1,0 +1,20 @@
+components:
+  schemas:
+    Address:
+      type: object
+      required: [ street1, city, state, zip ]
+      properties:
+        street1:
+          type: string
+        street2:
+          type: string
+        city:
+          type: string
+        state:
+          type: string
+        zip:
+          type: string
+    MenuItemQuantities:
+      type: object
+      additionalProperties:
+        type: integer

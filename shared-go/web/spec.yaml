@@ -1,0 +1,12 @@
+components:
+  responses:
+    ErrorResponse:
+      description: Unexpected Error
+      content:
+        application/json:
+          schema:
+            type: object
+            required: [ message ]
+            properties:
+              message:
+                type: string

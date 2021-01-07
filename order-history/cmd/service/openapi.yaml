@@ -1,0 +1,97 @@
+openapi: "3.0.0"
+info:
+  version: "1.0.0"
+  title: Order Service API
+  description: The order-service API is part of the FTGOGO demonstration application
+  contact:
+    name: FTGOGO Issues
+    url: https://github.com/stackus/ftgogo/issues
+servers:
+  - url: https://{host}:{port}/api
+    variables:
+      host:
+        default: localhost
+      port:
+        default: "8005"
+paths:
+  /orders:
+    get:
+      summary: Search orders for a consumer
+      operationId: getConsumerOrderHistory
+      parameters:
+        - in: query
+          name: consumerID
+          description: consumer id (uuid)
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - in: query
+          name: filter
+          description: search filters
+          style: deepObject
+          schema:
+            $ref: '../../internal/application/queries/spec.yaml#/components/schemas/OrderHistoryFilters'
+        - in: query
+          name: next
+          description: provide to read the next page of results
+          required: false
+          schema:
+            type: string
+        - in: query
+          name: limit
+          description: provide to set the results page size
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 50
+            default: 20
+      responses:
+        '200':
+          $ref: '../../internal/application/queries/spec.yaml#/components/responses/GetConsumerOrderHistoryResponse'
+        default:
+          $ref: '../../../shared-go/web/spec.yaml#/components/responses/ErrorResponse'
+  /orders/{orderID}:
+    get:
+      summary: Get information for an order by ID
+      operationId: getOrderHistory
+      parameters:
+        - $ref: '#/components/parameters/OrderID'
+      responses:
+        '200':
+          $ref: '#/components/responses/OrderHistoryResponse'
+        default:
+          $ref: '../../../shared-go/web/spec.yaml#/components/responses/ErrorResponse'
+
+components:
+  parameters:
+    OrderID:
+      in: path
+      name: orderID
+      description: order id (uuid)
+      required: true
+      schema:
+        type: string
+        format: uuid
+  responses:
+    OrderHistoryResponse:
+      description: OK
+      content:
+        application/json:
+          schema:
+            $ref: '../../internal/application/queries/spec.yaml#/components/schemas/OrderHistory'
+    OrderHistoriesResponse:
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            required: [ orders, next ]
+            properties:
+              orders:
+                type: array
+                items:
+                  $ref: '../../internal/application/queries/spec.yaml#/components/schemas/OrderHistory'
+              next:
+                type: string

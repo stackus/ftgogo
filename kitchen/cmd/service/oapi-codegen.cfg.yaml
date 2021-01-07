@@ -1,0 +1,9 @@
+output: web_server_api.gen.go
+package: main
+generate:
+  - types
+  - chi-server
+  - spec
+import-mapping:
+  ../../../serviceapis/commonapi/spec.yaml: serviceapis/commonapi
+  ../../../shared-go/web/spec.yaml: shared-go/web
