@@ -1,4 +1,4 @@
-ftgogo - event-driven architecture demonstration application 
+# ftgogo - event-driven architecture demonstration application 
 
 ## Prerequisites
 
@@ -10,7 +10,7 @@ Optionally [Postman](https://www.postman.com/) can be used to load the api colle
 
 Open a command prompt and then execute the following docker command
 
-### Mac Linux Users
+### Mac and Linux Users
 
     COMPOSE_DOCKER_CLI_BUILD=1 DOCKER_BUILDKIT=1 docker-compose up
 
