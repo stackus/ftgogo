@@ -13,5 +13,5 @@ type ConsumerSnapshot struct {
 }
 
 func (ConsumerSnapshot) SnapshotName() string {
-	return "domain-service.domain.ConsumerSnapshot"
+	return "consumerservice.ConsumerSnapshot"
 }

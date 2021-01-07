@@ -73,7 +73,7 @@ func (t *Ticket) ProcessCommand(command core.Command) error {
 		})
 
 	case *CancelCreateTicket:
-		// Originally not implemented in ftgo-domain-service
+		// Originally not implemented in ftgo-kitchen-service
 		if t.State != CreatePending {
 			return ErrTicketInvalidState
 		}
