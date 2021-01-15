@@ -39,20 +39,20 @@ Use `Ctrl-C` to stop all services.
 Several services also have sibling CDC services.
 
 ### Design
-- Services exist within a "domain" folder. Within that folder you'll find the following layout.
-
-
-    /"domain"
-      /cmd - Parent for servers, cli, and tools that are built using the code in this domain
-        /cdc - CDC (Change Data Capture) server. If the service publishes messages it will also have this
-        /service - Primary domain service
-      /internal - Use Golangs special treatment of "internal" to sequester our code from the other services
-        /adapters - The "Adapters" from "Ports & Adapters". These are the infrastructure implementations of domain interfaces
-        /application - CQRS parent. Processes under this will implement business rules and logic
-          /commands - Application commands. Processes that apply some change to our domain
-          /queries - Application queries. Processes that request information from our domain
-        /domain - The definitions, interfaces, and the domain rules and logic
-        /sagas - The definitions for complex multi-service interactions
+- Services exist within a "domain" folder. Within that folder you'll find the following layout.  
+  ```
+  /"domain"
+  |-/cmd           - Parent for servers, cli, and tools that are built using the code in this domain
+  | |-/cdc         - CDC (Change Data Capture) server. If the service publishes messages it will also have this
+  | |-/service     - Primary domain service
+  |-/internal      - Use Golangs special treatment of "internal" to sequester our code from the other services
+    |-/adapters    - The "Adapters" from "Ports & Adapters". These are the implementations of domain interfaces
+    |-/application - CQRS parent. Processes under this will implement business rules and logic
+    | |-/commands  - Application commands. Processes that apply some change to our domain
+    | |-/queries   - Application queries. Processes that request information from our domain
+    |-/domain      - The definitions, interfaces, and the domain rules and logic
+    |-/sagas       - The definitions for complex multi-service interactions
+  ```
 
 - The api for each service has been defined in an `/"domain"/cmd/service/openapi.yaml` file.
   > An issue in the openapi library being used prevents the serving the openapi document via HTTP request. A swagger UI may be added sometime later if this is resolved, or a different solution is used.
