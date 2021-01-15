@@ -1,8 +1,8 @@
 openapi: "3.0.0"
 info:
   version: "1.0.0"
-  title: Order Service API
-  description: The order-service API is part of the FTGOGO demonstration application
+  title: Order History Service API
+  description: The order-history-service API is part of the FTGOGO demonstration application
   contact:
     name: FTGOGO Issues
     url: https://github.com/stackus/ftgogo/issues
@@ -12,7 +12,7 @@ servers:
       host:
         default: localhost
       port:
-        default: "8005"
+        default: "8015"
 paths:
   /orders:
     get:
