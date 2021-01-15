@@ -16,15 +16,24 @@ This repository exists to demonstrate the patterns and processes involved when c
 
 Open a command prompt and then execute the following docker command
 
-### Mac and Linux Users
+> NOTE: The first time you bring everything up the init script for Postgres will run authomatically. The services will crash-loop for a bit because of that. Eventually things will stabilize.
 
-    COMPOSE_DOCKER_CLI_BUILD=1 DOCKER_BUILDKIT=1 docker-compose up
+### Mac and Linux Users
+```bash
+COMPOSE_DOCKER_CLI_BUILD=1 DOCKER_BUILDKIT=1 docker-compose up
+```
 
 ### Windows Users
-
-    set "COMPOSE_DOCKER_CLI_BUILD=1" & set "DOCKER_BUILDKIT=1" & docker-compose up
+```shell
+set "COMPOSE_DOCKER_CLI_BUILD=1" & set "DOCKER_BUILDKIT=1" & docker-compose up
+```
 
 Use `Ctrl-C` to stop all services.
+
+### Running individual services
+Not recommended but each service can be run using `go run .`. You'll need to use an `.env` file or set some environment variables to properly run the service.
+
+> Use `go run . --help` to see what flags and the list of environment variables that can be set.
 
 ## Application
 ### Services
@@ -65,9 +74,10 @@ Several services also have sibling CDC services.
 
 ### DDD / Hexagonal Architecture / Ports & Adapters
 
-The organizational layout of the services is to bring separation to our layers. The `/"domain"/cmd/service/application.go` file found in all the services is where ports (web handlers, message receivers) are combined with the application commands and queries. The application is connected to the `/internal/domain` using interfaces backed by real implementations found the `/internal/adapters`. 
+The organizational layout of the services is to bring separation to the layers. The `/"domain"/cmd/service/application.go` file found in all the services is where ports (web handlers, message receivers) are combined with the application commands and queries. 
 
-- The application commands queries have no dependencies on any primary ports or any adapters directly. In fact, they may only receive adapters that implement secondary ports defined by interfaces in the domain. 
+- The application is connected to the `/internal/domain` using interfaces backed by real implementations found the `/internal/adapters`.
+- The applications commands and queries have no dependencies on any primary ports or any adapters directly. In fact, they may only receive adapters that implement secondary ports defined by interfaces in the domain. 
 - No dependencies exist on any ports or adapters from the code in `/internal/domain` and this is crucial to having a clean architecture.
 
 > Regarding the layout. What I landed on felt alright to work with, felt like it provided the right separations, and felt like it wasn't an over complication of DDD applied to a folder structure. You be the judge. 
@@ -75,6 +85,8 @@ The organizational layout of the services is to bring separation to our layers. 
 ### CQRS
 
 Each service divides the requests it receives into commands and queries. Using a simple design described [here](https://threedots.tech/post/basic-cqrs-in-go/) by [Three Dots Labs](https://threedotslabs.com/) all of our handlers can be setup to use a command or query. 
+
+> While most application commands in this repository will adhere to the "commands return nothing" rule, some commands return simple scalar values, mostly entity ids, in addition to the error and I am OK with that. 
 
 ### Event Sourcing
 
@@ -97,9 +109,15 @@ An implementation of the outbox pattern is included. It provides the solution to
 > Services can be made to publish messages directly without having to use an outbox and CDC. The pattern works best, only?, with backends that provide transactional support.
 
 ### Other
+#### Mono-repository
 This demonstration application is a mono-repository for the Golang services. I chose to use as few additional frameworks as possible so you'll find there is also quite a bit of shared code in packages under `/shared-go`
 
 > `/shared-go` is named the way it is because I intended to build one of the services in another language. I didn't but left the name the way it was.
+
+#### Type Registration
+Commands, Events, Snapshots, and other serializable entities and value objects are registered in groups in each `/"domain"/internal/domain/register_types.go` and in the child packages of `serviceapis`. This type registration is a feature of [edat/core](https://github.com/stackus/edat/blob/master/core) and is not unique to this application.
+
+The purpose of doing this type registration is to avoid boilerplate marshalling and unmarshalling code for every struct.
 
 ## Changes from FTGO
 I intend for this demonstration to exist as a faithful Golang recreation of the original. If a difference exists either because of opinion or is necessary due of the particulars of Go, I will try my best to include them all here.
@@ -144,4 +162,3 @@ Please make sure to update tests as appropriate.
 ## No warranties
 
 From time to time I expect to make improvements that may be breaking. I provide no expectation that local copies of this demonstration application won't be broken after fetching any new commit(s). If it does fail to run; simply remove the related docker volumes and re-run the demonstration.
- 
