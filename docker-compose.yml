@@ -38,17 +38,17 @@ services:
     volumes:
       - 'standata:/data'
 
-  account-service:
-    container_name: accountservice
-    hostname: accountservice
+  accounting-service:
+    container_name: accountingservice
+    hostname: accountingservice
     restart: on-failure
     build:
       context: .
       args:
-        service: account
+        service: accounting
     environment:
       <<: *default-environment
-      SERVICE_ID: account-service
+      SERVICE_ID: accounting-service
       PG_CONN: host=postgres dbname=accounting user=accounting_user password=accounting_pass pool_max_conns=10
     depends_on:
       - postgres
@@ -57,18 +57,18 @@ services:
       - mononet
     ports:
       - '8001:80'
-  account-cdc:
-    container_name: accountcdc
-    hostname: accountcdc
+  accounting-cdc:
+    container_name: accountingcdc
+    hostname: accountingcdc
     restart: on-failure
     build:
       context: .
       args:
-        service: account
+        service: accounting
         cmd: cdc
     environment:
       <<: *default-environment
-      SERVICE_ID: account-cdc
+      SERVICE_ID: accounting-cdc
       PG_CONN: host=postgres dbname=accounting user=accounting_user password=accounting_pass pool_max_conns=10
     depends_on:
       - postgres
