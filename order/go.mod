@@ -11,6 +11,7 @@ require (
 	github.com/getkin/kin-openapi v0.35.0
 	github.com/go-chi/chi v4.1.2+incompatible
 	github.com/go-chi/render v1.0.1
+	github.com/prometheus/client_golang v1.9.0
 	github.com/rs/zerolog v1.20.0
 	github.com/stackus/edat v0.0.1
 	github.com/stackus/edat-pgx v0.0.1

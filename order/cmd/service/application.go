@@ -7,6 +7,8 @@ import (
 
 	"github.com/go-chi/chi"
 	"github.com/go-chi/render"
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promauto"
 
 	"github.com/stackus/edat/msg"
 	"github.com/stackus/edat/saga"
@@ -28,6 +30,7 @@ import (
 type Application struct {
 	Commands Commands
 	Queries  Queries
+	Metrics  Metrics
 }
 
 type Commands struct {
@@ -50,6 +53,12 @@ type Commands struct {
 type Queries struct {
 	GetOrder      queries.GetOrderHandler
 	GetRestaurant queries.GetRestaurantHandler
+}
+
+type Metrics struct {
+	OrdersPlaced   prometheus.Counter
+	OrdersApproved prometheus.Counter
+	OrdersRejected prometheus.Counter
 }
 
 func initApplication(svc *applications.Service) error {
@@ -89,6 +98,11 @@ func initApplication(svc *applications.Service) error {
 		Queries: Queries{
 			GetOrder:      queries.NewGetOrderHandler(orderRepo),
 			GetRestaurant: queries.NewGetRestaurantHandler(restaurantRepo),
+		},
+		Metrics: Metrics{
+			OrdersPlaced:   promauto.NewCounter(prometheus.CounterOpts{Name: "placed_orders"}),
+			OrdersApproved: promauto.NewCounter(prometheus.CounterOpts{Name: "approved_orders"}),
+			OrdersRejected: promauto.NewCounter(prometheus.CounterOpts{Name: "rejected_orders"}),
 		},
 	}
 
@@ -145,6 +159,8 @@ func (h CommandHandlers) RejectOrder(ctx context.Context, cmdMsg saga.Command) (
 		return []msg.Reply{msg.WithFailure()}, nil
 	}
 
+	h.app.Metrics.OrdersRejected.Inc()
+
 	return []msg.Reply{msg.WithSuccess()}, nil
 }
 
@@ -158,6 +174,8 @@ func (h CommandHandlers) ApproveOrder(ctx context.Context, cmdMsg saga.Command) 
 	if err != nil {
 		return []msg.Reply{msg.WithFailure()}, nil
 	}
+
+	h.app.Metrics.OrdersApproved.Inc()
 
 	return []msg.Reply{msg.WithSuccess()}, nil
 }
@@ -266,13 +284,20 @@ func NewOrderEventHandlers(app Application) OrderEventHandlers { return OrderEve
 func (h OrderEventHandlers) OrderCreated(ctx context.Context, evtMsg msg.EntityEvent) error {
 	evt := evtMsg.Event().(*orderapi.OrderCreated)
 
-	return h.app.Commands.StartCreateOrderSaga.Handle(ctx, commands.StartCreateOrderSaga{
+	err := h.app.Commands.StartCreateOrderSaga.Handle(ctx, commands.StartCreateOrderSaga{
 		OrderID:      evtMsg.EntityID(),
 		ConsumerID:   evt.ConsumerID,
 		RestaurantID: evt.RestaurantID,
 		LineItems:    evt.LineItems,
 		OrderTotal:   evt.OrderTotal,
 	})
+	if err != nil {
+		return err
+	}
+
+	h.app.Metrics.OrdersPlaced.Inc()
+
+	return nil
 }
 
 type WebHandlers struct {
