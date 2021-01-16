@@ -181,7 +181,7 @@ func (s *Service) run(*cobra.Command, []string) error {
 			edatpgx.WebSessionMiddleware(pgConn, zerologto.Logger(s.Logger)),
 		))
 
-	s.WebServer.Mount("/metrics", func(r chi.Router) http.Handler {
+	s.WebServer.Mount(s.Cfg.Web.MetricsPath, func(r chi.Router) http.Handler {
 		return promhttp.Handler()
 	})
 

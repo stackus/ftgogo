@@ -23,8 +23,9 @@ type kafkaCfg struct {
 }
 
 type webCfg struct {
-	ApiPath  string        `envconfig:"API_PATH" default:"/api"`
-	PingPath string        `envconfig:"PING_PATH" default:"/ping"`
-	Http     web.ServerCfg `envconfig:"HTTP"`
-	Cors     web.CorsCfg   `envconfig:"CORS"`
+	ApiPath     string        `envconfig:"API_PATH" default:"/api"`
+	PingPath    string        `envconfig:"PING_PATH" default:"/ping"`
+	MetricsPath string        `envconfig:"METRICS_PATH" default:"/metrics"`
+	Http        web.ServerCfg `envconfig:"HTTP"`
+	Cors        web.CorsCfg   `envconfig:"CORS"`
 }
