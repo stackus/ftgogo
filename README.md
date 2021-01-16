@@ -16,7 +16,7 @@ This repository exists to demonstrate the patterns and processes involved when c
 
 Open a command prompt and then execute the following docker command
 
-> NOTE: The first time you bring everything up the init script for Postgres will run authomatically. The services will crash-loop for a bit because of that. Eventually things will stabilize.
+> NOTE: The first time you bring everything up the init script for Postgres will run automatically. The services will crash-loop for a bit because of that. Eventually things will stabilize.
 
 ### Mac and Linux Users
 ```bash
@@ -50,15 +50,15 @@ Several services also have sibling CDC services.
 ### Design
 - Services exist within a "domain" folder. Within that folder you'll find the following layout.  
   ```
-  /"domain"
+  /"domain"        - Domain that is a subdomain in the application domain
   |-/cmd           - Parent for servers, cli, and tools that are built using the code in this domain
   | |-/cdc         - CDC (Change Data Capture) server. If the service publishes messages it will also have this
   | |-/service     - Primary domain service
   |-/internal      - Use Golangs special treatment of "internal" to sequester our code from the other services
     |-/adapters    - The "Adapters" from "Ports & Adapters". These are the implementations of domain interfaces
     |-/application - CQRS parent. Processes under this will implement business rules and logic
-    | |-/commands  - Application commands. Processes that apply some change to our domain
-    | |-/queries   - Application queries. Processes that request information from our domain
+    | |-/commands  - Application commands. Processes that apply some change to the subdomain
+    | |-/queries   - Application queries. Processes that request information from the subdomain
     |-/domain      - The definitions, interfaces, and the domain rules and logic
     |-/sagas       - The definitions for complex multi-service interactions
   ```
@@ -70,14 +70,14 @@ Several services also have sibling CDC services.
   - [edat/es](https://github.com/stackus/edat/blob/master/es) - implements event sourcing
   - [edat/msg](https://github.com/stackus/edat/blob/master/msg) - implements transactional messaging
   - [edat/sagas](https://github.com/stackus/edat/blob/master/sagas) - implements orchestrated sagas
-- Shared application domain apis, events, commands, and entities are available to all subdomains and are imported from the [serviceapis](https://github.com/stackus/ftgogo/blob/master/serviceapis) package and its child packages.
+- Application domain apis, events, commands, and entities are available to all subdomains from the [serviceapis](https://github.com/stackus/ftgogo/blob/master/serviceapis) folder and its child packages.
 
 ### DDD / Hexagonal Architecture / Ports & Adapters
 
 The organizational layout of the services is to bring separation to the layers. The `/"domain"/cmd/service/application.go` file found in all the services is where ports (web handlers, message receivers) are combined with the application commands and queries. 
 
-- The application is connected to the `/internal/domain` using interfaces backed by real implementations found the `/internal/adapters`.
-- The applications commands and queries have no dependencies on any primary ports or any adapters directly. In fact, they may only receive adapters that implement secondary ports defined by interfaces in the domain. 
+- The application is connected to the `/internal/domain` using interfaces backed by real implementations found in the `/internal/adapters` folder.
+- Commands and queries have no dependencies on any primary ports or on any adapters directly. In fact, they may only receive adapters that implement secondary ports defined by interfaces in the `/internal/domain` folder. 
 - No dependencies exist on any ports or adapters from the code in `/internal/domain` and this is crucial to having a clean architecture.
 
 > Regarding the layout. What I landed on felt alright to work with, felt like it provided the right separations, and felt like it wasn't an over complication of DDD applied to a folder structure. You be the judge. 
@@ -109,6 +109,9 @@ An implementation of the outbox pattern is included. It provides the solution to
 > Services can be made to publish messages directly without having to use an outbox and CDC. The pattern works best, only?, with backends that provide transactional support.
 
 ### Other
+#### Metrics/Instrumentation
+Prometheus metrics for each service are available at `http://localhost:[port]/metrics`. The order-service has a few additional counters. See the order-service [application](https://github.com/stackus/ftgogo/blob/master/order/cmd/service/application.go) for more information.
+
 #### Mono-repository
 This demonstration application is a mono-repository for the Golang services. I chose to use as few additional frameworks as possible so you'll find there is also quite a bit of shared code in packages under `/shared-go`
 
@@ -131,7 +134,6 @@ I intend for this demonstration to exist as a faithful Golang recreation of the 
 ### Missing
 - Tests. Examples of testing these services. Both Unit and Integration
 - Api-Gateway. I haven't gotten around to creating the gateway.
-- Instrumentation/Metrics. I intend to add Prometheus at some point.
 
 ## Out Of Scope
 Just like the original the following are outside the scope of the demonstration.

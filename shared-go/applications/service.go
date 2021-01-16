@@ -29,6 +29,7 @@ import (
 
 	"shared-go/eddsarama"
 	"shared-go/egress"
+	"shared-go/instrumentation"
 	"shared-go/logging"
 	"shared-go/logging/zerologto"
 	"shared-go/web"
@@ -165,8 +166,11 @@ func (s *Service) run(*cobra.Command, []string) error {
 	msgProducer = edatpgx.NewMessageStore(s.PgConn)
 
 	s.Subscriber = msg.NewSubscriber(msgConsumer)
-	// 3. Outbox: Use a message receiver middleware to start a new transaction for each incoming message
-	s.Subscriber.Use(edatpgx.ReceiverSessionMiddleware(pgConn, zerologto.Logger(s.Logger)))
+	s.Subscriber.Use(
+		instrumentation.MessageInstrumentation(),
+		// 3. Outbox: Use a message receiver middleware to start a new transaction for each incoming message
+		edatpgx.ReceiverSessionMiddleware(pgConn, zerologto.Logger(s.Logger)),
+	)
 	s.Publisher = msg.NewPublisher(msgProducer)
 
 	s.WebServer = web.NewServer(s.Cfg.Web.Http, web.WithHealthCheck(s.Cfg.Web.PingPath))
@@ -175,6 +179,7 @@ func (s *Service) run(*cobra.Command, []string) error {
 		web.WithSecure(),
 		web.WithCors(s.Cfg.Web.Cors),
 		web.WithMiddleware(
+			instrumentation.WebInstrumentation(),
 			web.ZeroLogger(s.Logger),
 			http2.RequestContext,
 			// 4. Outbox: Use a web request middleware to start a new transaction for each incoming request
