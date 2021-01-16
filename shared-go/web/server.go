@@ -31,11 +31,13 @@ type Server interface {
 	Start() error
 	Shutdown(ctx context.Context) error
 	Mount(path string, routeFn func(router chi.Router) http.Handler, options ...ServerOption)
+	Options(path string, options ...ServerOption)
 }
 
 type server struct {
-	s    *http.Server
-	root *chi.Mux
+	s       *http.Server
+	root    *chi.Mux
+	options map[string][]ServerOption
 }
 
 type tlsServer struct {
@@ -64,23 +66,26 @@ func NewServer(cfg ServerCfg, options ...ServerOption) Server {
 		IdleTimeout:       cfg.IdleTimeout,
 	}
 
-	// setup TLS and listen for secure requests
-	if cfg.CertPath != "" && cfg.KeyPath != "" {
-		cert, err := tls.LoadX509KeyPair(cfg.CertPath, cfg.KeyPath)
-		if err != nil {
-			panic(err)
-		}
+	s := server{s: httpServer, root: root, options: map[string][]ServerOption{}}
 
-		httpServer.TLSConfig = &tls.Config{
-			Certificates: []tls.Certificate{cert},
-		}
-
-		root.Use(middleware.SetHeader("Strict-Transport-Security", "max-age=31536000; includeSubDomains; preload"))
-
-		return &tlsServer{server: server{s: httpServer, root: root}}
+	if cfg.CertPath == "" || cfg.KeyPath == "" {
+		return &s
 	}
 
-	return &server{s: httpServer, root: root}
+	// setup TLS and listen for secure requests
+	cert, err := tls.LoadX509KeyPair(cfg.CertPath, cfg.KeyPath)
+	if err != nil {
+		panic(err)
+	}
+
+	httpServer.TLSConfig = &tls.Config{
+		Certificates: []tls.Certificate{cert},
+	}
+
+	root.Use(middleware.SetHeader("Strict-Transport-Security", "max-age=31536000; includeSubDomains; preload"))
+
+	return &tlsServer{server: s}
+
 }
 
 // Start starts listening to non-TLS requests
@@ -93,8 +98,16 @@ func (s server) Shutdown(ctx context.Context) error {
 	return s.s.Shutdown(ctx)
 }
 
+func (s *server) Options(path string, options ...ServerOption) {
+	s.options[path] = options
+}
+
 func (s *server) Mount(path string, routeFn func(router chi.Router) http.Handler, options ...ServerOption) {
 	router := chi.NewRouter()
+
+	for _, option := range s.options[path] {
+		option(router)
+	}
 
 	for _, option := range options {
 		option(router)

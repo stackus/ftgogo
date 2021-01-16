@@ -8,10 +8,12 @@ import (
 	"sync"
 	"time"
 
+	"github.com/go-chi/chi"
 	"github.com/jackc/pgx/v4/pgxpool"
 	"github.com/joho/godotenv"
 	"github.com/kelseyhightower/envconfig"
 	"github.com/nats-io/stan.go"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/rs/zerolog"
 	"github.com/spf13/cobra"
 	_ "github.com/stackus/edat-msgpack"
@@ -47,7 +49,7 @@ type svcConfig struct {
 type Service struct {
 	appFn             func(*Service) error
 	app               *cobra.Command
-	cfg               *svcConfig
+	Cfg               *svcConfig
 	Logger            zerolog.Logger
 	PgConn            edatpgx.Client
 	AggregateStore    es.AggregateRootStore
@@ -60,7 +62,7 @@ type Service struct {
 func NewService(appFn func(*Service) error) *Service {
 	svc := &Service{
 		appFn: appFn,
-		cfg:   &svcConfig{},
+		Cfg:   &svcConfig{},
 	}
 
 	svc.app = &cobra.Command{
@@ -77,7 +79,7 @@ func NewService(appFn func(*Service) error) *Service {
 	svc.app.SetUsageFunc(func(command *cobra.Command) error {
 		fmt.Println(appUsage)
 		fmt.Println("Environment Variables:")
-		return envconfig.Usage("", svc.cfg)
+		return envconfig.Usage("", svc.Cfg)
 	})
 
 	return svc
@@ -102,7 +104,7 @@ func (s *Service) initConfig() {
 		}
 	}
 
-	err = envconfig.Process(appPrefix, s.cfg)
+	err = envconfig.Process(appPrefix, s.Cfg)
 	if err != nil {
 		fmt.Println("error reading environment variables", err)
 		os.Exit(1)
@@ -113,8 +115,8 @@ func (s *Service) run(*cobra.Command, []string) error {
 	var err error
 
 	s.Logger, err = logging.NewZeroLogger(logging.Config{
-		Environment: s.cfg.Environment,
-		LogLevel:    s.cfg.LogLevel,
+		Environment: s.Cfg.Environment,
+		LogLevel:    s.Cfg.LogLevel,
 	})
 	if err != nil {
 		return err
@@ -123,11 +125,12 @@ func (s *Service) run(*cobra.Command, []string) error {
 	log.DefaultLogger = zerologto.Logger(s.Logger)
 
 	var pgConn *pgxpool.Pool
-	pgConn, err = pgxpool.Connect(context.Background(), s.cfg.Postgres.Conn)
+	pgConn, err = pgxpool.Connect(context.Background(), s.Cfg.Postgres.Conn)
 	if err != nil {
 		panic(err)
 	}
 
+	// 1. Outbox: Use session client which will fetch a transaction from the context
 	s.PgConn = edatpgx.NewSessionClient()
 
 	defer func() {
@@ -143,39 +146,44 @@ func (s *Service) run(*cobra.Command, []string) error {
 	var msgProducer msg.Producer
 
 	switch {
-	case s.cfg.EventDriver == "nats":
+	case s.Cfg.EventDriver == "nats":
 		var conn stan.Conn
-		conn, err = stan.Connect(s.cfg.Nats.ClusterID, s.cfg.ServiceID, stan.NatsURL(s.cfg.Nats.URL))
+		conn, err = stan.Connect(s.Cfg.Nats.ClusterID, s.Cfg.ServiceID, stan.NatsURL(s.Cfg.Nats.URL))
 		if err != nil {
 			panic(err)
 		}
-		msgConsumer = edatstan.NewConsumer(conn, s.cfg.ServiceID,
-			edatstan.WithConsumerActWait(s.cfg.Nats.AckWaitTimeout),
+		msgConsumer = edatstan.NewConsumer(conn, s.Cfg.ServiceID,
+			edatstan.WithConsumerActWait(s.Cfg.Nats.AckWaitTimeout),
 		)
-	case s.cfg.EventDriver == "kafka":
-		msgConsumer = eddsarama.NewConsumer(s.cfg.Kafka.Brokers, s.cfg.ServiceID)
+	case s.Cfg.EventDriver == "kafka":
+		msgConsumer = eddsarama.NewConsumer(s.Cfg.Kafka.Brokers, s.Cfg.ServiceID)
 	default:
-		// msgProducer = inmem.NewProducer()
 		msgConsumer = inmem.NewConsumer()
 	}
 
-	// Outbox Producer
+	// 2. Outbox: Producer publishes into the db
 	msgProducer = edatpgx.NewMessageStore(s.PgConn)
 
 	s.Subscriber = msg.NewSubscriber(msgConsumer)
+	// 3. Outbox: Use a message receiver middleware to start a new transaction for each incoming message
 	s.Subscriber.Use(edatpgx.ReceiverSessionMiddleware(pgConn, zerologto.Logger(s.Logger)))
 	s.Publisher = msg.NewPublisher(msgProducer)
 
-	s.WebServer = web.NewServer(s.cfg.Web.Http,
-		web.WithHealthCheck(s.cfg.Web.PingPath),
+	s.WebServer = web.NewServer(s.Cfg.Web.Http, web.WithHealthCheck(s.Cfg.Web.PingPath))
+
+	s.WebServer.Options(s.Cfg.Web.ApiPath,
 		web.WithSecure(),
-		web.WithCors(s.cfg.Web.Cors),
+		web.WithCors(s.Cfg.Web.Cors),
 		web.WithMiddleware(
 			web.ZeroLogger(s.Logger),
 			http2.RequestContext,
+			// 4. Outbox: Use a web request middleware to start a new transaction for each incoming request
 			edatpgx.WebSessionMiddleware(pgConn, zerologto.Logger(s.Logger)),
-		),
-	)
+		))
+
+	s.WebServer.Mount("/metrics", func(r chi.Router) http.Handler {
+		return promhttp.Handler()
+	})
 
 	err = s.appFn(s)
 	if err != nil {
@@ -204,7 +212,7 @@ func (s Service) waitForMessaging(ctx context.Context) error {
 	group.Go(func() error {
 		<-gCtx.Done()
 		s.Logger.Debug().Msg("shutting down messaging")
-		sCtx, cancel := context.WithTimeout(context.Background(), s.cfg.ShutdownTimeout)
+		sCtx, cancel := context.WithTimeout(context.Background(), s.Cfg.ShutdownTimeout)
 		defer cancel()
 
 		wg := sync.WaitGroup{}
@@ -257,7 +265,7 @@ func (s Service) waitForWebServer(ctx context.Context) (err error) {
 	group.Go(func() error {
 		<-gCtx.Done()
 		s.Logger.Debug().Msg("shutting down the web server")
-		ctx, cancel := context.WithTimeout(context.Background(), s.cfg.ShutdownTimeout)
+		ctx, cancel := context.WithTimeout(context.Background(), s.Cfg.ShutdownTimeout)
 		defer cancel()
 
 		if err = s.WebServer.Shutdown(ctx); err != nil {

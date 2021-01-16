@@ -10,6 +10,7 @@ import (
 
 	"github.com/stackus/edat/msg"
 	"github.com/stackus/edat/saga"
+
 	"github.com/stackus/ftgogo/order/internal/adapters"
 	"github.com/stackus/ftgogo/order/internal/application/commands"
 	"github.com/stackus/ftgogo/order/internal/application/queries"
@@ -111,8 +112,7 @@ func initApplication(svc *applications.Service) error {
 	svc.Subscriber.Subscribe(orderapi.OrderAggregateChannel, msg.NewEntityEventDispatcher().
 		Handle(orderapi.OrderCreated{}, orderEventHandlers.OrderCreated))
 
-	// TODO refactor so a string isn't used here
-	svc.WebServer.Mount("/api", func(r chi.Router) http.Handler {
+	svc.WebServer.Mount(svc.Cfg.Web.ApiPath, func(r chi.Router) http.Handler {
 		return HandlerFromMux(NewWebHandlers(application), r)
 	})
 

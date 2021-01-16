@@ -73,8 +73,7 @@ func initApplication(svc *applications.Service) error {
 		Handle(kitchenapi.TicketAccepted{}, ticketEventHandlers.TicketAccepted).
 		Handle(kitchenapi.TicketCancelled{}, ticketEventHandlers.TicketCancelled))
 
-	// TODO refactor so a string isn't used here
-	svc.WebServer.Mount("/api", func(r chi.Router) http.Handler {
+	svc.WebServer.Mount(svc.Cfg.Web.ApiPath, func(r chi.Router) http.Handler {
 		return HandlerFromMux(NewWebHandlers(application), r)
 	})
 

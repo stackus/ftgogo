@@ -8,6 +8,7 @@ import (
 	"github.com/go-chi/render"
 
 	"github.com/stackus/edat/msg"
+
 	"github.com/stackus/ftgogo/order-history/internal/adapters"
 	"github.com/stackus/ftgogo/order-history/internal/application/commands"
 	"github.com/stackus/ftgogo/order-history/internal/application/queries"
@@ -58,8 +59,7 @@ func initApplication(svc *applications.Service) error {
 		Handle(orderapi.OrderCancelled{}, orderEventHandlers.OrderCancelled).
 		Handle(orderapi.OrderRejected{}, orderEventHandlers.OrderRejected))
 
-	// TODO refactor so a string isn't used here
-	svc.WebServer.Mount("/api", func(r chi.Router) http.Handler {
+	svc.WebServer.Mount(svc.Cfg.Web.ApiPath, func(r chi.Router) http.Handler {
 		return HandlerFromMux(NewWebHandlers(application), r)
 	})
 
