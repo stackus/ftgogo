@@ -6,6 +6,7 @@ import (
 	"github.com/stackus/edat/core"
 	"github.com/stackus/edat/msg"
 	"github.com/stackus/edat/saga"
+
 	"github.com/stackus/ftgogo/order/internal/domain"
 	"serviceapis/accountingapi"
 	"serviceapis/consumerapi"

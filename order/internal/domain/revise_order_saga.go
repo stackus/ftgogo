@@ -6,7 +6,6 @@ import (
 	"github.com/stackus/edat/core"
 	"github.com/stackus/edat/msg"
 	"github.com/stackus/edat/saga"
-	"serviceapis/commonapi"
 )
 
 func registerReviseOrderSagaData() {
@@ -26,7 +25,7 @@ type ReviseOrderSagaData struct {
 	TicketID          string
 	ExpectedVersion   int
 	RevisedOrderTotal int
-	RevisedQuantities commonapi.MenuItemQuantities
+	RevisedQuantities map[string]int
 }
 
 func (ReviseOrderSagaData) SagaDataName() string {

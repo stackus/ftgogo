@@ -4,7 +4,7 @@ import (
 	"time"
 
 	"github.com/stackus/edat/core"
-	"serviceapis/commonapi"
+
 	"serviceapis/orderapi"
 )
 
@@ -24,7 +24,7 @@ type CreateOrder struct {
 	LineItems      []orderapi.LineItem
 	OrderTotal     int
 	DeliverAt      time.Time
-	DeliverTo      commonapi.Address
+	DeliverTo      orderapi.Address
 }
 
 // CommandName command method
@@ -68,7 +68,7 @@ func (ConfirmCancelOrder) CommandName() string { return "orderservice.ConfirmCan
 
 // BeginReviseOrder order command
 type BeginReviseOrder struct {
-	RevisedQuantities commonapi.MenuItemQuantities
+	RevisedQuantities map[string]int
 }
 
 // CommandName command method
@@ -82,7 +82,7 @@ func (UndoReviseOrder) CommandName() string { return "orderservice.UndoReviseOrd
 
 // ConfirmReviseOrder order command
 type ConfirmReviseOrder struct {
-	RevisedQuantities commonapi.MenuItemQuantities
+	RevisedQuantities map[string]int
 }
 
 // CommandName command method

@@ -14,12 +14,14 @@ type ApproveOrder struct {
 type ApproveOrderHandler struct {
 	repo      domain.OrderRepository
 	publisher domain.OrderPublisher
+	counter   domain.Counter
 }
 
-func NewApproveOrderHandler(orderRepo domain.OrderRepository, orderPublisher domain.OrderPublisher) ApproveOrderHandler {
+func NewApproveOrderHandler(orderRepo domain.OrderRepository, orderPublisher domain.OrderPublisher, ordersApprovedCounter domain.Counter) ApproveOrderHandler {
 	return ApproveOrderHandler{
 		repo:      orderRepo,
 		publisher: orderPublisher,
+		counter:   ordersApprovedCounter,
 	}
 }
 
@@ -28,6 +30,8 @@ func (h ApproveOrderHandler) Handle(ctx context.Context, cmd ApproveOrder) error
 	if err != nil {
 		return err
 	}
+
+	h.counter.Inc()
 
 	return h.publisher.PublishEntityEvents(ctx, root)
 }

@@ -4,7 +4,6 @@ import (
 	"time"
 
 	"github.com/stackus/edat/core"
-	"serviceapis/commonapi"
 )
 
 func registerEvents() {
@@ -27,7 +26,7 @@ type OrderCreated struct {
 	LineItems      []LineItem
 	OrderTotal     int
 	DeliverAt      time.Time
-	DeliverTo      commonapi.Address
+	DeliverTo      Address
 }
 
 func (OrderCreated) EventName() string { return "orderapi.OrderCreated" }
@@ -60,7 +59,7 @@ type OrderRevised struct {
 	OrderEvent
 	CurrentOrderTotal int
 	NewOrderTotal     int
-	RevisedQuantities commonapi.MenuItemQuantities
+	RevisedQuantities map[string]int
 }
 
 func (OrderRevised) EventName() string { return "orderapi.OrderRevised" }

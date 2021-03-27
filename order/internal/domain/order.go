@@ -6,7 +6,7 @@ import (
 
 	"github.com/stackus/edat/core"
 	"github.com/stackus/edat/es"
-	"serviceapis/commonapi"
+
 	"serviceapis/orderapi"
 	"shared-go/errs"
 )
@@ -30,7 +30,7 @@ type Order struct {
 	LineItems    []orderapi.LineItem
 	State        orderapi.OrderState
 	DeliverAt    time.Time
-	DeliverTo    commonapi.Address
+	DeliverTo    orderapi.Address
 }
 
 var _ es.Aggregate = (*Order)(nil)
@@ -226,7 +226,7 @@ func (o *Order) OrderTotal() int {
 	return total
 }
 
-func (o *Order) RevisedOrderTotal(currentTotal int, revisedQuantities commonapi.MenuItemQuantities) int {
+func (o *Order) RevisedOrderTotal(currentTotal int, revisedQuantities map[string]int) int {
 	delta := 0
 	for menuItemID, quantity := range revisedQuantities {
 		for _, lineItem := range o.LineItems {

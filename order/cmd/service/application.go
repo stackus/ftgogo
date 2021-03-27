@@ -5,11 +5,8 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/go-chi/chi"
+	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/render"
-	"github.com/prometheus/client_golang/prometheus"
-	"github.com/prometheus/client_golang/prometheus/promauto"
-
 	"github.com/stackus/edat/msg"
 	"github.com/stackus/edat/saga"
 
@@ -30,7 +27,6 @@ import (
 type Application struct {
 	Commands Commands
 	Queries  Queries
-	Metrics  Metrics
 }
 
 type Commands struct {
@@ -55,12 +51,6 @@ type Queries struct {
 	GetRestaurant queries.GetRestaurantHandler
 }
 
-type Metrics struct {
-	OrdersPlaced   prometheus.Counter
-	OrdersApproved prometheus.Counter
-	OrdersRejected prometheus.Counter
-}
-
 func initApplication(svc *applications.Service) error {
 	serviceapis.RegisterTypes()
 	domain.RegisterTypes()
@@ -78,18 +68,22 @@ func initApplication(svc *applications.Service) error {
 	reviseOrderSaga := adapters.NewReviseOrderSaga(svc.SagaInstanceStore, svc.Publisher)
 	svc.Subscriber.Subscribe(reviseOrderSaga.ReplyChannel(), reviseOrderSaga)
 
+	ordersPlacedCounter := adapters.NewOrdersPlacedCounter()
+	ordersApprovedCounter := adapters.NewOrdersApprovedCounter()
+	ordersRejectedCounter := adapters.NewOrdersRejectedCounter()
+
 	application := Application{
 		Commands: Commands{
 			CreateOrder:          commands.NewCreateOrderHandler(orderRepo, restaurantRepo, orderPublisher, svc.Logger),
-			ApproveOrder:         commands.NewApproveOrderHandler(orderRepo, orderPublisher),
-			RejectOrder:          commands.NewRejectOrderHandler(orderRepo, orderPublisher),
+			ApproveOrder:         commands.NewApproveOrderHandler(orderRepo, orderPublisher, ordersApprovedCounter),
+			RejectOrder:          commands.NewRejectOrderHandler(orderRepo, orderPublisher, ordersRejectedCounter),
 			BeginCancelOrder:     commands.NewBeginCancelOrderHandler(orderRepo),
 			UndoCancelOrder:      commands.NewUndoCancelOrderHandler(orderRepo),
 			ConfirmCancelOrder:   commands.NewConfirmCancelOrderHandler(orderRepo, orderPublisher),
 			BeginReviseOrder:     commands.NewBeginReviseOrderHandler(orderRepo, orderPublisher),
 			UndoReviseOrder:      commands.NewUndoReviseOrderHandler(orderRepo),
 			ConfirmReviseOrder:   commands.NewConfirmReviseOrderHandler(orderRepo, orderPublisher),
-			StartCreateOrderSaga: commands.NewStartCreateOrderSagaHandler(createOrderSaga),
+			StartCreateOrderSaga: commands.NewStartCreateOrderSagaHandler(createOrderSaga, ordersPlacedCounter),
 			StartCancelOrderSaga: commands.NewStartCancelOrderSagaHandler(orderRepo, cancelOrderSaga),
 			StartReviseOrderSaga: commands.NewStartReviseOrderSagaHandler(orderRepo, reviseOrderSaga),
 			CreateRestaurant:     commands.NewCreateRestaurantHandler(restaurantRepo),
@@ -98,11 +92,6 @@ func initApplication(svc *applications.Service) error {
 		Queries: Queries{
 			GetOrder:      queries.NewGetOrderHandler(orderRepo),
 			GetRestaurant: queries.NewGetRestaurantHandler(restaurantRepo),
-		},
-		Metrics: Metrics{
-			OrdersPlaced:   promauto.NewCounter(prometheus.CounterOpts{Name: "placed_orders"}),
-			OrdersApproved: promauto.NewCounter(prometheus.CounterOpts{Name: "approved_orders"}),
-			OrdersRejected: promauto.NewCounter(prometheus.CounterOpts{Name: "rejected_orders"}),
 		},
 	}
 
@@ -125,6 +114,8 @@ func initApplication(svc *applications.Service) error {
 	orderEventHandlers := NewOrderEventHandlers(application)
 	svc.Subscriber.Subscribe(orderapi.OrderAggregateChannel, msg.NewEntityEventDispatcher().
 		Handle(orderapi.OrderCreated{}, orderEventHandlers.OrderCreated))
+
+	orderapi.RegisterOrderServiceServer(svc.RpcServer, newRpcHandlers(application))
 
 	svc.WebServer.Mount(svc.Cfg.Web.ApiPath, func(r chi.Router) http.Handler {
 		return HandlerFromMux(NewWebHandlers(application), r)
@@ -159,8 +150,6 @@ func (h CommandHandlers) RejectOrder(ctx context.Context, cmdMsg saga.Command) (
 		return []msg.Reply{msg.WithFailure()}, nil
 	}
 
-	h.app.Metrics.OrdersRejected.Inc()
-
 	return []msg.Reply{msg.WithSuccess()}, nil
 }
 
@@ -174,8 +163,6 @@ func (h CommandHandlers) ApproveOrder(ctx context.Context, cmdMsg saga.Command) 
 	if err != nil {
 		return []msg.Reply{msg.WithFailure()}, nil
 	}
-
-	h.app.Metrics.OrdersApproved.Inc()
 
 	return []msg.Reply{msg.WithSuccess()}, nil
 }
@@ -295,8 +282,6 @@ func (h OrderEventHandlers) OrderCreated(ctx context.Context, evtMsg msg.EntityE
 		return err
 	}
 
-	h.app.Metrics.OrdersPlaced.Inc()
-
 	return nil
 }
 
@@ -319,8 +304,14 @@ func (s WebHandlers) CreateOrder(w http.ResponseWriter, r *http.Request) {
 		ConsumerID:   request.ConsumerId,
 		RestaurantID: request.RestaurantId,
 		DeliverAt:    request.DeliveryTime,
-		DeliverTo:    request.DeliveryAddress,
-		LineItems:    request.LineItems,
+		DeliverTo: orderapi.Address{
+			Street1: request.DeliveryAddress.Street1,
+			Street2: request.DeliveryAddress.Street2,
+			City:    request.DeliveryAddress.City,
+			State:   request.DeliveryAddress.State,
+			Zip:     request.DeliveryAddress.Zip,
+		},
+		LineItems: request.LineItems,
 	})
 	if err != nil {
 		render.Render(w, r, web.NewErrorResponse(err))
@@ -392,4 +383,89 @@ func (s WebHandlers) GetRestaurant(w http.ResponseWriter, r *http.Request, resta
 	}
 
 	render.Respond(w, r, RestaurantIDResponse{Id: restaurant.RestaurantID})
+}
+
+type RpcHandlers struct {
+	app Application
+	orderapi.UnimplementedOrderServiceServer
+}
+
+var _ orderapi.OrderServiceServer = (*RpcHandlers)(nil)
+
+func newRpcHandlers(app Application) RpcHandlers {
+	return RpcHandlers{app: app}
+}
+
+func (h RpcHandlers) CreateOrder(ctx context.Context, request *orderapi.CreateOrderRequest) (*orderapi.CreateOrderResponse, error) {
+	lineItems := make(map[string]int, len(request.LineItems))
+	for s, i := range request.LineItems {
+		lineItems[s] = int(i)
+	}
+
+	orderID, err := h.app.Commands.CreateOrder.Handle(ctx, commands.CreateOrder{
+		ConsumerID:   request.ConsumerID,
+		RestaurantID: request.RestaurantID,
+		DeliverAt:    request.DeliverAt.AsTime(),
+		DeliverTo: orderapi.Address{
+			Street1: request.DeliverTo.Street1,
+			Street2: request.DeliverTo.Street2,
+			City:    request.DeliverTo.City,
+			State:   request.DeliverTo.State,
+			Zip:     request.DeliverTo.Zip,
+		},
+		LineItems: lineItems,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return &orderapi.CreateOrderResponse{OrderID: orderID}, nil
+}
+
+func (h RpcHandlers) GetOrder(ctx context.Context, request *orderapi.GetOrderRequest) (*orderapi.GetOrderResponse, error) {
+	order, err := h.app.Queries.GetOrder.Handle(ctx, queries.GetOrder{OrderID: request.OrderID})
+	if err != nil {
+		return nil, err
+	}
+
+	return &orderapi.GetOrderResponse{
+		OrderID:    order.ID(),
+		OrderTotal: int64(order.OrderTotal()),
+		State:      order.State.String(),
+	}, nil
+}
+
+func (h RpcHandlers) CancelOrder(ctx context.Context, request *orderapi.CancelOrderRequest) (*orderapi.CancelOrderResponse, error) {
+	status, err := h.app.Commands.StartCancelOrderSaga.Handle(ctx, commands.StartCancelOrderSaga{OrderID: request.OrderID})
+	if err != nil {
+		return nil, err
+	}
+
+	return &orderapi.CancelOrderResponse{Status: status}, nil
+}
+
+func (h RpcHandlers) ReviseOrder(ctx context.Context, request *orderapi.ReviseOrderRequest) (*orderapi.ReviseOrderResponse, error) {
+	revisedQuantities := make(map[string]int, len(request.RevisedQuantities))
+	for s, i := range request.RevisedQuantities {
+		revisedQuantities[s] = int(i)
+	}
+
+	status, err := h.app.Commands.StartReviseOrderSaga.Handle(ctx, commands.StartReviseOrderSaga{
+		OrderID:           request.OrderID,
+		RevisedQuantities: revisedQuantities,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return &orderapi.ReviseOrderResponse{Status: status}, nil
+}
+
+func (h RpcHandlers) GetRestaurant(ctx context.Context, request *orderapi.GetRestaurantRequest) (*orderapi.GetRestaurantResponse, error) {
+	restaurant, err := h.app.Queries.GetRestaurant.Handle(ctx, queries.GetRestaurant{RestaurantID: request.RestaurantID})
+	if err != nil {
+		return nil, err
+	}
+
+	return &orderapi.GetRestaurantResponse{RestaurantID: restaurant.RestaurantID}, nil
 }

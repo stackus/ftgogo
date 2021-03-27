@@ -1,0 +1,70 @@
+syntax = "proto3";
+
+option go_package = "github.com/stackus/ftgogo/serviceapis/orderapi";
+
+import "google/protobuf/timestamp.proto";
+
+package orderapi;
+
+service OrderService {
+  rpc CreateOrder(CreateOrderRequest) returns (CreateOrderResponse);
+  rpc GetOrder(GetOrderRequest) returns (GetOrderResponse);
+  rpc CancelOrder(CancelOrderRequest) returns (CancelOrderResponse);
+  rpc ReviseOrder(ReviseOrderRequest) returns (ReviseOrderResponse);
+  rpc GetRestaurant(GetRestaurantRequest) returns (GetRestaurantResponse);
+}
+
+message CreateOrderRequest {
+  message Address {
+    string Street1 = 1;
+    string Street2 = 2;
+    string City = 3;
+    string State = 4;
+    string Zip = 5;
+  }
+
+  string ConsumerID = 1;
+  string RestaurantID = 2;
+  google.protobuf.Timestamp DeliverAt = 3;
+  Address DeliverTo = 4;
+  map<string, int64> LineItems = 5;
+}
+
+message CreateOrderResponse {
+  string OrderID = 1;
+}
+
+message GetOrderRequest {
+  string OrderID = 1;
+}
+
+message GetOrderResponse {
+  string OrderID = 1;
+  int64 OrderTotal = 2;
+  string State = 3;
+}
+
+message CancelOrderRequest {
+  string OrderID = 1;
+}
+
+message CancelOrderResponse {
+  string Status = 1;
+}
+
+message ReviseOrderRequest {
+  string OrderID = 1;
+  map<string, int64> RevisedQuantities = 2;
+}
+
+message ReviseOrderResponse {
+  string Status = 1;
+}
+
+message GetRestaurantRequest {
+  string RestaurantID = 1;
+}
+
+message GetRestaurantResponse {
+  string RestaurantID = 1;
+}

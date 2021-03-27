@@ -4,12 +4,11 @@ import (
 	"context"
 
 	"github.com/stackus/ftgogo/order/internal/domain"
-	"serviceapis/commonapi"
 )
 
 type BeginReviseOrder struct {
 	OrderID           string
-	RevisedQuantities commonapi.MenuItemQuantities
+	RevisedQuantities map[string]int
 }
 
 type BeginReviseOrderHandler struct {

@@ -13,10 +13,11 @@ import (
 	"time"
 
 	externalRef0 "serviceapis/commonapi"
+	"serviceapis/restaurantapi"
 
 	"github.com/deepmap/oapi-codegen/pkg/runtime"
 	"github.com/getkin/kin-openapi/openapi3"
-	"github.com/go-chi/chi"
+	"github.com/go-chi/chi/v5"
 )
 
 // OrderID defines model for OrderID.
@@ -50,7 +51,7 @@ type RestaurantIDResponse struct {
 // CreateOrderJSONBody defines parameters for CreateOrder.
 type CreateOrderJSONBody struct {
 	ConsumerId      string                          `json:"consumer_id"`
-	DeliveryAddress externalRef0.Address            `json:"delivery_address"`
+	DeliveryAddress restaurantapi.Address           `json:"delivery_address"`
 	DeliveryTime    time.Time                       `json:"delivery_time"`
 	LineItems       externalRef0.MenuItemQuantities `json:"line_items"`
 	RestaurantId    string                          `json:"restaurant_id"`

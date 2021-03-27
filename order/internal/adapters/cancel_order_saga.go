@@ -3,6 +3,7 @@ package adapters
 import (
 	"github.com/stackus/edat/msg"
 	"github.com/stackus/edat/saga"
+
 	"github.com/stackus/ftgogo/order/internal/sagas"
 )
 

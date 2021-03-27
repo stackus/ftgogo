@@ -7,7 +7,6 @@ import (
 	"github.com/rs/zerolog"
 
 	"github.com/stackus/ftgogo/order/internal/domain"
-	"serviceapis/commonapi"
 	"serviceapis/orderapi"
 )
 
@@ -15,8 +14,8 @@ type CreateOrder struct {
 	ConsumerID   string
 	RestaurantID string
 	DeliverAt    time.Time
-	DeliverTo    commonapi.Address
-	LineItems    commonapi.MenuItemQuantities
+	DeliverTo    orderapi.Address
+	LineItems    map[string]int
 }
 
 type CreateOrderHandler struct {

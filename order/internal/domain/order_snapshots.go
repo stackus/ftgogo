@@ -4,7 +4,7 @@ import (
 	"time"
 
 	"github.com/stackus/edat/core"
-	"serviceapis/commonapi"
+
 	"serviceapis/orderapi"
 )
 
@@ -18,7 +18,7 @@ type OrderSnapshot struct {
 	TicketID     string
 	LineItems    []orderapi.LineItem
 	DeliverAt    time.Time
-	DeliverTo    commonapi.Address
+	DeliverTo    orderapi.Address
 	State        orderapi.OrderState
 }
 

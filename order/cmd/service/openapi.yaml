@@ -25,7 +25,7 @@ paths:
           application/json:
             schema:
               type: object
-              required: [consumer_id, restaurant_id, delivery_time, delivery_address, line_items]
+              required: [ consumer_id, restaurant_id, delivery_time, delivery_address, line_items ]
               properties:
                 consumer_id:
                   type: string
@@ -78,7 +78,7 @@ paths:
           application/json:
             schema:
               type: object
-              required: [revised_quantities]
+              required: [ revised_quantities ]
               properties:
                 revised_quantities:
                   $ref: '../../../serviceapis/commonapi/spec.yaml#/components/schemas/MenuItemQuantities'
@@ -129,7 +129,7 @@ components:
         application/json:
           schema:
             type: object
-            required: [id]
+            required: [ id ]
             properties:
               id:
                 type: string
@@ -139,7 +139,7 @@ components:
         application/json:
           schema:
             type: object
-            required: [status]
+            required: [ status ]
             properties:
               status:
                 type: string
@@ -149,7 +149,7 @@ components:
         application/json:
           schema:
             type: object
-            required: [order_id, state, order_total]
+            required: [ order_id, state, order_total ]
             properties:
               order_id:
                 type: string
@@ -164,7 +164,7 @@ components:
         application/json:
           schema:
             type: object
-            required: [id]
+            required: [ id ]
             properties:
               id:
                 type: string

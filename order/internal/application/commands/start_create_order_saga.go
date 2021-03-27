@@ -16,11 +16,15 @@ type StartCreateOrderSaga struct {
 }
 
 type StartCreateOrderSagaHandler struct {
-	saga domain.CreateOrderSaga
+	saga    domain.CreateOrderSaga
+	counter domain.Counter
 }
 
-func NewStartCreateOrderSagaHandler(createOrderSaga domain.CreateOrderSaga) StartCreateOrderSagaHandler {
-	return StartCreateOrderSagaHandler{saga: createOrderSaga}
+func NewStartCreateOrderSagaHandler(createOrderSaga domain.CreateOrderSaga, ordersPlaced domain.Counter) StartCreateOrderSagaHandler {
+	return StartCreateOrderSagaHandler{
+		saga:    createOrderSaga,
+		counter: ordersPlaced,
+	}
 }
 
 func (h StartCreateOrderSagaHandler) Handle(ctx context.Context, cmd StartCreateOrderSaga) error {
@@ -31,6 +35,8 @@ func (h StartCreateOrderSagaHandler) Handle(ctx context.Context, cmd StartCreate
 		LineItems:    cmd.LineItems,
 		OrderTotal:   cmd.OrderTotal,
 	})
+
+	h.counter.Inc()
 
 	return err
 }
