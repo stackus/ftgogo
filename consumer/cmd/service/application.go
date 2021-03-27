@@ -5,7 +5,7 @@ import (
 	"errors"
 	"net/http"
 
-	"github.com/go-chi/chi"
+	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/render"
 
 	"github.com/stackus/edat/msg"
@@ -59,6 +59,8 @@ func initApplication(svc *applications.Service) error {
 	svc.Subscriber.Subscribe(consumerapi.ConsumerServiceCommandChannel, saga.NewCommandDispatcher(svc.Publisher).
 		Handle(consumerapi.ValidateOrderByConsumer{}, cmdHandlers.ValidateOrderByConsumer))
 
+	consumerapi.RegisterConsumerServiceServer(svc.RpcServer, newRpcHandlers(application))
+
 	svc.WebServer.Mount(svc.Cfg.Web.ApiPath, func(r chi.Router) http.Handler {
 		return HandlerFromMux(NewWebHandlers(application), r)
 	})
@@ -103,6 +105,36 @@ func (h WebHandlers) GetConsumer(w http.ResponseWriter, r *http.Request, consume
 		ConsumerId: consumer.ID(),
 		Name:       consumer.Name(),
 	})
+}
+
+type RpcHandlers struct {
+	app Application
+	consumerapi.UnimplementedConsumerServiceServer
+}
+
+var _ consumerapi.ConsumerServiceServer = (*RpcHandlers)(nil)
+
+func newRpcHandlers(app Application) RpcHandlers {
+	return RpcHandlers{app: app}
+}
+
+func (h RpcHandlers) RegisterConsumer(ctx context.Context, request *consumerapi.RegisterConsumerRequest) (*consumerapi.RegisterConsumerResponse, error) {
+	consumerID, err := h.app.Commands.RegisterConsumer.Handle(ctx, commands.RegisterConsumer{Name: request.Name})
+	if err != nil {
+		return nil, err
+	}
+	return &consumerapi.RegisterConsumerResponse{ConsumerID: consumerID}, nil
+}
+
+func (h RpcHandlers) GetConsumer(ctx context.Context, request *consumerapi.GetConsumerRequest) (*consumerapi.GetConsumerResponse, error) {
+	consumer, err := h.app.Queries.GetConsumer.Handle(ctx, queries.GetConsumer{ConsumerID: request.ConsumerID})
+	if err != nil {
+		return nil, err
+	}
+	return &consumerapi.GetConsumerResponse{
+		ConsumerID: consumer.ID(),
+		Name:       consumer.Name(),
+	}, nil
 }
 
 type CommandHandlers struct{ app Application }

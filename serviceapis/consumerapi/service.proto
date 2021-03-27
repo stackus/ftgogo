@@ -1,0 +1,27 @@
+syntax = "proto3";
+
+option go_package = "github.com/stackus/ftgogo/serviceapis/consumerapi";
+
+package consumerapi;
+
+service ConsumerService {
+  rpc RegisterConsumer(RegisterConsumerRequest) returns (RegisterConsumerResponse);
+  rpc GetConsumer(GetConsumerRequest) returns (GetConsumerResponse);
+}
+
+message RegisterConsumerRequest {
+  string Name = 1;
+}
+
+message RegisterConsumerResponse {
+  string ConsumerID = 1;
+}
+
+message GetConsumerRequest {
+  string ConsumerID = 1;
+}
+
+message GetConsumerResponse {
+  string ConsumerID = 1;
+  string Name = 2;
+}
