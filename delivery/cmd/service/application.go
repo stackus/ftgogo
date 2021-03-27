@@ -4,13 +4,14 @@ import (
 	"context"
 	"net/http"
 
-	"github.com/go-chi/chi"
+	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/render"
 
 	"github.com/stackus/edat/msg"
 	"github.com/stackus/ftgogo/delivery/internal/adapters"
 	"github.com/stackus/ftgogo/delivery/internal/application/commands"
 	"github.com/stackus/ftgogo/delivery/internal/application/queries"
+	"serviceapis/deliveryapi"
 	"serviceapis/kitchenapi"
 	"serviceapis/orderapi"
 	"serviceapis/restaurantapi"
@@ -73,6 +74,8 @@ func initApplication(svc *applications.Service) error {
 		Handle(kitchenapi.TicketAccepted{}, ticketEventHandlers.TicketAccepted).
 		Handle(kitchenapi.TicketCancelled{}, ticketEventHandlers.TicketCancelled))
 
+	deliveryapi.RegisterDeliveryServiceServer(svc.RpcServer, newRpcHandlers(application))
+
 	svc.WebServer.Mount(svc.Cfg.Web.ApiPath, func(r chi.Router) http.Handler {
 		return HandlerFromMux(NewWebHandlers(application), r)
 	})
@@ -116,6 +119,43 @@ func (h WebHandlers) GetDeliveryStatus(w http.ResponseWriter, r *http.Request, d
 	}
 
 	render.Respond(w, r, status)
+}
+
+type RpcHandlers struct {
+	app Application
+	deliveryapi.UnimplementedDeliveryServiceServer
+}
+
+var _ deliveryapi.DeliveryServiceServer = (*RpcHandlers)(nil)
+
+func newRpcHandlers(app Application) RpcHandlers {
+	return RpcHandlers{app: app}
+}
+
+func (h RpcHandlers) SetCourierAvailability(ctx context.Context, request *deliveryapi.SetCourierAvailabilityRequest) (*deliveryapi.SetCourierAvailabilityResponse, error) {
+	err := h.app.Commands.SetCourierAvailability.Handle(ctx, commands.SetCourierAvailability{
+		CourierID: request.CourierID,
+		Available: request.Available,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return &deliveryapi.SetCourierAvailabilityResponse{Available: request.Available}, nil
+}
+
+func (h RpcHandlers) GetDeliveryStatus(ctx context.Context, request *deliveryapi.GetDeliveryStatusRequest) (*deliveryapi.GetDeliveryStatusResponse, error) {
+	status, err := h.app.Queries.GetDeliveryStatus.Handle(ctx, queries.GetDeliveryStatus{DeliveryID: request.DeliveryID})
+	if err != nil {
+		return nil, err
+	}
+
+	return &deliveryapi.GetDeliveryStatusResponse{
+		DeliveryID:        status.ID,
+		AssignedCourierID: status.AssignedCourier,
+		CourierActions:    status.CourierActions,
+		Status:            status.Status,
+	}, nil
 }
 
 type RestaurantEventHandlers struct{ app Application }

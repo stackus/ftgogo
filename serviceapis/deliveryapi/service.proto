@@ -1,0 +1,30 @@
+syntax = "proto3";
+
+option go_package = "github.com/stackus/ftgogo/serviceapis/deliveryapi";
+
+package deliveryapi;
+
+service DeliveryService {
+  rpc SetCourierAvailability(SetCourierAvailabilityRequest) returns (SetCourierAvailabilityResponse);
+  rpc GetDeliveryStatus(GetDeliveryStatusRequest) returns (GetDeliveryStatusResponse);
+}
+
+message SetCourierAvailabilityRequest {
+  string CourierID = 1;
+  bool Available = 2;
+}
+
+message SetCourierAvailabilityResponse {
+  bool Available = 1;
+}
+
+message GetDeliveryStatusRequest {
+  string DeliveryID = 1;
+}
+
+message GetDeliveryStatusResponse {
+  string DeliveryID = 1;
+  string AssignedCourierID = 2;
+  repeated string CourierActions = 3;
+  string Status = 4;
+}
