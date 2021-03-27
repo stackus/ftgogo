@@ -4,11 +4,12 @@ import (
 	"context"
 	"net/http"
 
-	"github.com/go-chi/chi"
+	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/render"
 
 	"github.com/stackus/edat/msg"
 	"github.com/stackus/edat/saga"
+
 	"github.com/stackus/ftgogo/kitchen/internal/adapters"
 	"github.com/stackus/ftgogo/kitchen/internal/application/commands"
 	"github.com/stackus/ftgogo/kitchen/internal/application/queries"
@@ -92,6 +93,8 @@ func initApplication(svc *applications.Service) error {
 		Handle(restaurantapi.RestaurantCreated{}, restaurantEventHandlers.RestaurantCreated).
 		Handle(restaurantapi.RestaurantMenuRevised{}, restaurantEventHandlers.RestaurantMenuRevised))
 
+	kitchenapi.RegisterKitchenServiceServer(svc.RpcServer, newRpcHandlers(application))
+
 	svc.WebServer.Mount(svc.Cfg.Web.ApiPath, func(r chi.Router) http.Handler {
 		return HandlerFromMux(NewWebHandlers(application), r)
 	})
@@ -136,6 +139,38 @@ func (h WebHandlers) AcceptTicket(w http.ResponseWriter, r *http.Request, ticket
 
 	render.Status(r, http.StatusAccepted)
 	render.Respond(w, r, TicketIDResponse{Id: tid})
+}
+
+type RpcHandlers struct {
+	app Application
+	kitchenapi.UnimplementedKitchenServiceServer
+}
+
+var _ kitchenapi.KitchenServiceServer = (*RpcHandlers)(nil)
+
+func newRpcHandlers(app Application) RpcHandlers {
+	return RpcHandlers{app: app}
+}
+
+func (h RpcHandlers) GetRestaurant(ctx context.Context, request *kitchenapi.GetRestaurantRequest) (*kitchenapi.GetRestaurantResponse, error) {
+	_, err := h.app.Queries.GetRestaurant.Handle(ctx, queries.GetRestaurant{RestaurantID: request.RestaurantID})
+	if err != nil {
+		return nil, err
+	}
+
+	return &kitchenapi.GetRestaurantResponse{RestaurantID: request.RestaurantID}, nil
+}
+
+func (h RpcHandlers) AcceptTicket(ctx context.Context, request *kitchenapi.AcceptTicketRequest) (*kitchenapi.AcceptTicketResponse, error) {
+	err := h.app.Commands.AcceptTicket.Handle(ctx, commands.AcceptTicket{
+		TicketID: request.TicketID,
+		ReadyBy:  request.ReadyBy.AsTime(),
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return &kitchenapi.AcceptTicketResponse{TicketID: request.TicketID}, nil
 }
 
 type CommandHandlers struct{ app Application }
