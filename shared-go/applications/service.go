@@ -8,7 +8,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/go-chi/chi"
+	"github.com/go-chi/chi/v5"
 	"github.com/jackc/pgx/v4/pgxpool"
 	"github.com/joho/godotenv"
 	"github.com/kelseyhightower/envconfig"
@@ -32,6 +32,7 @@ import (
 	"shared-go/instrumentation"
 	"shared-go/logging"
 	"shared-go/logging/zerologto"
+	"shared-go/rpc"
 	"shared-go/web"
 )
 
@@ -41,6 +42,7 @@ type svcConfig struct {
 	LogLevel        logging.Level `envconfig:"LOG_LEVEL" default:"WARN" desc:"options: [TRACE,DEBUG,INFO,WARN,ERROR,PANIC]"`
 	ShutdownTimeout time.Duration `envconfig:"SHUTDOWN_TIMEOUT" default:"30s" desc:"time to allow services to gracefully stop"`
 	Web             webCfg        `envconfig:"WEB"`                                                             // Web Config
+	Rpc             rpc.ServerCfg `envconfig:"RPC"`                                                             // RPC Config
 	Postgres        pgCfg         `envconfig:"PG"`                                                              // DataDriver / Postgres
 	EventDriver     string        `envconfig:"EVENT_DRIVER" default:"inmem" desc:"options: [inmem,nats,kafka]"` // "inmem", "nats", "kafka"
 	Nats            natsCfg       `envconfig:"NATS"`                                                            // EventDriver / Nats Streaming Config
@@ -58,6 +60,7 @@ type Service struct {
 	Publisher         *msg.Publisher
 	Subscriber        *msg.Subscriber
 	WebServer         web.Server
+	RpcServer         rpc.Server
 }
 
 func NewService(appFn func(*Service) error) *Service {
@@ -173,6 +176,8 @@ func (s *Service) run(*cobra.Command, []string) error {
 	)
 	s.Publisher = msg.NewPublisher(msgProducer)
 
+	s.RpcServer = rpc.NewServer(s.Cfg.Rpc)
+
 	s.WebServer = web.NewServer(s.Cfg.Web.Http, web.WithHealthCheck(s.Cfg.Web.PingPath))
 
 	s.WebServer.Options(s.Cfg.Web.ApiPath,
@@ -197,6 +202,7 @@ func (s *Service) run(*cobra.Command, []string) error {
 
 	waiter := egress.NewWaiter()
 
+	waiter.Add(s.waitForRpcServer)
 	waiter.Add(s.waitForWebServer)
 	waiter.Add(s.waitForMessaging)
 
@@ -275,6 +281,35 @@ func (s Service) waitForWebServer(ctx context.Context) (err error) {
 
 		if err = s.WebServer.Shutdown(ctx); err != nil {
 			s.Logger.Warn().Msg("timed out while shutting down the web server")
+		}
+
+		return nil
+	})
+
+	return group.Wait()
+}
+
+func (s Service) waitForRpcServer(ctx context.Context) (err error) {
+	defer s.Logger.Debug().Msg("rpc server has been shutdown")
+
+	group, gCtx := errgroup.WithContext(ctx)
+	group.Go(func() error {
+		defer s.Logger.Debug().Msg("rpc server exited")
+		err = s.RpcServer.Start()
+		if err != nil && err != http.ErrServerClosed {
+			return err
+		}
+		return nil
+	})
+
+	group.Go(func() error {
+		<-gCtx.Done()
+		s.Logger.Debug().Msg("shutting down the rpc server")
+		ctx, cancel := context.WithTimeout(context.Background(), s.Cfg.ShutdownTimeout)
+		defer cancel()
+
+		if err = s.RpcServer.Shutdown(ctx); err != nil {
+			s.Logger.Warn().Msg("timed out while shutting down the rpc server")
 		}
 
 		return nil
