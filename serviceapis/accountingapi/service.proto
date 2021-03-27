@@ -1,0 +1,35 @@
+syntax = "proto3";
+
+option go_package = "github.com/stackus/ftgogo/serviceapis/accountingapi";
+
+package accountingapi;
+
+service AccountingService {
+  rpc GetAccount(GetAccountRequest) returns (GetAccountResponse);
+  rpc DisableAccount(DisableAccountRequest) returns (DisableAccountResponse);
+  rpc EnableAccount(EnableAccountRequest) returns (EnableAccountResponse);
+}
+
+message GetAccountRequest {
+  string AccountID = 1;
+}
+
+message GetAccountResponse {
+  string AccountID = 1;
+}
+
+message DisableAccountRequest {
+  string AccountID = 1;
+}
+
+message DisableAccountResponse {
+  string AccountID = 1;
+}
+
+message EnableAccountRequest {
+  string AccountID = 1;
+}
+
+message EnableAccountResponse {
+  string AccountID = 1;
+}
