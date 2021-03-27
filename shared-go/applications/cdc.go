@@ -180,7 +180,7 @@ func (s CDC) waitForMessaging(ctx context.Context) error {
 		defer cancel()
 
 		wg := sync.WaitGroup{}
-		wg.Add(2)
+		wg.Add(1)
 		go func() {
 			defer wg.Done()
 			if s.Publisher != nil {
