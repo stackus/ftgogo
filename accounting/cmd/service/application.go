@@ -5,7 +5,7 @@ import (
 	"errors"
 	"net/http"
 
-	"github.com/go-chi/chi"
+	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/render"
 
 	"github.com/stackus/edat/msg"
@@ -72,6 +72,8 @@ func initApplication(svc *applications.Service) error {
 	svc.Subscriber.Subscribe(consumerapi.ConsumerAggregateChannel, msg.NewEntityEventDispatcher().
 		Handle(consumerapi.ConsumerRegistered{}, consumerEventHandlers.ConsumerRegistered))
 
+	accountingapi.RegisterAccountingServiceServer(svc.RpcServer, newRpcHandlers(application))
+
 	svc.WebServer.Mount(svc.Cfg.Web.ApiPath, func(r chi.Router) http.Handler {
 		return HandlerFromMux(NewWebHandlers(application), r)
 	})
@@ -121,6 +123,44 @@ func (h WebHandlers) EnableAccount(w http.ResponseWriter, r *http.Request, accou
 	}
 
 	render.Respond(w, r, AccountIDResponse{Id: aid})
+}
+
+type RpcHandlers struct {
+	app Application
+	accountingapi.UnimplementedAccountingServiceServer
+}
+
+var _ accountingapi.AccountingServiceServer = (*RpcHandlers)(nil)
+
+func newRpcHandlers(app Application) RpcHandlers {
+	return RpcHandlers{app: app}
+}
+
+func (h RpcHandlers) GetAccount(ctx context.Context, request *accountingapi.GetAccountRequest) (*accountingapi.GetAccountResponse, error) {
+	_, err := h.app.Queries.GetAccount.Handle(ctx, queries.GetAccount{AccountID: request.AccountID})
+	if err != nil {
+		return nil, err
+	}
+
+	return &accountingapi.GetAccountResponse{AccountID: request.AccountID}, nil
+}
+
+func (h RpcHandlers) DisableAccount(ctx context.Context, request *accountingapi.DisableAccountRequest) (*accountingapi.DisableAccountResponse, error) {
+	err := h.app.Commands.DisableAccount.Handle(ctx, commands.DisableAccount{AccountID: request.AccountID})
+	if err != nil {
+		return nil, err
+	}
+
+	return &accountingapi.DisableAccountResponse{AccountID: request.AccountID}, nil
+}
+
+func (h RpcHandlers) EnableAccount(ctx context.Context, request *accountingapi.EnableAccountRequest) (*accountingapi.EnableAccountResponse, error) {
+	err := h.app.Commands.EnableAccount.Handle(ctx, commands.EnableAccount{AccountID: request.AccountID})
+	if err != nil {
+		return nil, err
+	}
+
+	return &accountingapi.EnableAccountResponse{AccountID: request.AccountID}, nil
 }
 
 type CommandHandlers struct {
