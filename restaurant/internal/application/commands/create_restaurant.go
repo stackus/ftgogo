@@ -6,13 +6,12 @@ import (
 	"github.com/google/uuid"
 
 	"github.com/stackus/ftgogo/restaurant/internal/domain"
-	"serviceapis/commonapi"
 	"serviceapis/restaurantapi"
 )
 
 type CreateRestaurant struct {
 	Name      string
-	Address   commonapi.Address
+	Address   restaurantapi.Address
 	MenuItems []restaurantapi.MenuItem
 }
 

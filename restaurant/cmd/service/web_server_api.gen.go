@@ -11,17 +11,16 @@ import (
 	"net/http"
 	"strings"
 
-	externalRef0 "serviceapis/commonapi"
 	externalRef1 "serviceapis/restaurantapi"
 
 	"github.com/deepmap/oapi-codegen/pkg/runtime"
 	"github.com/getkin/kin-openapi/openapi3"
-	"github.com/go-chi/chi"
+	"github.com/go-chi/chi/v5"
 )
 
 // Restaurant defines model for Restaurant.
 type Restaurant struct {
-	Address externalRef0.Address `json:"address"`
+	Address externalRef1.Address `json:"address"`
 	Id      string               `json:"id"`
 	Menu    struct {
 		MenuItems []externalRef1.MenuItem `json:"menu_items"`
@@ -42,7 +41,7 @@ type RestaurantResponse Restaurant
 
 // CreateRestaurantJSONBody defines parameters for CreateRestaurant.
 type CreateRestaurantJSONBody struct {
-	Address externalRef0.Address `json:"address"`
+	Address externalRef1.Address `json:"address"`
 	Menu    struct {
 		MenuItems []externalRef1.MenuItem `json:"menu_items"`
 	} `json:"menu"`

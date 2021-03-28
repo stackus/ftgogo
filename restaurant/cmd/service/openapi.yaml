@@ -25,7 +25,7 @@ paths:
           application/json:
             schema:
               type: object
-              required: [name, address, menu]
+              required: [ name, address, menu ]
               properties:
                 name:
                   type: string
@@ -33,12 +33,12 @@ paths:
                   $ref: '../../../serviceapis/commonapi/spec.yaml#/components/schemas/Address'
                 menu:
                   type: object
-                  required: [menu_items]
+                  required: [ menu_items ]
                   properties:
                     menu_items:
                       type: array
                       items:
-                        $ref:  '../../../serviceapis/restaurantapi/spec.yaml#/components/schemas/MenuItem'
+                        $ref: '../../../serviceapis/restaurantapi/spec.yaml#/components/schemas/MenuItem'
       responses:
         '201':
           $ref: '#/components/responses/RestaurantIDResponse'
@@ -93,7 +93,7 @@ components:
         application/json:
           schema:
             type: object
-            required: [id]
+            required: [ id ]
             properties:
               id:
                 type: string

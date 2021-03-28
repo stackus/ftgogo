@@ -2,7 +2,7 @@ package domain
 
 import (
 	"github.com/stackus/edat/core"
-	"serviceapis/commonapi"
+
 	"serviceapis/restaurantapi"
 	"shared-go/errs"
 )
@@ -17,7 +17,7 @@ type Restaurant struct {
 	core.EntityBase
 	RestaurantID string
 	Name         string
-	Address      commonapi.Address
+	Address      restaurantapi.Address
 	MenuItems    []restaurantapi.MenuItem
 }
 

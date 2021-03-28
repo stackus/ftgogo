@@ -1,0 +1,67 @@
+syntax = "proto3";
+
+option go_package = "github.com/stackus/ftgogo/serviceapis/restaurantapi";
+
+package restaurantapi;
+
+service RestaurantService {
+  rpc CreateRestaurant(CreateRestaurantRequest) returns (CreateRestaurantResponse);
+  rpc GetRestaurant(GetRestaurantRequest) returns (GetRestaurantResponse);
+}
+
+message CreateRestaurantRequest {
+  message address {
+    string Street1 = 1;
+    string Street2 = 2;
+    string City = 3;
+    string State = 4;
+    string Zip = 5;
+  }
+
+  message menuItem {
+    string ID = 1;
+    string Name = 2;
+    int64 Price = 3;
+  }
+
+  message menu {
+    repeated menuItem MenuItems = 1;
+  }
+
+  string Name = 1;
+  address Address = 2;
+  menu Menu = 3;
+}
+
+message CreateRestaurantResponse {
+  string RestaurantID = 1;
+}
+
+message GetRestaurantRequest {
+  string RestaurantID = 1;
+}
+
+message GetRestaurantResponse {
+  message address {
+    string Street1 = 1;
+    string Street2 = 2;
+    string City = 3;
+    string State = 4;
+    string Zip = 5;
+  }
+
+  message menuItem {
+    string ID = 1;
+    string Name = 2;
+    int64 Price = 3;
+  }
+
+  message menu {
+    repeated menuItem MenuItems = 1;
+  }
+
+  string RestaurantID = 1;
+  string Name = 2;
+  address Address = 3;
+  menu Menu = 4;
+}

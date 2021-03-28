@@ -1,9 +1,10 @@
 package main
 
 import (
+	"context"
 	"net/http"
 
-	"github.com/go-chi/chi"
+	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/render"
 
 	"github.com/stackus/ftgogo/restaurant/internal/adapters"
@@ -98,4 +99,72 @@ func (h WebHandlers) GetRestaurant(w http.ResponseWriter, r *http.Request, resta
 		},
 		Name: restaurant.Name,
 	})
+}
+
+type RpcHandlers struct {
+	app Application
+	restaurantapi.UnimplementedRestaurantServiceServer
+}
+
+var _ restaurantapi.RestaurantServiceServer = (*RpcHandlers)(nil)
+
+func newRpcHandlers(app Application) RpcHandlers {
+	return RpcHandlers{app: app}
+}
+
+func (h RpcHandlers) CreateRestaurant(ctx context.Context, request *restaurantapi.CreateRestaurantRequest) (*restaurantapi.CreateRestaurantResponse, error) {
+	menuItems := make([]restaurantapi.MenuItem, 0)
+	for _, item := range request.Menu.MenuItems {
+		menuItems = append(menuItems, restaurantapi.MenuItem{
+			ID:    item.ID,
+			Name:  item.Name,
+			Price: int(item.Price),
+		})
+	}
+
+	restaurantID, err := h.app.Commands.CreateRestaurant.Handle(ctx, commands.CreateRestaurant{
+		Name: request.Name,
+		Address: restaurantapi.Address{
+			Street1: request.Address.Street1,
+			Street2: request.Address.Street2,
+			City:    request.Address.City,
+			State:   request.Address.State,
+			Zip:     request.Address.Zip,
+		},
+		MenuItems: menuItems,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return &restaurantapi.CreateRestaurantResponse{RestaurantID: restaurantID}, nil
+}
+
+func (h RpcHandlers) GetRestaurant(ctx context.Context, request *restaurantapi.GetRestaurantRequest) (*restaurantapi.GetRestaurantResponse, error) {
+	restaurant, err := h.app.Queries.GetRestaurant.Handle(ctx, queries.GetRestaurant{RestaurantID: request.RestaurantID})
+	if err != nil {
+		return nil, err
+	}
+
+	menuItems := make([]*restaurantapi.GetRestaurantResponseMenuItem, 0, len(restaurant.MenuItems))
+	for _, item := range restaurant.MenuItems {
+		menuItems = append(menuItems, &restaurantapi.GetRestaurantResponseMenuItem{
+			ID:    item.ID,
+			Name:  item.Name,
+			Price: int64(item.Price),
+		})
+	}
+
+	return &restaurantapi.GetRestaurantResponse{
+		RestaurantID: restaurant.ID(),
+		Name:         restaurant.Name,
+		Address: &restaurantapi.GetRestaurantResponseAddress{
+			Street1: restaurant.Address.Street1,
+			Street2: restaurant.Address.Street2,
+			City:    restaurant.Address.City,
+			State:   restaurant.Address.State,
+			Zip:     restaurant.Address.Zip,
+		},
+		Menu: &restaurantapi.GetRestaurantResponseMenu{MenuItems: menuItems},
+	}, nil
 }
