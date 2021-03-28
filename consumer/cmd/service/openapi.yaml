@@ -25,7 +25,7 @@ paths:
           application/json:
             schema:
               type: object
-              required: [name]
+              required: [ name ]
               properties:
                 name:
                   type: string
@@ -63,7 +63,7 @@ components:
         application/json:
           schema:
             type: object
-            required: [id]
+            required: [ id ]
             properties:
               id:
                 type: string
@@ -73,7 +73,7 @@ components:
         application/json:
           schema:
             type: object
-            required: [consumer_id, name]
+            required: [ consumer_id, name ]
             properties:
               consumer_id:
                 type: string

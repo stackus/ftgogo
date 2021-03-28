@@ -27,7 +27,7 @@ paths:
           application/json:
             schema:
               type: object
-              required: [ready_by]
+              required: [ ready_by ]
               properties:
                 ready_by:
                   type: string
@@ -74,7 +74,7 @@ components:
         application/json:
           schema:
             type: object
-            required: [id]
+            required: [ id ]
             properties:
               id:
                 type: string
@@ -84,7 +84,7 @@ components:
         application/json:
           schema:
             type: object
-            required: [id]
+            required: [ id ]
             properties:
               id:
                 type: string

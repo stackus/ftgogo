@@ -28,9 +28,7 @@ type server struct {
 
 var _ Server = (*server)(nil)
 
-func NewServer(cfg ServerCfg) Server {
-	options := make([]grpc.ServerOption, 0)
-
+func NewServer(cfg ServerCfg, options ...grpc.ServerOption) Server {
 	if cfg.KeyPath != "" && cfg.CertPath != "" {
 		// setup TLS and listen for secure requests
 		creds, err := credentials.NewServerTLSFromFile(cfg.CertPath, cfg.KeyPath)

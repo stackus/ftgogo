@@ -8,6 +8,7 @@ import (
 	"github.com/go-chi/render"
 
 	"github.com/stackus/edat/msg"
+
 	"github.com/stackus/ftgogo/delivery/internal/adapters"
 	"github.com/stackus/ftgogo/delivery/internal/application/commands"
 	"github.com/stackus/ftgogo/delivery/internal/application/queries"
@@ -170,7 +171,13 @@ func (h RestaurantEventHandlers) RestaurantCreated(ctx context.Context, evtMsg m
 	return h.app.Commands.CreateRestaurant.Handle(ctx, commands.CreateRestaurant{
 		RestaurantID: evtMsg.EntityID(),
 		Name:         evt.Name,
-		Address:      evt.Address,
+		Address: deliveryapi.Address{
+			Street1: evt.Address.Street1,
+			Street2: evt.Address.Street2,
+			City:    evt.Address.City,
+			State:   evt.Address.State,
+			Zip:     evt.Address.Zip,
+		},
 	})
 }
 
@@ -182,9 +189,15 @@ func (h OrderEventHandlers) OrderCreated(ctx context.Context, evtMsg msg.EntityE
 	evt := evtMsg.Event().(*orderapi.OrderCreated)
 
 	return h.app.Commands.CreateDelivery.Handle(ctx, commands.CreateDelivery{
-		OrderID:         evtMsg.EntityID(),
-		RestaurantID:    evt.RestaurantID,
-		DeliveryAddress: evt.DeliverTo,
+		OrderID:      evtMsg.EntityID(),
+		RestaurantID: evt.RestaurantID,
+		DeliveryAddress: deliveryapi.Address{
+			Street1: evt.DeliverTo.Street1,
+			Street2: evt.DeliverTo.Street2,
+			City:    evt.DeliverTo.City,
+			State:   evt.DeliverTo.State,
+			Zip:     evt.DeliverTo.Zip,
+		},
 	})
 }
 

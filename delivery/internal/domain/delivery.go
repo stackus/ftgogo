@@ -3,7 +3,7 @@ package domain
 import (
 	"time"
 
-	"serviceapis/commonapi"
+	"serviceapis/deliveryapi"
 	"shared-go/errs"
 )
 
@@ -19,8 +19,8 @@ type Delivery struct {
 	DeliveryID        string
 	RestaurantID      string
 	AssignedCourierID string
-	PickUpAddress     commonapi.Address
-	DeliveryAddress   commonapi.Address
+	PickUpAddress     deliveryapi.Address
+	DeliveryAddress   deliveryapi.Address
 	Status            DeliveryStatus
 	PickUpTime        time.Time
 	ReadyBy           time.Time

@@ -10,6 +10,7 @@ import (
 
 	"github.com/stackus/edat/msg"
 	"github.com/stackus/edat/saga"
+
 	"github.com/stackus/ftgogo/account/internal/adapters"
 	"github.com/stackus/ftgogo/account/internal/application/commands"
 	"github.com/stackus/ftgogo/account/internal/application/queries"

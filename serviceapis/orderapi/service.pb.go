@@ -26,11 +26,11 @@ type CreateOrderRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	ConsumerID   string                      `protobuf:"bytes,1,opt,name=ConsumerID,proto3" json:"ConsumerID,omitempty"`
-	RestaurantID string                      `protobuf:"bytes,2,opt,name=RestaurantID,proto3" json:"RestaurantID,omitempty"`
-	DeliverAt    *timestamppb.Timestamp      `protobuf:"bytes,3,opt,name=DeliverAt,proto3" json:"DeliverAt,omitempty"`
-	DeliverTo    *CreateOrderRequest_Address `protobuf:"bytes,4,opt,name=DeliverTo,proto3" json:"DeliverTo,omitempty"`
-	LineItems    map[string]int64            `protobuf:"bytes,5,rep,name=LineItems,proto3" json:"LineItems,omitempty" protobuf_key:"bytes,1,opt,name=key,proto3" protobuf_val:"varint,2,opt,name=value,proto3"`
+	ConsumerID   string                     `protobuf:"bytes,1,opt,name=ConsumerID,proto3" json:"ConsumerID,omitempty"`
+	RestaurantID string                     `protobuf:"bytes,2,opt,name=RestaurantID,proto3" json:"RestaurantID,omitempty"`
+	DeliverAt    *timestamppb.Timestamp     `protobuf:"bytes,3,opt,name=DeliverAt,proto3" json:"DeliverAt,omitempty"`
+	DeliverTo    *CreateOrderRequestAddress `protobuf:"bytes,4,opt,name=DeliverTo,proto3" json:"DeliverTo,omitempty"`
+	LineItems    map[string]int64           `protobuf:"bytes,5,rep,name=LineItems,proto3" json:"LineItems,omitempty" protobuf_key:"bytes,1,opt,name=key,proto3" protobuf_val:"varint,2,opt,name=value,proto3"`
 }
 
 func (x *CreateOrderRequest) Reset() {
@@ -86,7 +86,7 @@ func (x *CreateOrderRequest) GetDeliverAt() *timestamppb.Timestamp {
 	return nil
 }
 
-func (x *CreateOrderRequest) GetDeliverTo() *CreateOrderRequest_Address {
+func (x *CreateOrderRequest) GetDeliverTo() *CreateOrderRequestAddress {
 	if x != nil {
 		return x.DeliverTo
 	}
@@ -547,7 +547,7 @@ func (x *GetRestaurantResponse) GetRestaurantID() string {
 	return ""
 }
 
-type CreateOrderRequest_Address struct {
+type CreateOrderRequestAddress struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
@@ -559,8 +559,8 @@ type CreateOrderRequest_Address struct {
 	Zip     string `protobuf:"bytes,5,opt,name=Zip,proto3" json:"Zip,omitempty"`
 }
 
-func (x *CreateOrderRequest_Address) Reset() {
-	*x = CreateOrderRequest_Address{}
+func (x *CreateOrderRequestAddress) Reset() {
+	*x = CreateOrderRequestAddress{}
 	if protoimpl.UnsafeEnabled {
 		mi := &file_service_proto_msgTypes[10]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -568,13 +568,13 @@ func (x *CreateOrderRequest_Address) Reset() {
 	}
 }
 
-func (x *CreateOrderRequest_Address) String() string {
+func (x *CreateOrderRequestAddress) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*CreateOrderRequest_Address) ProtoMessage() {}
+func (*CreateOrderRequestAddress) ProtoMessage() {}
 
-func (x *CreateOrderRequest_Address) ProtoReflect() protoreflect.Message {
+func (x *CreateOrderRequestAddress) ProtoReflect() protoreflect.Message {
 	mi := &file_service_proto_msgTypes[10]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -586,40 +586,40 @@ func (x *CreateOrderRequest_Address) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use CreateOrderRequest_Address.ProtoReflect.Descriptor instead.
-func (*CreateOrderRequest_Address) Descriptor() ([]byte, []int) {
+// Deprecated: Use CreateOrderRequestAddress.ProtoReflect.Descriptor instead.
+func (*CreateOrderRequestAddress) Descriptor() ([]byte, []int) {
 	return file_service_proto_rawDescGZIP(), []int{0, 0}
 }
 
-func (x *CreateOrderRequest_Address) GetStreet1() string {
+func (x *CreateOrderRequestAddress) GetStreet1() string {
 	if x != nil {
 		return x.Street1
 	}
 	return ""
 }
 
-func (x *CreateOrderRequest_Address) GetStreet2() string {
+func (x *CreateOrderRequestAddress) GetStreet2() string {
 	if x != nil {
 		return x.Street2
 	}
 	return ""
 }
 
-func (x *CreateOrderRequest_Address) GetCity() string {
+func (x *CreateOrderRequestAddress) GetCity() string {
 	if x != nil {
 		return x.City
 	}
 	return ""
 }
 
-func (x *CreateOrderRequest_Address) GetState() string {
+func (x *CreateOrderRequestAddress) GetState() string {
 	if x != nil {
 		return x.State
 	}
 	return ""
 }
 
-func (x *CreateOrderRequest_Address) GetZip() string {
+func (x *CreateOrderRequestAddress) GetZip() string {
 	if x != nil {
 		return x.Zip
 	}
@@ -645,13 +645,13 @@ var file_service_proto_rawDesc = []byte{
 	0x42, 0x0a, 0x09, 0x44, 0x65, 0x6c, 0x69, 0x76, 0x65, 0x72, 0x54, 0x6f, 0x18, 0x04, 0x20, 0x01,
 	0x28, 0x0b, 0x32, 0x24, 0x2e, 0x6f, 0x72, 0x64, 0x65, 0x72, 0x61, 0x70, 0x69, 0x2e, 0x43, 0x72,
 	0x65, 0x61, 0x74, 0x65, 0x4f, 0x72, 0x64, 0x65, 0x72, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74,
-	0x2e, 0x41, 0x64, 0x64, 0x72, 0x65, 0x73, 0x73, 0x52, 0x09, 0x44, 0x65, 0x6c, 0x69, 0x76, 0x65,
+	0x2e, 0x61, 0x64, 0x64, 0x72, 0x65, 0x73, 0x73, 0x52, 0x09, 0x44, 0x65, 0x6c, 0x69, 0x76, 0x65,
 	0x72, 0x54, 0x6f, 0x12, 0x49, 0x0a, 0x09, 0x4c, 0x69, 0x6e, 0x65, 0x49, 0x74, 0x65, 0x6d, 0x73,
 	0x18, 0x05, 0x20, 0x03, 0x28, 0x0b, 0x32, 0x2b, 0x2e, 0x6f, 0x72, 0x64, 0x65, 0x72, 0x61, 0x70,
 	0x69, 0x2e, 0x43, 0x72, 0x65, 0x61, 0x74, 0x65, 0x4f, 0x72, 0x64, 0x65, 0x72, 0x52, 0x65, 0x71,
 	0x75, 0x65, 0x73, 0x74, 0x2e, 0x4c, 0x69, 0x6e, 0x65, 0x49, 0x74, 0x65, 0x6d, 0x73, 0x45, 0x6e,
 	0x74, 0x72, 0x79, 0x52, 0x09, 0x4c, 0x69, 0x6e, 0x65, 0x49, 0x74, 0x65, 0x6d, 0x73, 0x1a, 0x79,
-	0x0a, 0x07, 0x41, 0x64, 0x64, 0x72, 0x65, 0x73, 0x73, 0x12, 0x18, 0x0a, 0x07, 0x53, 0x74, 0x72,
+	0x0a, 0x07, 0x61, 0x64, 0x64, 0x72, 0x65, 0x73, 0x73, 0x12, 0x18, 0x0a, 0x07, 0x53, 0x74, 0x72,
 	0x65, 0x65, 0x74, 0x31, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x07, 0x53, 0x74, 0x72, 0x65,
 	0x65, 0x74, 0x31, 0x12, 0x18, 0x0a, 0x07, 0x53, 0x74, 0x72, 0x65, 0x65, 0x74, 0x32, 0x18, 0x02,
 	0x20, 0x01, 0x28, 0x09, 0x52, 0x07, 0x53, 0x74, 0x72, 0x65, 0x65, 0x74, 0x32, 0x12, 0x12, 0x0a,
@@ -749,24 +749,24 @@ func file_service_proto_rawDescGZIP() []byte {
 
 var file_service_proto_msgTypes = make([]protoimpl.MessageInfo, 13)
 var file_service_proto_goTypes = []interface{}{
-	(*CreateOrderRequest)(nil),         // 0: orderapi.CreateOrderRequest
-	(*CreateOrderResponse)(nil),        // 1: orderapi.CreateOrderResponse
-	(*GetOrderRequest)(nil),            // 2: orderapi.GetOrderRequest
-	(*GetOrderResponse)(nil),           // 3: orderapi.GetOrderResponse
-	(*CancelOrderRequest)(nil),         // 4: orderapi.CancelOrderRequest
-	(*CancelOrderResponse)(nil),        // 5: orderapi.CancelOrderResponse
-	(*ReviseOrderRequest)(nil),         // 6: orderapi.ReviseOrderRequest
-	(*ReviseOrderResponse)(nil),        // 7: orderapi.ReviseOrderResponse
-	(*GetRestaurantRequest)(nil),       // 8: orderapi.GetRestaurantRequest
-	(*GetRestaurantResponse)(nil),      // 9: orderapi.GetRestaurantResponse
-	(*CreateOrderRequest_Address)(nil), // 10: orderapi.CreateOrderRequest.Address
-	nil,                                // 11: orderapi.CreateOrderRequest.LineItemsEntry
-	nil,                                // 12: orderapi.ReviseOrderRequest.RevisedQuantitiesEntry
-	(*timestamppb.Timestamp)(nil),      // 13: google.protobuf.Timestamp
+	(*CreateOrderRequest)(nil),        // 0: orderapi.CreateOrderRequest
+	(*CreateOrderResponse)(nil),       // 1: orderapi.CreateOrderResponse
+	(*GetOrderRequest)(nil),           // 2: orderapi.GetOrderRequest
+	(*GetOrderResponse)(nil),          // 3: orderapi.GetOrderResponse
+	(*CancelOrderRequest)(nil),        // 4: orderapi.CancelOrderRequest
+	(*CancelOrderResponse)(nil),       // 5: orderapi.CancelOrderResponse
+	(*ReviseOrderRequest)(nil),        // 6: orderapi.ReviseOrderRequest
+	(*ReviseOrderResponse)(nil),       // 7: orderapi.ReviseOrderResponse
+	(*GetRestaurantRequest)(nil),      // 8: orderapi.GetRestaurantRequest
+	(*GetRestaurantResponse)(nil),     // 9: orderapi.GetRestaurantResponse
+	(*CreateOrderRequestAddress)(nil), // 10: orderapi.CreateOrderRequest.address
+	nil,                               // 11: orderapi.CreateOrderRequest.LineItemsEntry
+	nil,                               // 12: orderapi.ReviseOrderRequest.RevisedQuantitiesEntry
+	(*timestamppb.Timestamp)(nil),     // 13: google.protobuf.Timestamp
 }
 var file_service_proto_depIdxs = []int32{
 	13, // 0: orderapi.CreateOrderRequest.DeliverAt:type_name -> google.protobuf.Timestamp
-	10, // 1: orderapi.CreateOrderRequest.DeliverTo:type_name -> orderapi.CreateOrderRequest.Address
+	10, // 1: orderapi.CreateOrderRequest.DeliverTo:type_name -> orderapi.CreateOrderRequest.address
 	11, // 2: orderapi.CreateOrderRequest.LineItems:type_name -> orderapi.CreateOrderRequest.LineItemsEntry
 	12, // 3: orderapi.ReviseOrderRequest.RevisedQuantities:type_name -> orderapi.ReviseOrderRequest.RevisedQuantitiesEntry
 	0,  // 4: orderapi.OrderService.CreateOrder:input_type -> orderapi.CreateOrderRequest
@@ -913,7 +913,7 @@ func file_service_proto_init() {
 			}
 		}
 		file_service_proto_msgTypes[10].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*CreateOrderRequest_Address); i {
+			switch v := v.(*CreateOrderRequestAddress); i {
 			case 0:
 				return &v.state
 			case 1:

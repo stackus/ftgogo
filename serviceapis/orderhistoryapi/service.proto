@@ -12,20 +12,20 @@ service OrderHistoryService {
 }
 
 message GetConsumerOrderHistoryRequest {
-  message Filters {
+  message filters {
     google.protobuf.Timestamp Since = 1;
     repeated string Keywords = 2;
     int64 Status = 3;
   }
 
   string ConsumerID = 1;
-  Filters Filter = 2;
+  filters Filter = 2;
   string Next = 3;
   int64 Limit = 4;
 }
 
 message GetConsumerOrderHistoryResponse {
-  message OrderHistory {
+  message orderHistory {
     string OrderID = 1;
     string Status = 2;
     string RestaurantID = 3;
@@ -33,7 +33,7 @@ message GetConsumerOrderHistoryResponse {
     google.protobuf.Timestamp CreatedAt = 5;
   }
 
-  repeated OrderHistory Orders = 1;
+  repeated orderHistory Orders = 1;
   string Next = 2;
 }
 

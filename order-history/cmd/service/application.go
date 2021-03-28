@@ -173,9 +173,9 @@ func (h RpcHandlers) GetConsumerOrderHistory(ctx context.Context, request *order
 		return nil, err
 	}
 
-	orders := make([]*orderhistoryapi.GetConsumerOrderHistoryResponse_OrderHistory, len(results.Orders))
+	orders := make([]*orderhistoryapi.GetConsumerOrderHistoryResponseOrderHistory, len(results.Orders))
 	for _, order := range results.Orders {
-		orders = append(orders, &orderhistoryapi.GetConsumerOrderHistoryResponse_OrderHistory{
+		orders = append(orders, &orderhistoryapi.GetConsumerOrderHistoryResponseOrderHistory{
 			OrderID:        order.OrderID,
 			Status:         order.Status,
 			RestaurantID:   order.RestaurantID,

@@ -5,13 +5,13 @@ import (
 	"time"
 
 	"github.com/stackus/ftgogo/delivery/internal/domain"
-	"serviceapis/commonapi"
+	"serviceapis/deliveryapi"
 )
 
 type CreateDelivery struct {
 	OrderID         string
 	RestaurantID    string
-	DeliveryAddress commonapi.Address
+	DeliveryAddress deliveryapi.Address
 }
 
 type CreateDeliveryHandler struct {

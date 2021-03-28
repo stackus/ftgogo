@@ -15,7 +15,7 @@ service OrderService {
 }
 
 message CreateOrderRequest {
-  message Address {
+  message address {
     string Street1 = 1;
     string Street2 = 2;
     string City = 3;
@@ -26,7 +26,7 @@ message CreateOrderRequest {
   string ConsumerID = 1;
   string RestaurantID = 2;
   google.protobuf.Timestamp DeliverAt = 3;
-  Address DeliverTo = 4;
+  address DeliverTo = 4;
   map<string, int64> LineItems = 5;
 }
 

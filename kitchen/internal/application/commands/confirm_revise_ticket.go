@@ -4,13 +4,12 @@ import (
 	"context"
 
 	"github.com/stackus/ftgogo/kitchen/internal/domain"
-	"serviceapis/commonapi"
 )
 
 type ConfirmReviseTicket struct {
 	TicketID          string
 	RestaurantID      string
-	RevisedQuantities commonapi.MenuItemQuantities
+	RevisedQuantities map[string]int
 }
 
 type ConfirmReviseTicketHandler struct {

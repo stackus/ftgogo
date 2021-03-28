@@ -3,7 +3,7 @@ package domain
 import (
 	"time"
 
-	"serviceapis/commonapi"
+	"serviceapis/deliveryapi"
 	"shared-go/errs"
 )
 
@@ -25,7 +25,7 @@ type Plan []Action
 type Action struct {
 	DeliveryID string
 	ActionType ActionType
-	Address    commonapi.Address
+	Address    deliveryapi.Address
 	When       time.Time
 }
 

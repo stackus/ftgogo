@@ -26,10 +26,10 @@ type GetConsumerOrderHistoryRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	ConsumerID string                                  `protobuf:"bytes,1,opt,name=ConsumerID,proto3" json:"ConsumerID,omitempty"`
-	Filter     *GetConsumerOrderHistoryRequest_Filters `protobuf:"bytes,2,opt,name=Filter,proto3" json:"Filter,omitempty"`
-	Next       string                                  `protobuf:"bytes,3,opt,name=Next,proto3" json:"Next,omitempty"`
-	Limit      int64                                   `protobuf:"varint,4,opt,name=Limit,proto3" json:"Limit,omitempty"`
+	ConsumerID string                                 `protobuf:"bytes,1,opt,name=ConsumerID,proto3" json:"ConsumerID,omitempty"`
+	Filter     *GetConsumerOrderHistoryRequestFilters `protobuf:"bytes,2,opt,name=Filter,proto3" json:"Filter,omitempty"`
+	Next       string                                 `protobuf:"bytes,3,opt,name=Next,proto3" json:"Next,omitempty"`
+	Limit      int64                                  `protobuf:"varint,4,opt,name=Limit,proto3" json:"Limit,omitempty"`
 }
 
 func (x *GetConsumerOrderHistoryRequest) Reset() {
@@ -71,7 +71,7 @@ func (x *GetConsumerOrderHistoryRequest) GetConsumerID() string {
 	return ""
 }
 
-func (x *GetConsumerOrderHistoryRequest) GetFilter() *GetConsumerOrderHistoryRequest_Filters {
+func (x *GetConsumerOrderHistoryRequest) GetFilter() *GetConsumerOrderHistoryRequestFilters {
 	if x != nil {
 		return x.Filter
 	}
@@ -97,8 +97,8 @@ type GetConsumerOrderHistoryResponse struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Orders []*GetConsumerOrderHistoryResponse_OrderHistory `protobuf:"bytes,1,rep,name=Orders,proto3" json:"Orders,omitempty"`
-	Next   string                                          `protobuf:"bytes,2,opt,name=Next,proto3" json:"Next,omitempty"`
+	Orders []*GetConsumerOrderHistoryResponseOrderHistory `protobuf:"bytes,1,rep,name=Orders,proto3" json:"Orders,omitempty"`
+	Next   string                                         `protobuf:"bytes,2,opt,name=Next,proto3" json:"Next,omitempty"`
 }
 
 func (x *GetConsumerOrderHistoryResponse) Reset() {
@@ -133,7 +133,7 @@ func (*GetConsumerOrderHistoryResponse) Descriptor() ([]byte, []int) {
 	return file_service_proto_rawDescGZIP(), []int{1}
 }
 
-func (x *GetConsumerOrderHistoryResponse) GetOrders() []*GetConsumerOrderHistoryResponse_OrderHistory {
+func (x *GetConsumerOrderHistoryResponse) GetOrders() []*GetConsumerOrderHistoryResponseOrderHistory {
 	if x != nil {
 		return x.Orders
 	}
@@ -273,7 +273,7 @@ func (x *GetOrderHistoryResponse) GetCreatedAt() *timestamppb.Timestamp {
 	return nil
 }
 
-type GetConsumerOrderHistoryRequest_Filters struct {
+type GetConsumerOrderHistoryRequestFilters struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
@@ -283,8 +283,8 @@ type GetConsumerOrderHistoryRequest_Filters struct {
 	Status   int64                  `protobuf:"varint,3,opt,name=Status,proto3" json:"Status,omitempty"`
 }
 
-func (x *GetConsumerOrderHistoryRequest_Filters) Reset() {
-	*x = GetConsumerOrderHistoryRequest_Filters{}
+func (x *GetConsumerOrderHistoryRequestFilters) Reset() {
+	*x = GetConsumerOrderHistoryRequestFilters{}
 	if protoimpl.UnsafeEnabled {
 		mi := &file_service_proto_msgTypes[4]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -292,13 +292,13 @@ func (x *GetConsumerOrderHistoryRequest_Filters) Reset() {
 	}
 }
 
-func (x *GetConsumerOrderHistoryRequest_Filters) String() string {
+func (x *GetConsumerOrderHistoryRequestFilters) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*GetConsumerOrderHistoryRequest_Filters) ProtoMessage() {}
+func (*GetConsumerOrderHistoryRequestFilters) ProtoMessage() {}
 
-func (x *GetConsumerOrderHistoryRequest_Filters) ProtoReflect() protoreflect.Message {
+func (x *GetConsumerOrderHistoryRequestFilters) ProtoReflect() protoreflect.Message {
 	mi := &file_service_proto_msgTypes[4]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -310,33 +310,33 @@ func (x *GetConsumerOrderHistoryRequest_Filters) ProtoReflect() protoreflect.Mes
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use GetConsumerOrderHistoryRequest_Filters.ProtoReflect.Descriptor instead.
-func (*GetConsumerOrderHistoryRequest_Filters) Descriptor() ([]byte, []int) {
+// Deprecated: Use GetConsumerOrderHistoryRequestFilters.ProtoReflect.Descriptor instead.
+func (*GetConsumerOrderHistoryRequestFilters) Descriptor() ([]byte, []int) {
 	return file_service_proto_rawDescGZIP(), []int{0, 0}
 }
 
-func (x *GetConsumerOrderHistoryRequest_Filters) GetSince() *timestamppb.Timestamp {
+func (x *GetConsumerOrderHistoryRequestFilters) GetSince() *timestamppb.Timestamp {
 	if x != nil {
 		return x.Since
 	}
 	return nil
 }
 
-func (x *GetConsumerOrderHistoryRequest_Filters) GetKeywords() []string {
+func (x *GetConsumerOrderHistoryRequestFilters) GetKeywords() []string {
 	if x != nil {
 		return x.Keywords
 	}
 	return nil
 }
 
-func (x *GetConsumerOrderHistoryRequest_Filters) GetStatus() int64 {
+func (x *GetConsumerOrderHistoryRequestFilters) GetStatus() int64 {
 	if x != nil {
 		return x.Status
 	}
 	return 0
 }
 
-type GetConsumerOrderHistoryResponse_OrderHistory struct {
+type GetConsumerOrderHistoryResponseOrderHistory struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
@@ -348,8 +348,8 @@ type GetConsumerOrderHistoryResponse_OrderHistory struct {
 	CreatedAt      *timestamppb.Timestamp `protobuf:"bytes,5,opt,name=CreatedAt,proto3" json:"CreatedAt,omitempty"`
 }
 
-func (x *GetConsumerOrderHistoryResponse_OrderHistory) Reset() {
-	*x = GetConsumerOrderHistoryResponse_OrderHistory{}
+func (x *GetConsumerOrderHistoryResponseOrderHistory) Reset() {
+	*x = GetConsumerOrderHistoryResponseOrderHistory{}
 	if protoimpl.UnsafeEnabled {
 		mi := &file_service_proto_msgTypes[5]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -357,13 +357,13 @@ func (x *GetConsumerOrderHistoryResponse_OrderHistory) Reset() {
 	}
 }
 
-func (x *GetConsumerOrderHistoryResponse_OrderHistory) String() string {
+func (x *GetConsumerOrderHistoryResponseOrderHistory) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*GetConsumerOrderHistoryResponse_OrderHistory) ProtoMessage() {}
+func (*GetConsumerOrderHistoryResponseOrderHistory) ProtoMessage() {}
 
-func (x *GetConsumerOrderHistoryResponse_OrderHistory) ProtoReflect() protoreflect.Message {
+func (x *GetConsumerOrderHistoryResponseOrderHistory) ProtoReflect() protoreflect.Message {
 	mi := &file_service_proto_msgTypes[5]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -375,40 +375,40 @@ func (x *GetConsumerOrderHistoryResponse_OrderHistory) ProtoReflect() protorefle
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use GetConsumerOrderHistoryResponse_OrderHistory.ProtoReflect.Descriptor instead.
-func (*GetConsumerOrderHistoryResponse_OrderHistory) Descriptor() ([]byte, []int) {
+// Deprecated: Use GetConsumerOrderHistoryResponseOrderHistory.ProtoReflect.Descriptor instead.
+func (*GetConsumerOrderHistoryResponseOrderHistory) Descriptor() ([]byte, []int) {
 	return file_service_proto_rawDescGZIP(), []int{1, 0}
 }
 
-func (x *GetConsumerOrderHistoryResponse_OrderHistory) GetOrderID() string {
+func (x *GetConsumerOrderHistoryResponseOrderHistory) GetOrderID() string {
 	if x != nil {
 		return x.OrderID
 	}
 	return ""
 }
 
-func (x *GetConsumerOrderHistoryResponse_OrderHistory) GetStatus() string {
+func (x *GetConsumerOrderHistoryResponseOrderHistory) GetStatus() string {
 	if x != nil {
 		return x.Status
 	}
 	return ""
 }
 
-func (x *GetConsumerOrderHistoryResponse_OrderHistory) GetRestaurantID() string {
+func (x *GetConsumerOrderHistoryResponseOrderHistory) GetRestaurantID() string {
 	if x != nil {
 		return x.RestaurantID
 	}
 	return ""
 }
 
-func (x *GetConsumerOrderHistoryResponse_OrderHistory) GetRestaurantName() string {
+func (x *GetConsumerOrderHistoryResponseOrderHistory) GetRestaurantName() string {
 	if x != nil {
 		return x.RestaurantName
 	}
 	return ""
 }
 
-func (x *GetConsumerOrderHistoryResponse_OrderHistory) GetCreatedAt() *timestamppb.Timestamp {
+func (x *GetConsumerOrderHistoryResponseOrderHistory) GetCreatedAt() *timestamppb.Timestamp {
 	if x != nil {
 		return x.CreatedAt
 	}
@@ -430,11 +430,11 @@ var file_service_proto_rawDesc = []byte{
 	0x20, 0x01, 0x28, 0x0b, 0x32, 0x37, 0x2e, 0x6f, 0x72, 0x64, 0x65, 0x72, 0x68, 0x69, 0x73, 0x74,
 	0x6f, 0x72, 0x79, 0x61, 0x70, 0x69, 0x2e, 0x47, 0x65, 0x74, 0x43, 0x6f, 0x6e, 0x73, 0x75, 0x6d,
 	0x65, 0x72, 0x4f, 0x72, 0x64, 0x65, 0x72, 0x48, 0x69, 0x73, 0x74, 0x6f, 0x72, 0x79, 0x52, 0x65,
-	0x71, 0x75, 0x65, 0x73, 0x74, 0x2e, 0x46, 0x69, 0x6c, 0x74, 0x65, 0x72, 0x73, 0x52, 0x06, 0x46,
+	0x71, 0x75, 0x65, 0x73, 0x74, 0x2e, 0x66, 0x69, 0x6c, 0x74, 0x65, 0x72, 0x73, 0x52, 0x06, 0x46,
 	0x69, 0x6c, 0x74, 0x65, 0x72, 0x12, 0x12, 0x0a, 0x04, 0x4e, 0x65, 0x78, 0x74, 0x18, 0x03, 0x20,
 	0x01, 0x28, 0x09, 0x52, 0x04, 0x4e, 0x65, 0x78, 0x74, 0x12, 0x14, 0x0a, 0x05, 0x4c, 0x69, 0x6d,
 	0x69, 0x74, 0x18, 0x04, 0x20, 0x01, 0x28, 0x03, 0x52, 0x05, 0x4c, 0x69, 0x6d, 0x69, 0x74, 0x1a,
-	0x6f, 0x0a, 0x07, 0x46, 0x69, 0x6c, 0x74, 0x65, 0x72, 0x73, 0x12, 0x30, 0x0a, 0x05, 0x53, 0x69,
+	0x6f, 0x0a, 0x07, 0x66, 0x69, 0x6c, 0x74, 0x65, 0x72, 0x73, 0x12, 0x30, 0x0a, 0x05, 0x53, 0x69,
 	0x6e, 0x63, 0x65, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x1a, 0x2e, 0x67, 0x6f, 0x6f, 0x67,
 	0x6c, 0x65, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x62, 0x75, 0x66, 0x2e, 0x54, 0x69, 0x6d, 0x65,
 	0x73, 0x74, 0x61, 0x6d, 0x70, 0x52, 0x05, 0x53, 0x69, 0x6e, 0x63, 0x65, 0x12, 0x1a, 0x0a, 0x08,
@@ -447,10 +447,10 @@ var file_service_proto_rawDesc = []byte{
 	0x20, 0x03, 0x28, 0x0b, 0x32, 0x3d, 0x2e, 0x6f, 0x72, 0x64, 0x65, 0x72, 0x68, 0x69, 0x73, 0x74,
 	0x6f, 0x72, 0x79, 0x61, 0x70, 0x69, 0x2e, 0x47, 0x65, 0x74, 0x43, 0x6f, 0x6e, 0x73, 0x75, 0x6d,
 	0x65, 0x72, 0x4f, 0x72, 0x64, 0x65, 0x72, 0x48, 0x69, 0x73, 0x74, 0x6f, 0x72, 0x79, 0x52, 0x65,
-	0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x2e, 0x4f, 0x72, 0x64, 0x65, 0x72, 0x48, 0x69, 0x73, 0x74,
+	0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x2e, 0x6f, 0x72, 0x64, 0x65, 0x72, 0x48, 0x69, 0x73, 0x74,
 	0x6f, 0x72, 0x79, 0x52, 0x06, 0x4f, 0x72, 0x64, 0x65, 0x72, 0x73, 0x12, 0x12, 0x0a, 0x04, 0x4e,
 	0x65, 0x78, 0x74, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x04, 0x4e, 0x65, 0x78, 0x74, 0x1a,
-	0xc6, 0x01, 0x0a, 0x0c, 0x4f, 0x72, 0x64, 0x65, 0x72, 0x48, 0x69, 0x73, 0x74, 0x6f, 0x72, 0x79,
+	0xc6, 0x01, 0x0a, 0x0c, 0x6f, 0x72, 0x64, 0x65, 0x72, 0x48, 0x69, 0x73, 0x74, 0x6f, 0x72, 0x79,
 	0x12, 0x18, 0x0a, 0x07, 0x4f, 0x72, 0x64, 0x65, 0x72, 0x49, 0x44, 0x18, 0x01, 0x20, 0x01, 0x28,
 	0x09, 0x52, 0x07, 0x4f, 0x72, 0x64, 0x65, 0x72, 0x49, 0x44, 0x12, 0x16, 0x0a, 0x06, 0x53, 0x74,
 	0x61, 0x74, 0x75, 0x73, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x06, 0x53, 0x74, 0x61, 0x74,
@@ -515,20 +515,20 @@ func file_service_proto_rawDescGZIP() []byte {
 
 var file_service_proto_msgTypes = make([]protoimpl.MessageInfo, 6)
 var file_service_proto_goTypes = []interface{}{
-	(*GetConsumerOrderHistoryRequest)(nil),               // 0: orderhistoryapi.GetConsumerOrderHistoryRequest
-	(*GetConsumerOrderHistoryResponse)(nil),              // 1: orderhistoryapi.GetConsumerOrderHistoryResponse
-	(*GetOrderHistoryRequest)(nil),                       // 2: orderhistoryapi.GetOrderHistoryRequest
-	(*GetOrderHistoryResponse)(nil),                      // 3: orderhistoryapi.GetOrderHistoryResponse
-	(*GetConsumerOrderHistoryRequest_Filters)(nil),       // 4: orderhistoryapi.GetConsumerOrderHistoryRequest.Filters
-	(*GetConsumerOrderHistoryResponse_OrderHistory)(nil), // 5: orderhistoryapi.GetConsumerOrderHistoryResponse.OrderHistory
-	(*timestamppb.Timestamp)(nil),                        // 6: google.protobuf.Timestamp
+	(*GetConsumerOrderHistoryRequest)(nil),              // 0: orderhistoryapi.GetConsumerOrderHistoryRequest
+	(*GetConsumerOrderHistoryResponse)(nil),             // 1: orderhistoryapi.GetConsumerOrderHistoryResponse
+	(*GetOrderHistoryRequest)(nil),                      // 2: orderhistoryapi.GetOrderHistoryRequest
+	(*GetOrderHistoryResponse)(nil),                     // 3: orderhistoryapi.GetOrderHistoryResponse
+	(*GetConsumerOrderHistoryRequestFilters)(nil),       // 4: orderhistoryapi.GetConsumerOrderHistoryRequest.filters
+	(*GetConsumerOrderHistoryResponseOrderHistory)(nil), // 5: orderhistoryapi.GetConsumerOrderHistoryResponse.orderHistory
+	(*timestamppb.Timestamp)(nil),                       // 6: google.protobuf.Timestamp
 }
 var file_service_proto_depIdxs = []int32{
-	4, // 0: orderhistoryapi.GetConsumerOrderHistoryRequest.Filter:type_name -> orderhistoryapi.GetConsumerOrderHistoryRequest.Filters
-	5, // 1: orderhistoryapi.GetConsumerOrderHistoryResponse.Orders:type_name -> orderhistoryapi.GetConsumerOrderHistoryResponse.OrderHistory
+	4, // 0: orderhistoryapi.GetConsumerOrderHistoryRequest.Filter:type_name -> orderhistoryapi.GetConsumerOrderHistoryRequest.filters
+	5, // 1: orderhistoryapi.GetConsumerOrderHistoryResponse.Orders:type_name -> orderhistoryapi.GetConsumerOrderHistoryResponse.orderHistory
 	6, // 2: orderhistoryapi.GetOrderHistoryResponse.CreatedAt:type_name -> google.protobuf.Timestamp
-	6, // 3: orderhistoryapi.GetConsumerOrderHistoryRequest.Filters.Since:type_name -> google.protobuf.Timestamp
-	6, // 4: orderhistoryapi.GetConsumerOrderHistoryResponse.OrderHistory.CreatedAt:type_name -> google.protobuf.Timestamp
+	6, // 3: orderhistoryapi.GetConsumerOrderHistoryRequest.filters.Since:type_name -> google.protobuf.Timestamp
+	6, // 4: orderhistoryapi.GetConsumerOrderHistoryResponse.orderHistory.CreatedAt:type_name -> google.protobuf.Timestamp
 	0, // 5: orderhistoryapi.OrderHistoryService.GetConsumerOrderHistory:input_type -> orderhistoryapi.GetConsumerOrderHistoryRequest
 	2, // 6: orderhistoryapi.OrderHistoryService.GetOrderHistory:input_type -> orderhistoryapi.GetOrderHistoryRequest
 	1, // 7: orderhistoryapi.OrderHistoryService.GetConsumerOrderHistory:output_type -> orderhistoryapi.GetConsumerOrderHistoryResponse
@@ -595,7 +595,7 @@ func file_service_proto_init() {
 			}
 		}
 		file_service_proto_msgTypes[4].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*GetConsumerOrderHistoryRequest_Filters); i {
+			switch v := v.(*GetConsumerOrderHistoryRequestFilters); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -607,7 +607,7 @@ func file_service_proto_init() {
 			}
 		}
 		file_service_proto_msgTypes[5].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*GetConsumerOrderHistoryResponse_OrderHistory); i {
+			switch v := v.(*GetConsumerOrderHistoryResponseOrderHistory); i {
 			case 0:
 				return &v.state
 			case 1:

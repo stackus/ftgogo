@@ -2,7 +2,6 @@ package kitchenapi
 
 import (
 	"github.com/stackus/edat/core"
-	"serviceapis/commonapi"
 )
 
 func registerCommands() {
@@ -68,7 +67,7 @@ type BeginReviseTicket struct {
 	KitchenServiceCommand
 	TicketID          string
 	RestaurantID      string
-	RevisedQuantities commonapi.MenuItemQuantities
+	RevisedQuantities map[string]int
 }
 
 func (BeginReviseTicket) CommandName() string { return "kitchenapi.BeginReviseTicket" }
@@ -77,7 +76,7 @@ type ConfirmReviseTicket struct {
 	KitchenServiceCommand
 	TicketID          string
 	RestaurantID      string
-	RevisedQuantities commonapi.MenuItemQuantities
+	RevisedQuantities map[string]int
 }
 
 func (ConfirmReviseTicket) CommandName() string { return "kitchenapi.ConfirmReviseTicket" }

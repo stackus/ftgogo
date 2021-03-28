@@ -1,7 +1,7 @@
 package domain
 
 import (
-	"serviceapis/commonapi"
+	"serviceapis/deliveryapi"
 	"shared-go/errs"
 )
 
@@ -13,6 +13,6 @@ var (
 type Restaurant struct {
 	RestaurantID string
 	Name         string
-	Address      commonapi.Address
+	Address      deliveryapi.Address
 	// note: no menu items
 }

@@ -89,7 +89,7 @@ components:
         application/json:
           schema:
             type: object
-            required: [available]
+            required: [ available ]
             properties:
               available:
                 type: boolean

@@ -4,7 +4,7 @@ import (
 	"time"
 
 	"github.com/stackus/edat/core"
-	"serviceapis/commonapi"
+
 	"serviceapis/kitchenapi"
 )
 
@@ -50,7 +50,7 @@ type ReviseTicket struct{}
 func (ReviseTicket) CommandName() string { return "kitchenservice.ReviseTicket" }
 
 type ConfirmReviseTicket struct {
-	RevisedQuantities commonapi.MenuItemQuantities
+	RevisedQuantities map[string]int
 }
 
 func (ConfirmReviseTicket) CommandName() string { return "kitchenservice.ConfirmReviseTicket" }

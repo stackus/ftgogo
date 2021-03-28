@@ -4,16 +4,15 @@ go 1.16
 
 require (
 	github.com/Shopify/sarama v1.28.0
-	github.com/go-chi/chi/v5 v5.0.1
-	github.com/go-chi/cors v1.1.1
+	github.com/go-chi/chi/v5 v5.0.2
+	github.com/go-chi/cors v1.2.0
 	github.com/go-chi/render v1.0.1
-	github.com/golang/protobuf v1.5.1 // indirect
 	github.com/golang/snappy v0.0.3 // indirect
 	github.com/google/uuid v1.2.0 // indirect
-	github.com/jackc/pgx/v4 v4.10.1
+	github.com/jackc/pgx/v4 v4.11.0
 	github.com/joho/godotenv v1.3.0
 	github.com/kelseyhightower/envconfig v1.4.0
-	github.com/klauspost/compress v1.11.12 // indirect
+	github.com/klauspost/compress v1.11.13 // indirect
 	github.com/nats-io/nats-streaming-server v0.19.0 // indirect
 	github.com/nats-io/nkeys v0.3.0 // indirect
 	github.com/nats-io/stan.go v0.8.3

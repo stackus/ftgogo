@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/stackus/edat/es"
+
 	"github.com/stackus/ftgogo/account/internal/domain"
 )
 
