@@ -8,6 +8,7 @@ import (
 )
 
 const OrderHistoryLimit = 20
+const OrderHistoryMinimum = 1
 const OrderHistoryMaximum = 50
 
 type OrderHistoryFilters struct {

@@ -4,8 +4,9 @@ import (
 	"context"
 	"net/http"
 
-	"github.com/go-chi/chi"
+	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/render"
+	"google.golang.org/protobuf/types/known/timestamppb"
 
 	"github.com/stackus/edat/msg"
 
@@ -14,6 +15,7 @@ import (
 	"github.com/stackus/ftgogo/order-history/internal/application/queries"
 	"serviceapis"
 	"serviceapis/orderapi"
+	"serviceapis/orderhistoryapi"
 	"shared-go/applications"
 	"shared-go/web"
 )
@@ -58,6 +60,8 @@ func initApplication(svc *applications.Service) error {
 		Handle(orderapi.OrderApproved{}, orderEventHandlers.OrderApproved).
 		Handle(orderapi.OrderCancelled{}, orderEventHandlers.OrderCancelled).
 		Handle(orderapi.OrderRejected{}, orderEventHandlers.OrderRejected))
+
+	orderhistoryapi.RegisterOrderHistoryServiceServer(svc.RpcServer, newRpcHandlers(application))
 
 	svc.WebServer.Mount(svc.Cfg.Web.ApiPath, func(r chi.Router) http.Handler {
 		return HandlerFromMux(NewWebHandlers(application), r)
@@ -116,8 +120,8 @@ func (h WebHandlers) GetConsumerOrderHistory(w http.ResponseWriter, r *http.Requ
 	if response, err := h.app.Queries.GetConsumerOrderHistory.Handle(r.Context(), queries.GetConsumerOrderHistory{
 		ConsumerID: params.ConsumerID,
 		Filter:     params.Filter,
-		Next:       params.Next,
-		Limit:      params.Limit,
+		Next:       *params.Next,
+		Limit:      *params.Limit,
 	}); err != nil {
 		render.Render(w, r, web.NewErrorResponse(err))
 		return
@@ -135,4 +139,68 @@ func (h WebHandlers) GetOrderHistory(w http.ResponseWriter, r *http.Request, ord
 	} else {
 		render.Respond(w, r, response)
 	}
+}
+
+type RpcHandlers struct {
+	app Application
+	orderhistoryapi.UnimplementedOrderHistoryServiceServer
+}
+
+var _ orderhistoryapi.OrderHistoryServiceServer = (*RpcHandlers)(nil)
+
+func newRpcHandlers(app Application) RpcHandlers {
+	return RpcHandlers{app: app}
+}
+
+func (h RpcHandlers) GetConsumerOrderHistory(ctx context.Context, request *orderhistoryapi.GetConsumerOrderHistoryRequest) (*orderhistoryapi.GetConsumerOrderHistoryResponse, error) {
+	var filters *queries.OrderHistoryFilters
+
+	if request.Filter != nil {
+		filters = &queries.OrderHistoryFilters{
+			Since:    request.Filter.Since.AsTime(),
+			Keywords: request.Filter.Keywords,
+			Status:   orderapi.OrderState(int(request.Filter.Status)),
+		}
+	}
+
+	results, err := h.app.Queries.GetConsumerOrderHistory.Handle(ctx, queries.GetConsumerOrderHistory{
+		ConsumerID: request.ConsumerID,
+		Filter:     filters,
+		Next:       request.Next,
+		Limit:      int(request.Limit),
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	orders := make([]*orderhistoryapi.GetConsumerOrderHistoryResponse_OrderHistory, len(results.Orders))
+	for _, order := range results.Orders {
+		orders = append(orders, &orderhistoryapi.GetConsumerOrderHistoryResponse_OrderHistory{
+			OrderID:        order.OrderID,
+			Status:         order.Status,
+			RestaurantID:   order.RestaurantID,
+			RestaurantName: order.RestaurantName,
+			CreatedAt:      timestamppb.New(order.CreatedAt),
+		})
+	}
+
+	return &orderhistoryapi.GetConsumerOrderHistoryResponse{
+		Orders: orders,
+		Next:   results.Next,
+	}, nil
+}
+
+func (h RpcHandlers) GetOrderHistory(ctx context.Context, request *orderhistoryapi.GetOrderHistoryRequest) (*orderhistoryapi.GetOrderHistoryResponse, error) {
+	result, err := h.app.Queries.GetOrderHistory.Handle(ctx, queries.GetOrderHistory{OrderID: request.OrderID})
+	if err != nil {
+		return nil, err
+	}
+
+	return &orderhistoryapi.GetOrderHistoryResponse{
+		OrderID:        result.OrderID,
+		Status:         result.Status,
+		RestaurantID:   result.RestaurantID,
+		RestaurantName: result.RestaurantName,
+		CreatedAt:      timestamppb.New(result.CreatedAt),
+	}, nil
 }

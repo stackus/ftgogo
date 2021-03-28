@@ -11,8 +11,8 @@ import (
 type GetConsumerOrderHistory struct {
 	ConsumerID string
 	Filter     *OrderHistoryFilters
-	Next       *string
-	Limit      *int
+	Next       string
+	Limit      int
 }
 
 type GetConsumerOrderHistoryHandler struct {
@@ -20,9 +20,9 @@ type GetConsumerOrderHistoryHandler struct {
 }
 
 type OrderHistoryFilters struct {
-	Since    *time.Time           `json:"since"`
-	Keywords []*string            `json:"keywords"`
-	Status   *orderapi.OrderState `json:"status"`
+	Since    time.Time           `json:"since"`
+	Keywords []string            `json:"keywords"`
+	Status   orderapi.OrderState `json:"status"`
 }
 
 type GetConsumerOrderHistoryResponse struct {
@@ -37,28 +37,24 @@ func NewGetConsumerOrderHistoryHandler(orderHistoryRepo domain.OrderHistoryRepos
 func (h GetConsumerOrderHistoryHandler) Handle(ctx context.Context, query GetConsumerOrderHistory) (*GetConsumerOrderHistoryResponse, error) {
 	filters := domain.OrderHistoryFilters{}
 
-	if query.Next != nil {
-		filters.Next = *query.Next
+	if query.Next != "" {
+		filters.Next = query.Next
 	}
 
 	filters.Limit = domain.OrderHistoryLimit
-	if query.Limit != nil {
-		if *query.Limit >= 1 && *query.Limit <= domain.OrderHistoryMaximum {
-			filters.Limit = *query.Limit
-		}
+	if query.Limit >= domain.OrderHistoryMinimum && query.Limit <= domain.OrderHistoryMaximum {
+		filters.Limit = query.Limit
 	}
 
 	if query.Filter != nil {
-		for _, keyword := range query.Filter.Keywords {
-			filters.Keywords = append(filters.Keywords, *keyword)
+		filters.Keywords = query.Filter.Keywords
+
+		if query.Filter.Status != orderapi.UnknownOrderState {
+			filters.Status = query.Filter.Status
 		}
 
-		if query.Filter.Status != nil {
-			filters.Status = *query.Filter.Status
-		}
-
-		if query.Filter.Since != nil {
-			filters.Since = *query.Filter.Since
+		if !query.Filter.Since.IsZero() {
+			filters.Since = query.Filter.Since
 		}
 	}
 
