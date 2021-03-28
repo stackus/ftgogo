@@ -133,5 +133,5 @@ var OrderHistoryService_ServiceDesc = grpc.ServiceDesc{
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "service.proto",
+	Metadata: "orderhistoryapi/service.proto",
 }

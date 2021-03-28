@@ -133,5 +133,5 @@ var ConsumerService_ServiceDesc = grpc.ServiceDesc{
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "service.proto",
+	Metadata: "consumerapi/service.proto",
 }

@@ -133,5 +133,5 @@ var KitchenService_ServiceDesc = grpc.ServiceDesc{
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "service.proto",
+	Metadata: "kitchenapi/service.proto",
 }

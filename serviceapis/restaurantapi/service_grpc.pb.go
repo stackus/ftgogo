@@ -133,5 +133,5 @@ var RestaurantService_ServiceDesc = grpc.ServiceDesc{
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "service.proto",
+	Metadata: "restaurantapi/service.proto",
 }

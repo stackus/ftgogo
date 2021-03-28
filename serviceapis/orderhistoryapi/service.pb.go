@@ -2,7 +2,7 @@
 // versions:
 // 	protoc-gen-go v1.26.0
 // 	protoc        v3.15.6
-// source: service.proto
+// source: orderhistoryapi/service.proto
 
 package orderhistoryapi
 
@@ -35,7 +35,7 @@ type GetConsumerOrderHistoryRequest struct {
 func (x *GetConsumerOrderHistoryRequest) Reset() {
 	*x = GetConsumerOrderHistoryRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_service_proto_msgTypes[0]
+		mi := &file_orderhistoryapi_service_proto_msgTypes[0]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -48,7 +48,7 @@ func (x *GetConsumerOrderHistoryRequest) String() string {
 func (*GetConsumerOrderHistoryRequest) ProtoMessage() {}
 
 func (x *GetConsumerOrderHistoryRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_service_proto_msgTypes[0]
+	mi := &file_orderhistoryapi_service_proto_msgTypes[0]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -61,7 +61,7 @@ func (x *GetConsumerOrderHistoryRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetConsumerOrderHistoryRequest.ProtoReflect.Descriptor instead.
 func (*GetConsumerOrderHistoryRequest) Descriptor() ([]byte, []int) {
-	return file_service_proto_rawDescGZIP(), []int{0}
+	return file_orderhistoryapi_service_proto_rawDescGZIP(), []int{0}
 }
 
 func (x *GetConsumerOrderHistoryRequest) GetConsumerID() string {
@@ -104,7 +104,7 @@ type GetConsumerOrderHistoryResponse struct {
 func (x *GetConsumerOrderHistoryResponse) Reset() {
 	*x = GetConsumerOrderHistoryResponse{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_service_proto_msgTypes[1]
+		mi := &file_orderhistoryapi_service_proto_msgTypes[1]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -117,7 +117,7 @@ func (x *GetConsumerOrderHistoryResponse) String() string {
 func (*GetConsumerOrderHistoryResponse) ProtoMessage() {}
 
 func (x *GetConsumerOrderHistoryResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_service_proto_msgTypes[1]
+	mi := &file_orderhistoryapi_service_proto_msgTypes[1]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -130,7 +130,7 @@ func (x *GetConsumerOrderHistoryResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetConsumerOrderHistoryResponse.ProtoReflect.Descriptor instead.
 func (*GetConsumerOrderHistoryResponse) Descriptor() ([]byte, []int) {
-	return file_service_proto_rawDescGZIP(), []int{1}
+	return file_orderhistoryapi_service_proto_rawDescGZIP(), []int{1}
 }
 
 func (x *GetConsumerOrderHistoryResponse) GetOrders() []*GetConsumerOrderHistoryResponseOrderHistory {
@@ -158,7 +158,7 @@ type GetOrderHistoryRequest struct {
 func (x *GetOrderHistoryRequest) Reset() {
 	*x = GetOrderHistoryRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_service_proto_msgTypes[2]
+		mi := &file_orderhistoryapi_service_proto_msgTypes[2]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -171,7 +171,7 @@ func (x *GetOrderHistoryRequest) String() string {
 func (*GetOrderHistoryRequest) ProtoMessage() {}
 
 func (x *GetOrderHistoryRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_service_proto_msgTypes[2]
+	mi := &file_orderhistoryapi_service_proto_msgTypes[2]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -184,7 +184,7 @@ func (x *GetOrderHistoryRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetOrderHistoryRequest.ProtoReflect.Descriptor instead.
 func (*GetOrderHistoryRequest) Descriptor() ([]byte, []int) {
-	return file_service_proto_rawDescGZIP(), []int{2}
+	return file_orderhistoryapi_service_proto_rawDescGZIP(), []int{2}
 }
 
 func (x *GetOrderHistoryRequest) GetOrderID() string {
@@ -209,7 +209,7 @@ type GetOrderHistoryResponse struct {
 func (x *GetOrderHistoryResponse) Reset() {
 	*x = GetOrderHistoryResponse{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_service_proto_msgTypes[3]
+		mi := &file_orderhistoryapi_service_proto_msgTypes[3]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -222,7 +222,7 @@ func (x *GetOrderHistoryResponse) String() string {
 func (*GetOrderHistoryResponse) ProtoMessage() {}
 
 func (x *GetOrderHistoryResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_service_proto_msgTypes[3]
+	mi := &file_orderhistoryapi_service_proto_msgTypes[3]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -235,7 +235,7 @@ func (x *GetOrderHistoryResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetOrderHistoryResponse.ProtoReflect.Descriptor instead.
 func (*GetOrderHistoryResponse) Descriptor() ([]byte, []int) {
-	return file_service_proto_rawDescGZIP(), []int{3}
+	return file_orderhistoryapi_service_proto_rawDescGZIP(), []int{3}
 }
 
 func (x *GetOrderHistoryResponse) GetOrderID() string {
@@ -286,7 +286,7 @@ type GetConsumerOrderHistoryRequestFilters struct {
 func (x *GetConsumerOrderHistoryRequestFilters) Reset() {
 	*x = GetConsumerOrderHistoryRequestFilters{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_service_proto_msgTypes[4]
+		mi := &file_orderhistoryapi_service_proto_msgTypes[4]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -299,7 +299,7 @@ func (x *GetConsumerOrderHistoryRequestFilters) String() string {
 func (*GetConsumerOrderHistoryRequestFilters) ProtoMessage() {}
 
 func (x *GetConsumerOrderHistoryRequestFilters) ProtoReflect() protoreflect.Message {
-	mi := &file_service_proto_msgTypes[4]
+	mi := &file_orderhistoryapi_service_proto_msgTypes[4]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -312,7 +312,7 @@ func (x *GetConsumerOrderHistoryRequestFilters) ProtoReflect() protoreflect.Mess
 
 // Deprecated: Use GetConsumerOrderHistoryRequestFilters.ProtoReflect.Descriptor instead.
 func (*GetConsumerOrderHistoryRequestFilters) Descriptor() ([]byte, []int) {
-	return file_service_proto_rawDescGZIP(), []int{0, 0}
+	return file_orderhistoryapi_service_proto_rawDescGZIP(), []int{0, 0}
 }
 
 func (x *GetConsumerOrderHistoryRequestFilters) GetSince() *timestamppb.Timestamp {
@@ -351,7 +351,7 @@ type GetConsumerOrderHistoryResponseOrderHistory struct {
 func (x *GetConsumerOrderHistoryResponseOrderHistory) Reset() {
 	*x = GetConsumerOrderHistoryResponseOrderHistory{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_service_proto_msgTypes[5]
+		mi := &file_orderhistoryapi_service_proto_msgTypes[5]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -364,7 +364,7 @@ func (x *GetConsumerOrderHistoryResponseOrderHistory) String() string {
 func (*GetConsumerOrderHistoryResponseOrderHistory) ProtoMessage() {}
 
 func (x *GetConsumerOrderHistoryResponseOrderHistory) ProtoReflect() protoreflect.Message {
-	mi := &file_service_proto_msgTypes[5]
+	mi := &file_orderhistoryapi_service_proto_msgTypes[5]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -377,7 +377,7 @@ func (x *GetConsumerOrderHistoryResponseOrderHistory) ProtoReflect() protoreflec
 
 // Deprecated: Use GetConsumerOrderHistoryResponseOrderHistory.ProtoReflect.Descriptor instead.
 func (*GetConsumerOrderHistoryResponseOrderHistory) Descriptor() ([]byte, []int) {
-	return file_service_proto_rawDescGZIP(), []int{1, 0}
+	return file_orderhistoryapi_service_proto_rawDescGZIP(), []int{1, 0}
 }
 
 func (x *GetConsumerOrderHistoryResponseOrderHistory) GetOrderID() string {
@@ -415,10 +415,11 @@ func (x *GetConsumerOrderHistoryResponseOrderHistory) GetCreatedAt() *timestampp
 	return nil
 }
 
-var File_service_proto protoreflect.FileDescriptor
+var File_orderhistoryapi_service_proto protoreflect.FileDescriptor
 
-var file_service_proto_rawDesc = []byte{
-	0x0a, 0x0d, 0x73, 0x65, 0x72, 0x76, 0x69, 0x63, 0x65, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x12,
+var file_orderhistoryapi_service_proto_rawDesc = []byte{
+	0x0a, 0x1d, 0x6f, 0x72, 0x64, 0x65, 0x72, 0x68, 0x69, 0x73, 0x74, 0x6f, 0x72, 0x79, 0x61, 0x70,
+	0x69, 0x2f, 0x73, 0x65, 0x72, 0x76, 0x69, 0x63, 0x65, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x12,
 	0x0f, 0x6f, 0x72, 0x64, 0x65, 0x72, 0x68, 0x69, 0x73, 0x74, 0x6f, 0x72, 0x79, 0x61, 0x70, 0x69,
 	0x1a, 0x1f, 0x67, 0x6f, 0x6f, 0x67, 0x6c, 0x65, 0x2f, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x62, 0x75,
 	0x66, 0x2f, 0x74, 0x69, 0x6d, 0x65, 0x73, 0x74, 0x61, 0x6d, 0x70, 0x2e, 0x70, 0x72, 0x6f, 0x74,
@@ -502,19 +503,19 @@ var file_service_proto_rawDesc = []byte{
 }
 
 var (
-	file_service_proto_rawDescOnce sync.Once
-	file_service_proto_rawDescData = file_service_proto_rawDesc
+	file_orderhistoryapi_service_proto_rawDescOnce sync.Once
+	file_orderhistoryapi_service_proto_rawDescData = file_orderhistoryapi_service_proto_rawDesc
 )
 
-func file_service_proto_rawDescGZIP() []byte {
-	file_service_proto_rawDescOnce.Do(func() {
-		file_service_proto_rawDescData = protoimpl.X.CompressGZIP(file_service_proto_rawDescData)
+func file_orderhistoryapi_service_proto_rawDescGZIP() []byte {
+	file_orderhistoryapi_service_proto_rawDescOnce.Do(func() {
+		file_orderhistoryapi_service_proto_rawDescData = protoimpl.X.CompressGZIP(file_orderhistoryapi_service_proto_rawDescData)
 	})
-	return file_service_proto_rawDescData
+	return file_orderhistoryapi_service_proto_rawDescData
 }
 
-var file_service_proto_msgTypes = make([]protoimpl.MessageInfo, 6)
-var file_service_proto_goTypes = []interface{}{
+var file_orderhistoryapi_service_proto_msgTypes = make([]protoimpl.MessageInfo, 6)
+var file_orderhistoryapi_service_proto_goTypes = []interface{}{
 	(*GetConsumerOrderHistoryRequest)(nil),              // 0: orderhistoryapi.GetConsumerOrderHistoryRequest
 	(*GetConsumerOrderHistoryResponse)(nil),             // 1: orderhistoryapi.GetConsumerOrderHistoryResponse
 	(*GetOrderHistoryRequest)(nil),                      // 2: orderhistoryapi.GetOrderHistoryRequest
@@ -523,7 +524,7 @@ var file_service_proto_goTypes = []interface{}{
 	(*GetConsumerOrderHistoryResponseOrderHistory)(nil), // 5: orderhistoryapi.GetConsumerOrderHistoryResponse.orderHistory
 	(*timestamppb.Timestamp)(nil),                       // 6: google.protobuf.Timestamp
 }
-var file_service_proto_depIdxs = []int32{
+var file_orderhistoryapi_service_proto_depIdxs = []int32{
 	4, // 0: orderhistoryapi.GetConsumerOrderHistoryRequest.Filter:type_name -> orderhistoryapi.GetConsumerOrderHistoryRequest.filters
 	5, // 1: orderhistoryapi.GetConsumerOrderHistoryResponse.Orders:type_name -> orderhistoryapi.GetConsumerOrderHistoryResponse.orderHistory
 	6, // 2: orderhistoryapi.GetOrderHistoryResponse.CreatedAt:type_name -> google.protobuf.Timestamp
@@ -540,13 +541,13 @@ var file_service_proto_depIdxs = []int32{
 	0, // [0:5] is the sub-list for field type_name
 }
 
-func init() { file_service_proto_init() }
-func file_service_proto_init() {
-	if File_service_proto != nil {
+func init() { file_orderhistoryapi_service_proto_init() }
+func file_orderhistoryapi_service_proto_init() {
+	if File_orderhistoryapi_service_proto != nil {
 		return
 	}
 	if !protoimpl.UnsafeEnabled {
-		file_service_proto_msgTypes[0].Exporter = func(v interface{}, i int) interface{} {
+		file_orderhistoryapi_service_proto_msgTypes[0].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*GetConsumerOrderHistoryRequest); i {
 			case 0:
 				return &v.state
@@ -558,7 +559,7 @@ func file_service_proto_init() {
 				return nil
 			}
 		}
-		file_service_proto_msgTypes[1].Exporter = func(v interface{}, i int) interface{} {
+		file_orderhistoryapi_service_proto_msgTypes[1].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*GetConsumerOrderHistoryResponse); i {
 			case 0:
 				return &v.state
@@ -570,7 +571,7 @@ func file_service_proto_init() {
 				return nil
 			}
 		}
-		file_service_proto_msgTypes[2].Exporter = func(v interface{}, i int) interface{} {
+		file_orderhistoryapi_service_proto_msgTypes[2].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*GetOrderHistoryRequest); i {
 			case 0:
 				return &v.state
@@ -582,7 +583,7 @@ func file_service_proto_init() {
 				return nil
 			}
 		}
-		file_service_proto_msgTypes[3].Exporter = func(v interface{}, i int) interface{} {
+		file_orderhistoryapi_service_proto_msgTypes[3].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*GetOrderHistoryResponse); i {
 			case 0:
 				return &v.state
@@ -594,7 +595,7 @@ func file_service_proto_init() {
 				return nil
 			}
 		}
-		file_service_proto_msgTypes[4].Exporter = func(v interface{}, i int) interface{} {
+		file_orderhistoryapi_service_proto_msgTypes[4].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*GetConsumerOrderHistoryRequestFilters); i {
 			case 0:
 				return &v.state
@@ -606,7 +607,7 @@ func file_service_proto_init() {
 				return nil
 			}
 		}
-		file_service_proto_msgTypes[5].Exporter = func(v interface{}, i int) interface{} {
+		file_orderhistoryapi_service_proto_msgTypes[5].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*GetConsumerOrderHistoryResponseOrderHistory); i {
 			case 0:
 				return &v.state
@@ -623,18 +624,18 @@ func file_service_proto_init() {
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
-			RawDescriptor: file_service_proto_rawDesc,
+			RawDescriptor: file_orderhistoryapi_service_proto_rawDesc,
 			NumEnums:      0,
 			NumMessages:   6,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
-		GoTypes:           file_service_proto_goTypes,
-		DependencyIndexes: file_service_proto_depIdxs,
-		MessageInfos:      file_service_proto_msgTypes,
+		GoTypes:           file_orderhistoryapi_service_proto_goTypes,
+		DependencyIndexes: file_orderhistoryapi_service_proto_depIdxs,
+		MessageInfos:      file_orderhistoryapi_service_proto_msgTypes,
 	}.Build()
-	File_service_proto = out.File
-	file_service_proto_rawDesc = nil
-	file_service_proto_goTypes = nil
-	file_service_proto_depIdxs = nil
+	File_orderhistoryapi_service_proto = out.File
+	file_orderhistoryapi_service_proto_rawDesc = nil
+	file_orderhistoryapi_service_proto_goTypes = nil
+	file_orderhistoryapi_service_proto_depIdxs = nil
 }
