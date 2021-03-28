@@ -47,6 +47,8 @@ func initApplication(svc *applications.Service) error {
 		},
 	}
 
+	restaurantapi.RegisterRestaurantServiceServer(svc.RpcServer, newRpcHandlers(application))
+
 	svc.WebServer.Mount(svc.Cfg.Web.ApiPath, func(r chi.Router) http.Handler {
 		return HandlerFromMux(NewWebHandlers(application), r)
 	})
