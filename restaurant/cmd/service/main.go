@@ -1,11 +1,9 @@
 package main
 
 import (
-	"github.com/go-chi/chi/v5"
 	"github.com/stackus/ftgogo/restaurant/internal/adapters"
 	"github.com/stackus/ftgogo/restaurant/internal/application/commands"
 	"github.com/stackus/ftgogo/restaurant/internal/application/queries"
-	"net/http"
 	"serviceapis"
 	"serviceapis/restaurantapi/pb"
 	"shared-go/applications"
@@ -49,10 +47,6 @@ func initService(svc *applications.Service) error {
 	}
 
 	restaurantpb.RegisterRestaurantServiceServer(svc.RpcServer, newRpcHandlers(application))
-
-	svc.WebServer.Mount(svc.Cfg.Web.ApiPath, func(r chi.Router) http.Handler {
-		return HandlerFromMux(newWebHandlers(application), r)
-	})
 
 	return nil
 }
