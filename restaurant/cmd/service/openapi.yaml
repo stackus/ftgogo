@@ -30,7 +30,7 @@ paths:
                 name:
                   type: string
                 address:
-                  $ref: '../../../serviceapis/commonapi/spec.yaml#/components/schemas/Address'
+                  $ref: '../../../serviceapis/restaurantapi/spec.yaml#/components/schemas/Address'
                 menu:
                   type: object
                   required: [ menu_items ]
@@ -68,7 +68,7 @@ components:
         name:
           type: string
         address:
-          $ref: '../../../serviceapis/commonapi/spec.yaml#/components/schemas/Address'
+          $ref: '../../../serviceapis/restaurantapi/spec.yaml#/components/schemas/Address'
         menu:
           type: object
           required: [ menu_items ]

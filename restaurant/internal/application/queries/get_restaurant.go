@@ -14,8 +14,8 @@ type GetRestaurantHandler struct {
 	repo domain.RestaurantRepository
 }
 
-func NewGetRestaurantHandler(restaurantRepo domain.RestaurantRepository) GetRestaurantHandler {
-	return GetRestaurantHandler{repo: restaurantRepo}
+func NewGetRestaurantHandler(repo domain.RestaurantRepository) GetRestaurantHandler {
+	return GetRestaurantHandler{repo: repo}
 }
 
 func (h GetRestaurantHandler) Handle(ctx context.Context, query GetRestaurant) (*domain.Restaurant, error) {

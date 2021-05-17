@@ -3,8 +3,6 @@ package commands
 import (
 	"context"
 
-	"github.com/google/uuid"
-
 	"github.com/stackus/ftgogo/restaurant/internal/domain"
 	"serviceapis/restaurantapi"
 )
@@ -16,37 +14,19 @@ type CreateRestaurant struct {
 }
 
 type CreateRestaurantHandler struct {
-	repo      domain.RestaurantRepository
-	publisher domain.RestaurantPublisher
+	repo domain.RestaurantRepository
 }
 
-func NewCreateRestaurantHandler(restaurantRepo domain.RestaurantRepository, restaurantPublisher domain.RestaurantPublisher) CreateRestaurantHandler {
+func NewCreateRestaurantHandler(restaurantRepo domain.RestaurantRepository) CreateRestaurantHandler {
 	return CreateRestaurantHandler{
-		repo:      restaurantRepo,
-		publisher: restaurantPublisher,
+		repo: restaurantRepo,
 	}
 }
 
 func (h CreateRestaurantHandler) Handle(ctx context.Context, cmd CreateRestaurant) (string, error) {
-	restaurant := &domain.Restaurant{
-		RestaurantID: uuid.New().String(),
-		Name:         cmd.Name,
-		Address:      cmd.Address,
-		MenuItems:    cmd.MenuItems,
-	}
-
-	restaurant.AddEvent(&restaurantapi.RestaurantCreated{
-		Name:    cmd.Name,
-		Address: cmd.Address,
-		Menu:    cmd.MenuItems,
-	})
+	restaurant := domain.CreateRestaurant(cmd.Name, cmd.Address, cmd.MenuItems)
 
 	err := h.repo.Save(ctx, restaurant)
-	if err != nil {
-		return "", err
-	}
-
-	err = h.publisher.PublishEntityEvents(ctx, restaurant)
 	if err != nil {
 		return "", err
 	}

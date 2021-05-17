@@ -1,6 +1,7 @@
 package domain
 
 import (
+	"github.com/google/uuid"
 	"github.com/stackus/edat/core"
 
 	"serviceapis/restaurantapi"
@@ -31,6 +32,24 @@ func (r Restaurant) ID() string {
 	return r.RestaurantID
 }
 
+//CreateRestaurant builds a new Restaurant instance
+func CreateRestaurant(name string, address restaurantapi.Address, menuItems []restaurantapi.MenuItem) *Restaurant {
+	r := &Restaurant{
+		RestaurantID: uuid.New().String(),
+		Name:         name,
+		Address:      address,
+		MenuItems:    menuItems,
+	}
+
+	r.AddEvent(&restaurantapi.RestaurantCreated{
+		Name:    r.Name,
+		Address: r.Address,
+		Menu:    r.MenuItems,
+	})
+
+	return r
+}
+
 // FindMenuItem locates the local menu item record for a given menuItemID
 func (r *Restaurant) FindMenuItem(menuItemID string) (restaurantapi.MenuItem, error) {
 	for _, item := range r.MenuItems {
@@ -44,6 +63,6 @@ func (r *Restaurant) FindMenuItem(menuItemID string) (restaurantapi.MenuItem, er
 
 // ReviseMenu updates the local menu
 // NOT IMPLEMENTED
-func (r *Restaurant) ReviseMenu([]restaurantapi.MenuItem) error {
+func (r *Restaurant) ReviseMenu(_ []restaurantapi.MenuItem) error {
 	return errs.ErrNotImplemented
 }
