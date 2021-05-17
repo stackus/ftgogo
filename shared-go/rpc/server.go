@@ -7,6 +7,7 @@ import (
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
+	"google.golang.org/grpc/reflection"
 )
 
 type ServerCfg struct {
@@ -28,7 +29,9 @@ type server struct {
 
 var _ Server = (*server)(nil)
 
-func NewServer(cfg ServerCfg, options ...grpc.ServerOption) Server {
+func NewServer(cfg ServerCfg, options ...ServerOption) Server {
+	serverCfg := &serverConfig{}
+
 	if cfg.KeyPath != "" && cfg.CertPath != "" {
 		// setup TLS and listen for secure requests
 		creds, err := credentials.NewServerTLSFromFile(cfg.CertPath, cfg.KeyPath)
@@ -36,11 +39,19 @@ func NewServer(cfg ServerCfg, options ...grpc.ServerOption) Server {
 			panic(err)
 		}
 
-		options = append(options, grpc.Creds(creds))
+		serverCfg.AddOption(grpc.Creds(creds))
 	}
 
+	for _, option := range options {
+		option(serverCfg)
+	}
+
+	s := grpc.NewServer(serverCfg.ServerOptions()...)
+
+	reflection.Register(s)
+
 	return server{
-		s:    grpc.NewServer(options...),
+		s:    s,
 		port: cfg.Port,
 	}
 }

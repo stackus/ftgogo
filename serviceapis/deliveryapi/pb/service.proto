@@ -1,8 +1,8 @@
 syntax = "proto3";
 
-option go_package = "github.com/stackus/ftgogo/serviceapis/deliveryapi";
+option go_package = "github.com/stackus/ftgogo/serviceapis/deliveryapi/deliverypb";
 
-package deliveryapi;
+package deliverypb;
 
 service DeliveryService {
   rpc SetCourierAvailability(SetCourierAvailabilityRequest) returns (SetCourierAvailabilityResponse);

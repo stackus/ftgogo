@@ -1,10 +1,10 @@
 syntax = "proto3";
 
-option go_package = "github.com/stackus/ftgogo/serviceapis/orderhistoryapi";
+option go_package = "github.com/stackus/ftgogo/serviceapis/orderhistoryapi/orderhistorypb";
 
 import "google/protobuf/timestamp.proto";
 
-package orderhistoryapi;
+package orderhistorypb;
 
 service OrderHistoryService {
   rpc GetConsumerOrderHistory(GetConsumerOrderHistoryRequest) returns (GetConsumerOrderHistoryResponse);

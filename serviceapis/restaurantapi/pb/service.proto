@@ -1,8 +1,8 @@
 syntax = "proto3";
 
-option go_package = "github.com/stackus/ftgogo/serviceapis/restaurantapi";
+option go_package = "github.com/stackus/ftgogo/serviceapis/restaurantapi/restaurantpb";
 
-package restaurantapi;
+package restaurantpb;
 
 service RestaurantService {
   rpc CreateRestaurant(CreateRestaurantRequest) returns (CreateRestaurantResponse);

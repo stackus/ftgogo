@@ -1,10 +1,10 @@
 syntax = "proto3";
 
-option go_package = "github.com/stackus/ftgogo/serviceapis/kitchenapi";
+option go_package = "github.com/stackus/ftgogo/serviceapis/kitchenapi/kitchenpb";
 
 import "google/protobuf/timestamp.proto";
 
-package kitchenapi;
+package kitchenpb;
 
 service KitchenService {
   rpc GetRestaurant(GetRestaurantRequest) returns (GetRestaurantResponse);

@@ -1,10 +1,10 @@
 syntax = "proto3";
 
-option go_package = "github.com/stackus/ftgogo/serviceapis/orderapi";
+option go_package = "github.com/stackus/ftgogo/serviceapis/orderapi/orderpb";
 
 import "google/protobuf/timestamp.proto";
 
-package orderapi;
+package orderpb;
 
 service OrderService {
   rpc CreateOrder(CreateOrderRequest) returns (CreateOrderResponse);
@@ -12,6 +12,15 @@ service OrderService {
   rpc CancelOrder(CancelOrderRequest) returns (CancelOrderResponse);
   rpc ReviseOrder(ReviseOrderRequest) returns (ReviseOrderResponse);
   rpc GetRestaurant(GetRestaurantRequest) returns (GetRestaurantResponse);
+}
+
+enum OrderState {
+  ApprovalPending = 0;
+  Approved = 1;
+  Rejected = 2;
+  CancelPending = 3;
+  Cancelled = 4;
+  RevisionPending = 5;
 }
 
 message CreateOrderRequest {
@@ -41,7 +50,7 @@ message GetOrderRequest {
 message GetOrderResponse {
   string OrderID = 1;
   int64 OrderTotal = 2;
-  string State = 3;
+  OrderState Status = 3;
 }
 
 message CancelOrderRequest {
@@ -49,7 +58,7 @@ message CancelOrderRequest {
 }
 
 message CancelOrderResponse {
-  string Status = 1;
+  OrderState Status = 1;
 }
 
 message ReviseOrderRequest {
@@ -58,7 +67,7 @@ message ReviseOrderRequest {
 }
 
 message ReviseOrderResponse {
-  string Status = 1;
+  OrderState Status = 1;
 }
 
 message GetRestaurantRequest {
