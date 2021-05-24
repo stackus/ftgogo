@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/stackus/ftgogo/delivery/internal/domain"
-	"serviceapis/deliveryapi"
+	"github.com/stackus/ftgogo/serviceapis/deliveryapi"
 )
 
 type CreateDelivery struct {

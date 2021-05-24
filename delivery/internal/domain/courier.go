@@ -3,8 +3,9 @@ package domain
 import (
 	"time"
 
-	"serviceapis/deliveryapi"
-	"shared-go/errs"
+	"github.com/stackus/errors"
+
+	"github.com/stackus/ftgogo/serviceapis/deliveryapi"
 )
 
 type ActionType string
@@ -31,7 +32,7 @@ type Action struct {
 
 // Courier errors
 var (
-	ErrCourierNotFound = errs.NewError("courier not found", errs.ErrNotFound)
+	ErrCourierNotFound = errors.Wrap(errors.ErrNotFound, "courier not found")
 )
 
 func (a ActionType) String() string {

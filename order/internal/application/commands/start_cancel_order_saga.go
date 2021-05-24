@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"github.com/stackus/ftgogo/order/internal/domain"
-	"serviceapis/orderapi"
+	"github.com/stackus/ftgogo/serviceapis/orderapi"
 )
 
 type StartCancelOrderSaga struct {
@@ -23,10 +23,10 @@ func NewStartCancelOrderSagaHandler(orderRepo domain.OrderRepository, cancelOrde
 	}
 }
 
-func (h StartCancelOrderSagaHandler) Handle(ctx context.Context, cmd StartCancelOrderSaga) (string, error) {
+func (h StartCancelOrderSagaHandler) Handle(ctx context.Context, cmd StartCancelOrderSaga) (orderapi.OrderState, error) {
 	root, err := h.repo.Load(ctx, cmd.OrderID)
 	if err != nil {
-		return "", err
+		return orderapi.UnknownOrderState, err
 	}
 
 	order := root.Aggregate().(*domain.Order)
@@ -39,5 +39,5 @@ func (h StartCancelOrderSagaHandler) Handle(ctx context.Context, cmd StartCancel
 		OrderTotal:   order.OrderTotal(),
 	})
 
-	return orderapi.CancelPending.String(), err
+	return orderapi.CancelPending, err
 }

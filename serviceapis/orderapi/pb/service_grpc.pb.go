@@ -22,7 +22,6 @@ type OrderServiceClient interface {
 	GetOrder(ctx context.Context, in *GetOrderRequest, opts ...grpc.CallOption) (*GetOrderResponse, error)
 	CancelOrder(ctx context.Context, in *CancelOrderRequest, opts ...grpc.CallOption) (*CancelOrderResponse, error)
 	ReviseOrder(ctx context.Context, in *ReviseOrderRequest, opts ...grpc.CallOption) (*ReviseOrderResponse, error)
-	GetRestaurant(ctx context.Context, in *GetRestaurantRequest, opts ...grpc.CallOption) (*GetRestaurantResponse, error)
 }
 
 type orderServiceClient struct {
@@ -69,15 +68,6 @@ func (c *orderServiceClient) ReviseOrder(ctx context.Context, in *ReviseOrderReq
 	return out, nil
 }
 
-func (c *orderServiceClient) GetRestaurant(ctx context.Context, in *GetRestaurantRequest, opts ...grpc.CallOption) (*GetRestaurantResponse, error) {
-	out := new(GetRestaurantResponse)
-	err := c.cc.Invoke(ctx, "/orderpb.OrderService/GetRestaurant", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
 // OrderServiceServer is the server API for OrderService service.
 // All implementations must embed UnimplementedOrderServiceServer
 // for forward compatibility
@@ -86,7 +76,6 @@ type OrderServiceServer interface {
 	GetOrder(context.Context, *GetOrderRequest) (*GetOrderResponse, error)
 	CancelOrder(context.Context, *CancelOrderRequest) (*CancelOrderResponse, error)
 	ReviseOrder(context.Context, *ReviseOrderRequest) (*ReviseOrderResponse, error)
-	GetRestaurant(context.Context, *GetRestaurantRequest) (*GetRestaurantResponse, error)
 	mustEmbedUnimplementedOrderServiceServer()
 }
 
@@ -105,9 +94,6 @@ func (UnimplementedOrderServiceServer) CancelOrder(context.Context, *CancelOrder
 }
 func (UnimplementedOrderServiceServer) ReviseOrder(context.Context, *ReviseOrderRequest) (*ReviseOrderResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ReviseOrder not implemented")
-}
-func (UnimplementedOrderServiceServer) GetRestaurant(context.Context, *GetRestaurantRequest) (*GetRestaurantResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetRestaurant not implemented")
 }
 func (UnimplementedOrderServiceServer) mustEmbedUnimplementedOrderServiceServer() {}
 
@@ -194,24 +180,6 @@ func _OrderService_ReviseOrder_Handler(srv interface{}, ctx context.Context, dec
 	return interceptor(ctx, in, info, handler)
 }
 
-func _OrderService_GetRestaurant_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetRestaurantRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(OrderServiceServer).GetRestaurant(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/orderpb.OrderService/GetRestaurant",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(OrderServiceServer).GetRestaurant(ctx, req.(*GetRestaurantRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
 // OrderService_ServiceDesc is the grpc.ServiceDesc for OrderService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -234,10 +202,6 @@ var OrderService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ReviseOrder",
 			Handler:    _OrderService_ReviseOrder_Handler,
-		},
-		{
-			MethodName: "GetRestaurant",
-			Handler:    _OrderService_GetRestaurant_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

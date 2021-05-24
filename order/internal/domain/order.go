@@ -1,23 +1,22 @@
 package domain
 
 import (
-	"fmt"
 	"time"
 
 	"github.com/stackus/edat/core"
 	"github.com/stackus/edat/es"
+	"github.com/stackus/errors"
 
-	"serviceapis/orderapi"
-	"shared-go/errs"
+	"github.com/stackus/ftgogo/serviceapis/commonapi"
+	"github.com/stackus/ftgogo/serviceapis/orderapi"
 )
 
 var (
-	ErrOrderUnhandledCommand  = errs.NewError("unhandled command in order aggregate", errs.ErrServerError)
-	ErrOrderUnhandledEvent    = errs.NewError("unhandled event in order aggregate", errs.ErrServerError)
-	ErrOrderUnhandledSnapshot = errs.NewError("unhandled snapshot in order aggregate", errs.ErrServerError)
-
-	ErrOrderInvalidState  = errs.NewError("order state does not allow action", errs.ErrConflict)
-	ErrOrderMinimumNotMet = errs.NewError("order total does not meet the minimum", errs.ErrUnprocessableEntity)
+	ErrOrderUnhandledCommand  = errors.Wrap(errors.ErrInternal, "unhandled command in order aggregate")
+	ErrOrderUnhandledEvent    = errors.Wrap(errors.ErrInternal, "unhandled event in order aggregate")
+	ErrOrderUnhandledSnapshot = errors.Wrap(errors.ErrInternal, "unhandled snapshot in order aggregate")
+	ErrOrderInvalidState      = errors.Wrap(errors.ErrFailedPrecondition, "order state does not allow action")
+	ErrOrderMinimumNotMet     = errors.Wrap(errors.ErrInvalidArgument, "order total does not meet the minimum")
 )
 
 const orderMinimum = 0
@@ -30,7 +29,7 @@ type Order struct {
 	LineItems    []orderapi.LineItem
 	State        orderapi.OrderState
 	DeliverAt    time.Time
-	DeliverTo    orderapi.Address
+	DeliverTo    commonapi.Address
 }
 
 var _ es.Aggregate = (*Order)(nil)
@@ -131,7 +130,7 @@ func (o *Order) ProcessCommand(command core.Command) error {
 		})
 
 	default:
-		return errs.NewError(fmt.Sprintf("unhandled command `%T`", command), ErrOrderUnhandledCommand)
+		return errors.Wrapf(ErrOrderUnhandledCommand, "unhandled command `%s`", command.CommandName())
 	}
 
 	return nil
@@ -181,7 +180,7 @@ func (o *Order) ApplyEvent(event core.Event) error {
 		}
 
 	default:
-		return errs.NewError(fmt.Sprintf("unhandled event `%T`", event), ErrOrderUnhandledEvent)
+		return errors.Wrapf(ErrOrderUnhandledEvent, "unhandled event `%s`", event.EventName())
 	}
 
 	return nil
@@ -199,7 +198,7 @@ func (o *Order) ApplySnapshot(snapshot core.Snapshot) error {
 		o.State = ss.State
 
 	default:
-		return errs.NewError(fmt.Sprintf("unhandled snapshot `%T`", snapshot), ErrOrderUnhandledSnapshot)
+		return errors.Wrapf(ErrOrderUnhandledSnapshot, "unhandled snapshot `%s`", snapshot.SnapshotName())
 	}
 
 	return nil

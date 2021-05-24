@@ -1,13 +1,14 @@
 package domain
 
 import (
-	"serviceapis/deliveryapi"
-	"shared-go/errs"
+	"github.com/stackus/errors"
+
+	"github.com/stackus/ftgogo/serviceapis/deliveryapi"
 )
 
 // Restaurant errors
 var (
-	ErrRestaurantNotFound = errs.NewError("restaurant not found", errs.ErrNotFound)
+	ErrRestaurantNotFound = errors.Wrap(errors.ErrNotFound, "restaurant not found")
 )
 
 type Restaurant struct {

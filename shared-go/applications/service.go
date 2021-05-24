@@ -61,6 +61,7 @@ type Service struct {
 	Subscriber        *msg.Subscriber
 	WebServer         web.Server
 	RpcServer         rpc.Server
+	Cleanup           CleanupFunc
 }
 
 func NewService(appFn func(*Service) error) *Service {
@@ -176,7 +177,13 @@ func (s *Service) run(*cobra.Command, []string) error {
 	)
 	s.Publisher = msg.NewPublisher(msgProducer)
 
-	s.RpcServer = rpc.NewServer(s.Cfg.Rpc)
+	s.RpcServer = rpc.NewServer(s.Cfg.Rpc,
+		rpc.WithServerUnaryInterceptors(
+			// 4. Outbox: Use a RPC request middleware to start a new transaction for each incoming request
+			edatpgx.RpcSessionUnaryInterceptor(pgConn, zerologto.Logger(s.Logger)),
+		),
+		rpc.WithServerUnaryEnsureStatus(),
+	)
 
 	s.WebServer = web.NewServer(s.Cfg.Web.Http, web.WithHealthCheck(s.Cfg.Web.PingPath))
 
@@ -187,7 +194,7 @@ func (s *Service) run(*cobra.Command, []string) error {
 			instrumentation.WebInstrumentation(),
 			web.ZeroLogger(s.Logger),
 			http2.RequestContext,
-			// 4. Outbox: Use a web request middleware to start a new transaction for each incoming request
+			// 4. Outbox: Use a WEB request middleware to start a new transaction for each incoming request
 			edatpgx.WebSessionMiddleware(pgConn, zerologto.Logger(s.Logger)),
 		))
 
@@ -205,6 +212,7 @@ func (s *Service) run(*cobra.Command, []string) error {
 	waiter.Add(s.waitForRpcServer)
 	waiter.Add(s.waitForWebServer)
 	waiter.Add(s.waitForMessaging)
+	waiter.Add(s.waitForCleanup)
 
 	s.Logger.Debug().Msg("service starting")
 
@@ -316,4 +324,30 @@ func (s Service) waitForRpcServer(ctx context.Context) (err error) {
 	})
 
 	return group.Wait()
+}
+
+func (s Service) waitForCleanup(ctx context.Context) (err error) {
+	defer s.Logger.Debug().Msg("cleanup has been completed")
+
+	<-ctx.Done()
+
+	if s.Cleanup == nil {
+		return nil
+	}
+
+	sCtx, cancel := context.WithTimeout(context.Background(), s.Cfg.ShutdownTimeout)
+	defer cancel()
+
+	done := make(chan struct{})
+	go func() {
+		err = s.Cleanup(sCtx)
+		close(done)
+	}()
+
+	select {
+	case <-sCtx.Done():
+		return fmt.Errorf("cleanup failed to complete within allowed time")
+	case <-done:
+		return
+	}
 }

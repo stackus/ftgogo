@@ -13,22 +13,20 @@ type ConfirmReviseTicket struct {
 }
 
 type ConfirmReviseTicketHandler struct {
-	repo      domain.TicketRepository
-	publisher domain.TicketPublisher
+	repo domain.TicketRepository
 }
 
-func NewConfirmReviseTicketHandler(ticketRepo domain.TicketRepository, ticketPublisher domain.TicketPublisher) ConfirmReviseTicketHandler {
+func NewConfirmReviseTicketHandler(repo domain.TicketRepository) ConfirmReviseTicketHandler {
 	return ConfirmReviseTicketHandler{
-		repo:      ticketRepo,
-		publisher: ticketPublisher,
+		repo: repo,
 	}
 }
 
 func (h ConfirmReviseTicketHandler) Handle(ctx context.Context, cmd ConfirmReviseTicket) error {
-	root, err := h.repo.Update(ctx, cmd.TicketID, &domain.ConfirmReviseTicket{})
+	_, err := h.repo.Update(ctx, cmd.TicketID, &domain.ConfirmReviseTicket{})
 	if err != nil {
 		return err
 	}
 
-	return h.publisher.PublishEntityEvents(ctx, root)
+	return nil
 }

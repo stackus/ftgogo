@@ -1,0 +1,7 @@
+output: web_server_api.gen.go
+package: main
+generate:
+  - types
+  - chi-server
+import-mapping:
+  ../../../serviceapis/commonapi/spec.yaml: github.com/stackus/ftgogo/serviceapis/commonapi

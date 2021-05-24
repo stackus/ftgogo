@@ -1,20 +1,18 @@
 package domain
 
 import (
-	"fmt"
-
 	"github.com/stackus/edat/core"
 	"github.com/stackus/edat/es"
-
-	"shared-go/errs"
+	"github.com/stackus/errors"
 )
 
-var ErrAccountUnhandledCommand = errs.NewError("unhandled command in account aggregate", errs.ErrServerError)
-var ErrAccountUnhandledEvent = errs.NewError("unhandled event in account aggregate", errs.ErrServerError)
-var ErrAccountUnhandledSnapshot = errs.NewError("unhandled snapshot in account aggregate", errs.ErrServerError)
-
-var ErrAccountDisabled = errs.NewError("account disabled", errs.ErrBadRequest)
-var ErrAccountEnabled = errs.NewError("account enabled", errs.ErrBadRequest)
+var (
+	ErrAccountUnhandledCommand  = errors.Wrap(errors.ErrInternal, "unhandled command in account aggregate")
+	ErrAccountUnhandledEvent    = errors.Wrap(errors.ErrInternal, "unhandled event in account aggregate")
+	ErrAccountUnhandledSnapshot = errors.Wrap(errors.ErrInternal, "unhandled snapshot in account aggregate")
+	ErrAccountDisabled          = errors.Wrap(errors.ErrFailedPrecondition, "account is disabled")
+	ErrAccountEnabled           = errors.Wrap(errors.ErrFailedPrecondition, "account is enabled")
+)
 
 type Account struct {
 	es.AggregateBase
@@ -79,7 +77,7 @@ func (a *Account) ProcessCommand(command core.Command) error {
 		a.AddEvent(&AccountEnabled{})
 
 	default:
-		return errs.NewError(fmt.Sprintf("unhandled command `%T`", command), ErrAccountUnhandledCommand)
+		return errors.Wrap(ErrAccountUnhandledCommand, command.CommandName())
 	}
 
 	return nil
@@ -100,7 +98,7 @@ func (a *Account) ApplyEvent(event core.Event) error {
 		a.Enabled = false
 
 	default:
-		return errs.NewError(fmt.Sprintf("unhandled event `%T`", event), ErrAccountUnhandledEvent)
+		return errors.Wrap(ErrAccountUnhandledEvent, event.EventName())
 	}
 
 	return nil
@@ -113,7 +111,7 @@ func (a *Account) ApplySnapshot(snapshot core.Snapshot) error {
 		a.Enabled = ss.Enabled
 
 	default:
-		return errs.NewError(fmt.Sprintf("unhandled snapshot `%T`", snapshot), ErrAccountUnhandledSnapshot)
+		return errors.Wrap(ErrAccountUnhandledSnapshot, snapshot.SnapshotName())
 	}
 
 	return nil

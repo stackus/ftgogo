@@ -8,6 +8,21 @@ x-environment: &default-environment
   NATS_CLUSTER_ID: test-cluster
 
 services:
+  consul:
+    container_name: consul
+    hostname: consul
+    image: consul:latest
+    restart: on-failure
+    command: agent -server -data-dir=/consul/data -bind 0.0.0.0 -client 0.0.0.0 -bootstrap-expect=1
+    networks:
+      - mononet
+    ports:
+      - '8500:8500'
+      - '8300:8300'
+    volumes:
+      - './config/consul:/config'
+      - 'consuldata:/consul/data'
+
   postgres:
     container_name: postgres
     hostname: postgres
@@ -22,7 +37,7 @@ services:
       - '5432:5432'
     volumes:
       - 'pgdata:/var/lib/postgresql/data'
-      - './local-data/init-postgres.sql:/docker-entrypoint-initdb.d/init-postgres.sql'
+      - './config/postgresql/init-postgres.sql:/docker-entrypoint-initdb.d/init-postgres.sql'
 
   stan:
     container_name: stan
@@ -39,7 +54,6 @@ services:
       - 'standata:/data'
 
   accounting-service:
-    container_name: accountingservice
     hostname: accountingservice
     restart: on-failure
     build:
@@ -76,7 +90,6 @@ services:
     networks:
       - mononet
   consumer-service:
-    container_name: consumerservice
     hostname: consumerservice
     restart: on-failure
     build:
@@ -113,7 +126,6 @@ services:
     networks:
       - mononet
   delivery-service:
-    container_name: deliveryservice
     hostname: deliveryservice
     restart: on-failure
     build:
@@ -132,7 +144,6 @@ services:
     ports:
       - '8003:80'
   kitchen-service:
-    container_name: kitchenservice
     hostname: kitchenservice
     restart: on-failure
     build:
@@ -169,7 +180,6 @@ services:
     networks:
       - mononet
   order-service:
-    container_name: orderservice
     hostname: orderservice
     restart: on-failure
     build:
@@ -188,7 +198,6 @@ services:
     ports:
       - '8005:80'
   order-history-service:
-    container_name: orderhistoryservice
     hostname: orderhistoryservice
     restart: on-failure
     build:
@@ -225,7 +234,6 @@ services:
     networks:
       - mononet
   restaurant-service:
-    container_name: restaurantservice
     hostname: restaurantservice
     restart: on-failure
     build:
@@ -266,5 +274,6 @@ networks:
   mononet:
 
 volumes:
+  consuldata:
   pgdata:
   standata:

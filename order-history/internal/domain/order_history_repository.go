@@ -4,7 +4,7 @@ import (
 	"context"
 	"time"
 
-	"serviceapis/orderapi"
+	"github.com/stackus/ftgogo/serviceapis/orderapi"
 )
 
 const OrderHistoryLimit = 20

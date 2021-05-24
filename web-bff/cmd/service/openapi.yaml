@@ -1,0 +1,360 @@
+openapi: "3.0.0"
+info:
+  version: "1.0.0"
+  title: Web BFF API
+  description: The web-service API is part of the FTGOGO demonstration application
+  contact:
+    name: FTGOGO Issues
+    url: https://github.com/stackus/ftgogo/issues
+servers:
+  - url: https://{host}:{port}/api
+    variables:
+      host:
+        default: localhost
+      port:
+        default: "80"
+paths:
+  /signin:
+    post:
+      operationId: signInConsumer
+      requestBody:
+        description: sign in consumer request
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [ consumer_id ]
+              properties:
+                consumer_id:
+                  type: string
+      responses:
+        '200':
+          $ref: '#/components/responses/SignInResponse'
+        default:
+          $ref: '../../../shared-go/web/spec.yaml#/components/responses/ErrorResponse'
+  /register:
+    post:
+      operationId: registerConsumer
+      requestBody:
+        description: register consumer request
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [ name ]
+              properties:
+                name:
+                  type: string
+      responses:
+        '201':
+          $ref: '#/components/responses/ConsumerIDResponse'
+        default:
+          $ref: '../../../shared-go/web/spec.yaml#/components/responses/ErrorResponse'
+    get:
+      operationId: getConsumer
+      responses:
+        '200':
+          $ref: '#/components/responses/ConsumerResponse'
+        default:
+          $ref: '../../../shared-go/web/spec.yaml#/components/responses/ErrorResponse'
+  /addresses:
+    post:
+      operationId: addConsumerAddress
+      requestBody:
+        description: add consumer address
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [ name, address ]
+              properties:
+                name:
+                  type: string
+                address:
+                  $ref: '../../../serviceapis/commonapi/spec.yaml#/components/schemas/Address'
+      responses:
+        '201':
+          $ref: '#/components/responses/ConsumerAddressIDResponse'
+        default:
+          $ref: '../../../shared-go/web/spec.yaml#/components/responses/ErrorResponse'
+  /addresses/{consumerAddressID}:
+    get:
+      operationId: getConsumerAddress
+      parameters:
+        - $ref: '#/components/parameters/ConsumerAddressID'
+      responses:
+        '200':
+          $ref: '#/components/responses/ConsumerAddressResponse'
+        default:
+          $ref: '../../../shared-go/web/spec.yaml#/components/responses/ErrorResponse'
+    put:
+      operationId: updateConsumerAddress
+      parameters:
+        - $ref: '#/components/parameters/ConsumerAddressID'
+      requestBody:
+        description: update consumer address
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [ address ]
+              properties:
+                address:
+                  $ref: '../../../serviceapis/commonapi/spec.yaml#/components/schemas/Address'
+      responses:
+        '200':
+          $ref: '#/components/responses/ConsumerAddressIDResponse'
+        default:
+          $ref: '../../../shared-go/web/spec.yaml#/components/responses/ErrorResponse'
+    delete:
+      operationId: removeConsumerAddress
+      parameters:
+        - $ref: '#/components/parameters/ConsumerAddressID'
+      responses:
+        '204':
+          $ref: '#/components/responses/EmptyResponse'
+        default:
+          $ref: '../../../shared-go/web/spec.yaml#/components/responses/ErrorResponse'
+  /orders:
+    post:
+      operationId: createOrder
+      requestBody:
+        description: create order request
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [ consumer_id, restaurant_id, address_id, line_items ]
+              properties:
+                consumer_id:
+                  type: string
+                restaurant_id:
+                  type: string
+                address_id:
+                  type: string
+                line_items:
+                  $ref: '../../../serviceapis/commonapi/spec.yaml#/components/schemas/MenuItemQuantities'
+      responses:
+        '201':
+          $ref: '#/components/responses/OrderIDResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+  /orders/{orderID}:
+    get:
+      operationId: getOrder
+      parameters:
+        - $ref: '#/components/parameters/OrderID'
+      responses:
+        '200':
+          $ref: '#/components/responses/OrderResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+  /orders/{orderID}/cancel:
+    put:
+      operationId: cancelOrder
+      parameters:
+        - $ref: '#/components/parameters/OrderID'
+      responses:
+        '202':
+          $ref: '#/components/responses/OrderStatusResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+  /orders/{orderID}/revise:
+    put:
+      operationId: reviseOrder
+      parameters:
+        - $ref: '#/components/parameters/OrderID'
+      requestBody:
+        description: revise order request
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [ revised_quantities ]
+              properties:
+                revised_quantities:
+                  $ref: '../../../serviceapis/commonapi/spec.yaml#/components/schemas/MenuItemQuantities'
+      responses:
+        '202':
+          $ref: '#/components/responses/OrderStatusResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+  /restaurants/{restaurantID}:
+    get:
+      operationId: getRestaurant
+      parameters:
+        - $ref: '#/components/parameters/RestaurantID'
+      responses:
+        '200':
+          $ref: '#/components/responses/RestaurantIDResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+
+components:
+  schemas:
+    Address:
+      type: object
+      required: [ street1, city, state, zip ]
+      properties:
+        street1:
+          type: string
+        street2:
+          type: string
+        city:
+          type: string
+        state:
+          type: string
+        zip:
+          type: string
+    OrderState:
+      type: string
+      enum: [ ApprovalPending, Approved, Rejected, CancelPending, Cancelled, RevisionPending ]
+  parameters:
+    ConsumerID:
+      in: path
+      name: consumerID
+      description: consumer id (uuid)
+      required: true
+      schema:
+        type: string
+        format: uuid
+    ConsumerAddressID:
+      in: path
+      name: consumerAddressID
+      description: consumer address id
+      required: true
+      schema:
+        type: string
+    OrderID:
+      in: path
+      name: orderID
+      description: order id (uuid)
+      required: true
+      schema:
+        type: string
+        format: uuid
+    RestaurantID:
+      in: path
+      name: restaurantID
+      description: restaurant id (uuid)
+      required: true
+      schema:
+        type: string
+        format: uuid
+  responses:
+    EmptyResponse:
+      description: No Content
+    ErrorResponse:
+      description: Unexpected Error
+      content:
+        application/json:
+          schema:
+            type: object
+            required: [ message ]
+            properties:
+              message:
+                type: string
+    SignInResponse:
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            required: [ token ]
+            properties:
+              token:
+                type: string
+    ConsumerIDResponse:
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            required: [ id ]
+            properties:
+              id:
+                type: string
+    ConsumerResponse:
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            required: [ consumer_id, name ]
+            properties:
+              consumer_id:
+                type: string
+              name:
+                type: string
+    ConsumerAddressIDResponse:
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            required: [ consumer_id, address_id ]
+            properties:
+              consumer_id:
+                type: string
+              address_id:
+                type: string
+    ConsumerAddressResponse:
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            required: [ address ]
+            properties:
+              address:
+                $ref: '../../../serviceapis/commonapi/spec.yaml#/components/schemas/Address'
+    OrderIDResponse:
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            required: [ id ]
+            properties:
+              id:
+                type: string
+    OrderStatusResponse:
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            required: [ status ]
+            properties:
+              status:
+                type: string
+    OrderResponse:
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            required: [ order_id, state, order_total ]
+            properties:
+              order_id:
+                type: string
+              state:
+                $ref: '#/components/schemas/OrderState'
+              order_total:
+                type: integer
+    RestaurantIDResponse:
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            required: [ id ]
+            properties:
+              id:
+                type: string

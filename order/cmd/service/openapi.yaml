@@ -123,6 +123,8 @@ components:
         type: string
         format: uuid
   responses:
+    EmptyResponse:
+      description: No Content
     OrderIDResponse:
       description: OK
       content:

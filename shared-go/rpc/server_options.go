@@ -1,6 +1,11 @@
 package rpc
 
-import "google.golang.org/grpc"
+import (
+	"context"
+
+	"github.com/stackus/errors"
+	"google.golang.org/grpc"
+)
 
 type serverConfig struct {
 	options []grpc.ServerOption
@@ -8,16 +13,16 @@ type serverConfig struct {
 	stream  []grpc.StreamServerInterceptor
 }
 
-func (c *serverConfig) AddOption(option grpc.ServerOption) {
-	c.options = append(c.options, option)
+func (c *serverConfig) AddOption(options ...grpc.ServerOption) {
+	c.options = append(c.options, options...)
 }
 
-func (c *serverConfig) AddUnaryInterceptor(interceptor grpc.UnaryServerInterceptor) {
-	c.unary = append(c.unary, interceptor)
+func (c *serverConfig) AddUnaryInterceptor(interceptors ...grpc.UnaryServerInterceptor) {
+	c.unary = append(c.unary, interceptors...)
 }
 
-func (c *serverConfig) AddStreamInterceptor(interceptor grpc.StreamServerInterceptor) {
-	c.stream = append(c.stream, interceptor)
+func (c *serverConfig) AddStreamInterceptor(interceptors ...grpc.StreamServerInterceptor) {
+	c.stream = append(c.stream, interceptors...)
 }
 
 func (c serverConfig) ServerOptions() []grpc.ServerOption {
@@ -30,3 +35,28 @@ func (c serverConfig) ServerOptions() []grpc.ServerOption {
 }
 
 type ServerOption func(config *serverConfig)
+
+func WithServerUnaryInterceptors(interceptors ...grpc.UnaryServerInterceptor) ServerOption {
+	return func(config *serverConfig) {
+		config.AddUnaryInterceptor(interceptors...)
+	}
+}
+
+func WithServerStreamInterceptors(interceptors ...grpc.StreamServerInterceptor) ServerOption {
+	return func(config *serverConfig) {
+		config.AddStreamInterceptor(interceptors...)
+	}
+}
+
+func WithServerUnaryEnsureStatus() ServerOption {
+	return func(config *serverConfig) {
+		config.AddUnaryInterceptor(
+			func(
+				ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler,
+			) (resp interface{}, err error) {
+				resp, err = handler(ctx, req)
+				return resp, errors.SendGRPCError(err)
+			},
+		)
+	}
+}

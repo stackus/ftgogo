@@ -1,4 +1,4 @@
-module serviceapis
+module github.com/stackus/ftgogo/serviceapis
 
 go 1.16
 

@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/stackus/ftgogo/order-history/internal/domain"
-	"serviceapis/orderapi"
+	"github.com/stackus/ftgogo/serviceapis/orderapi"
 )
 
 type CreateOrderHistory struct {

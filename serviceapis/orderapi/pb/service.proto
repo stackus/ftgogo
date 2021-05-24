@@ -1,17 +1,18 @@
 syntax = "proto3";
 
-option go_package = "github.com/stackus/ftgogo/serviceapis/orderapi/orderpb";
+option go_package = "github.com/stackus/ftgogo/serviceapis/orderapi/pb;orderpb";
 
 import "google/protobuf/timestamp.proto";
 
 package orderpb;
+
+import 'commonapi/pb/service.proto';
 
 service OrderService {
   rpc CreateOrder(CreateOrderRequest) returns (CreateOrderResponse);
   rpc GetOrder(GetOrderRequest) returns (GetOrderResponse);
   rpc CancelOrder(CancelOrderRequest) returns (CancelOrderResponse);
   rpc ReviseOrder(ReviseOrderRequest) returns (ReviseOrderResponse);
-  rpc GetRestaurant(GetRestaurantRequest) returns (GetRestaurantResponse);
 }
 
 enum OrderState {
@@ -21,22 +22,23 @@ enum OrderState {
   CancelPending = 3;
   Cancelled = 4;
   RevisionPending = 5;
+  Unknown = 6;
+}
+
+message Order {
+  string OrderID = 1;
+  string ConsumerID = 2;
+  string RestaurantID = 3;
+  int64 OrderTotal = 4;
+  OrderState Status = 5;
 }
 
 message CreateOrderRequest {
-  message address {
-    string Street1 = 1;
-    string Street2 = 2;
-    string City = 3;
-    string State = 4;
-    string Zip = 5;
-  }
-
   string ConsumerID = 1;
   string RestaurantID = 2;
   google.protobuf.Timestamp DeliverAt = 3;
-  address DeliverTo = 4;
-  map<string, int64> LineItems = 5;
+  commonpb.Address DeliverTo = 4;
+  commonpb.MenuItemQuantities LineItems = 5;
 }
 
 message CreateOrderResponse {
@@ -48,9 +50,7 @@ message GetOrderRequest {
 }
 
 message GetOrderResponse {
-  string OrderID = 1;
-  int64 OrderTotal = 2;
-  OrderState Status = 3;
+  Order Order = 1;
 }
 
 message CancelOrderRequest {
@@ -63,17 +63,9 @@ message CancelOrderResponse {
 
 message ReviseOrderRequest {
   string OrderID = 1;
-  map<string, int64> RevisedQuantities = 2;
+  commonpb.MenuItemQuantities RevisedQuantities = 2;
 }
 
 message ReviseOrderResponse {
   OrderState Status = 1;
-}
-
-message GetRestaurantRequest {
-  string RestaurantID = 1;
-}
-
-message GetRestaurantResponse {
-  string RestaurantID = 1;
 }

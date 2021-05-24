@@ -4,8 +4,8 @@ import (
 	"github.com/stackus/ftgogo/restaurant/internal/adapters"
 	"github.com/stackus/ftgogo/restaurant/internal/application/commands"
 	"github.com/stackus/ftgogo/restaurant/internal/application/queries"
-	"serviceapis"
-	"serviceapis/restaurantapi/pb"
+	"github.com/stackus/ftgogo/serviceapis"
+	"github.com/stackus/ftgogo/serviceapis/restaurantapi/pb"
 	"shared-go/applications"
 )
 

@@ -12,24 +12,22 @@ type ConfirmReviseOrder struct {
 }
 
 type ConfirmReviseOrderHandler struct {
-	repo      domain.OrderRepository
-	publisher domain.OrderPublisher
+	repo domain.OrderRepository
 }
 
-func NewConfirmReviseOrderHandler(orderRepo domain.OrderRepository, orderPublisher domain.OrderPublisher) ConfirmReviseOrderHandler {
+func NewConfirmReviseOrderHandler(repo domain.OrderRepository) ConfirmReviseOrderHandler {
 	return ConfirmReviseOrderHandler{
-		repo:      orderRepo,
-		publisher: orderPublisher,
+		repo: repo,
 	}
 }
 
 func (h ConfirmReviseOrderHandler) Handle(ctx context.Context, cmd ConfirmReviseOrder) error {
-	root, err := h.repo.Update(ctx, cmd.OrderID, &domain.ConfirmReviseOrder{
+	_, err := h.repo.Update(ctx, cmd.OrderID, &domain.ConfirmReviseOrder{
 		RevisedQuantities: cmd.RevisedQuantities,
 	})
 	if err != nil {
 		return err
 	}
 
-	return h.publisher.PublishEntityEvents(ctx, root)
+	return nil
 }

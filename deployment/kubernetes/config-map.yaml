@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: common-config
+  namespace: ftgogo
+data:
+  GET_HOSTS_FROM: dns
+  ENVIRONMENT: development
+  LOG_LEVEL: TRACE
+  EVENT_DRIVER: nats
+  NATS_URL: stan:4222
+  NATS_CLUSTER_ID: test-cluster

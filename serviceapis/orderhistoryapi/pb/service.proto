@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-option go_package = "github.com/stackus/ftgogo/serviceapis/orderhistoryapi/orderhistorypb";
+option go_package = "github.com/stackus/ftgogo/serviceapis/orderhistoryapi/pb;orderhistorypb";
 
 import "google/protobuf/timestamp.proto";
 

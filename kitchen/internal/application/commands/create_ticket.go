@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"github.com/stackus/ftgogo/kitchen/internal/domain"
-	"serviceapis/kitchenapi"
+	"github.com/stackus/ftgogo/serviceapis/kitchenapi"
 )
 
 type CreateTicket struct {

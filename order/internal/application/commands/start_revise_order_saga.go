@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"github.com/stackus/ftgogo/order/internal/domain"
-	"serviceapis/orderapi"
+	"github.com/stackus/ftgogo/serviceapis/orderapi"
 )
 
 type StartReviseOrderSaga struct {
@@ -24,10 +24,10 @@ func NewStartReviseOrderSagaHandler(orderRepo domain.OrderRepository, reviseOrde
 	}
 }
 
-func (h StartReviseOrderSagaHandler) Handle(ctx context.Context, cmd StartReviseOrderSaga) (string, error) {
+func (h StartReviseOrderSagaHandler) Handle(ctx context.Context, cmd StartReviseOrderSaga) (orderapi.OrderState, error) {
 	root, err := h.repo.Load(ctx, cmd.OrderID)
 	if err != nil {
-		return "", err
+		return orderapi.UnknownOrderState, err
 	}
 
 	order := root.Aggregate().(*domain.Order)
@@ -40,5 +40,5 @@ func (h StartReviseOrderSagaHandler) Handle(ctx context.Context, cmd StartRevise
 		RevisedQuantities: cmd.RevisedQuantities,
 	})
 
-	return orderapi.RevisionPending.String(), err
+	return orderapi.RevisionPending, err
 }

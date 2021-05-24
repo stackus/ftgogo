@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"github.com/stackus/ftgogo/restaurant/internal/domain"
-	"serviceapis/restaurantapi"
+	"github.com/stackus/ftgogo/serviceapis/restaurantapi"
 )
 
 type CreateRestaurant struct {

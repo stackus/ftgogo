@@ -3,8 +3,9 @@ package domain
 import (
 	"time"
 
-	"serviceapis/deliveryapi"
-	"shared-go/errs"
+	"github.com/stackus/errors"
+
+	"github.com/stackus/ftgogo/serviceapis/deliveryapi"
 )
 
 type DeliveryStatus int
@@ -28,7 +29,7 @@ type Delivery struct {
 
 // Delivery errors
 var (
-	ErrDeliveryNotFound = errs.NewError("delivery not found", errs.ErrNotFound)
+	ErrDeliveryNotFound = errors.Wrap(errors.ErrNotFound, "delivery not found")
 )
 
 func (s DeliveryStatus) String() string {

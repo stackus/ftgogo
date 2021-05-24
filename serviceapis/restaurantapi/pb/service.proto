@@ -1,8 +1,10 @@
 syntax = "proto3";
 
-option go_package = "github.com/stackus/ftgogo/serviceapis/restaurantapi/restaurantpb";
+option go_package = "github.com/stackus/ftgogo/serviceapis/restaurantapi/pb;restaurantpb";
 
 package restaurantpb;
+
+import 'commonapi/pb/service.proto';
 
 service RestaurantService {
   rpc CreateRestaurant(CreateRestaurantRequest) returns (CreateRestaurantResponse);
@@ -10,14 +12,6 @@ service RestaurantService {
 }
 
 message CreateRestaurantRequest {
-  message address {
-    string Street1 = 1;
-    string Street2 = 2;
-    string City = 3;
-    string State = 4;
-    string Zip = 5;
-  }
-
   message menuItem {
     string ID = 1;
     string Name = 2;
@@ -29,7 +23,7 @@ message CreateRestaurantRequest {
   }
 
   string Name = 1;
-  address Address = 2;
+  commonpb.Address Address = 2;
   menu Menu = 3;
 }
 
@@ -42,14 +36,6 @@ message GetRestaurantRequest {
 }
 
 message GetRestaurantResponse {
-  message address {
-    string Street1 = 1;
-    string Street2 = 2;
-    string City = 3;
-    string State = 4;
-    string Zip = 5;
-  }
-
   message menuItem {
     string ID = 1;
     string Name = 2;
@@ -62,6 +48,6 @@ message GetRestaurantResponse {
 
   string RestaurantID = 1;
   string Name = 2;
-  address Address = 3;
+  commonpb.Address Address = 3;
   menu Menu = 4;
 }

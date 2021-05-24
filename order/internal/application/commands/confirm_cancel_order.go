@@ -11,22 +11,20 @@ type ConfirmCancelOrder struct {
 }
 
 type ConfirmCancelOrderHandler struct {
-	repo      domain.OrderRepository
-	publisher domain.OrderPublisher
+	repo domain.OrderRepository
 }
 
-func NewConfirmCancelOrderHandler(orderRepo domain.OrderRepository, orderPublisher domain.OrderPublisher) ConfirmCancelOrderHandler {
+func NewConfirmCancelOrderHandler(repo domain.OrderRepository) ConfirmCancelOrderHandler {
 	return ConfirmCancelOrderHandler{
-		repo:      orderRepo,
-		publisher: orderPublisher,
+		repo: repo,
 	}
 }
 
 func (h ConfirmCancelOrderHandler) Handle(ctx context.Context, cmd ConfirmCancelOrder) error {
-	root, err := h.repo.Update(ctx, cmd.OrderID, &domain.ConfirmCancelOrder{})
+	_, err := h.repo.Update(ctx, cmd.OrderID, &domain.ConfirmCancelOrder{})
 	if err != nil {
 		return err
 	}
 
-	return h.publisher.PublishEntityEvents(ctx, root)
+	return nil
 }

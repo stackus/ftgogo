@@ -11,14 +11,12 @@ type RegisterConsumer struct {
 }
 
 type RegisterConsumerHandler struct {
-	repo      domain.ConsumerRepository
-	publisher domain.ConsumerPublisher
+	repo domain.ConsumerRepository
 }
 
-func NewRegisterConsumerHandler(consumerRepo domain.ConsumerRepository, consumerPublisher domain.ConsumerPublisher) RegisterConsumerHandler {
+func NewRegisterConsumerHandler(repo domain.ConsumerRepository) RegisterConsumerHandler {
 	return RegisterConsumerHandler{
-		repo:      consumerRepo,
-		publisher: consumerPublisher,
+		repo: repo,
 	}
 }
 
@@ -30,5 +28,5 @@ func (h RegisterConsumerHandler) Handle(ctx context.Context, cmd RegisterConsume
 		return "", err
 	}
 
-	return root.AggregateID(), h.publisher.PublishEntityEvents(ctx, root)
+	return root.AggregateID(), nil
 }

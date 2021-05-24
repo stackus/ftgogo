@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-option go_package = "github.com/stackus/ftgogo/serviceapis/deliveryapi/deliverypb";
+option go_package = "github.com/stackus/ftgogo/serviceapis/deliveryapi/pb;deliverypb";
 
 package deliverypb;
 

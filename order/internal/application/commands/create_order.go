@@ -2,39 +2,35 @@ package commands
 
 import (
 	"context"
-	"time"
-
 	"github.com/rs/zerolog"
-
 	"github.com/stackus/ftgogo/order/internal/domain"
-	"serviceapis/orderapi"
+	"github.com/stackus/ftgogo/serviceapis/commonapi"
+	"github.com/stackus/ftgogo/serviceapis/orderapi"
+	"time"
 )
 
 type CreateOrder struct {
 	ConsumerID   string
 	RestaurantID string
 	DeliverAt    time.Time
-	DeliverTo    orderapi.Address
+	DeliverTo    commonapi.Address
 	LineItems    map[string]int
 }
 
 type CreateOrderHandler struct {
 	orderRepo      domain.OrderRepository
 	restaurantRepo domain.RestaurantRepository
-	publisher      domain.OrderPublisher
 	logger         zerolog.Logger // TODO Eliminate passing logger everywhere use a pkg logger i.e. logging.Error()...
 }
 
 func NewCreateOrderHandler(
 	orderRepo domain.OrderRepository,
 	restaurantRepo domain.RestaurantRepository,
-	orderPublisher domain.OrderPublisher,
 	logger zerolog.Logger,
 ) CreateOrderHandler {
 	return CreateOrderHandler{
 		orderRepo:      orderRepo,
 		restaurantRepo: restaurantRepo,
-		publisher:      orderPublisher,
 		logger:         logger,
 	}
 }
@@ -74,11 +70,6 @@ func (h CreateOrderHandler) Handle(ctx context.Context, cmd CreateOrder) (string
 	if err != nil {
 		h.logger.Error().Err(err).Msg("error while saving the order")
 		return "", err
-	}
-
-	err = h.publisher.PublishEntityEvents(ctx, root)
-	if err != nil {
-		h.logger.Error().Err(err).Msg("error while publishing the message")
 	}
 
 	return root.AggregateID(), nil

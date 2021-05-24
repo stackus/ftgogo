@@ -1,6 +1,7 @@
 package orderapi
 
 import (
+	"github.com/stackus/ftgogo/serviceapis/commonapi"
 	"time"
 
 	"github.com/stackus/edat/core"
@@ -26,7 +27,7 @@ type OrderCreated struct {
 	LineItems      []LineItem
 	OrderTotal     int
 	DeliverAt      time.Time
-	DeliverTo      Address
+	DeliverTo      commonapi.Address
 }
 
 func (OrderCreated) EventName() string { return "orderapi.OrderCreated" }

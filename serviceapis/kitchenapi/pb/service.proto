@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-option go_package = "github.com/stackus/ftgogo/serviceapis/kitchenapi/kitchenpb";
+option go_package = "github.com/stackus/ftgogo/serviceapis/kitchenapi/pb;kitchenpb";
 
 import "google/protobuf/timestamp.proto";
 

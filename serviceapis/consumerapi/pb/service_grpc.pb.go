@@ -7,6 +7,7 @@ import (
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
+	emptypb "google.golang.org/protobuf/types/known/emptypb"
 )
 
 // This is a compile-time assertion to ensure that this generated file
@@ -20,6 +21,11 @@ const _ = grpc.SupportPackageIsVersion7
 type ConsumerServiceClient interface {
 	RegisterConsumer(ctx context.Context, in *RegisterConsumerRequest, opts ...grpc.CallOption) (*RegisterConsumerResponse, error)
 	GetConsumer(ctx context.Context, in *GetConsumerRequest, opts ...grpc.CallOption) (*GetConsumerResponse, error)
+	UpdateConsumer(ctx context.Context, in *UpdateConsumerRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	AddAddress(ctx context.Context, in *AddAddressRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	GetAddress(ctx context.Context, in *GetAddressRequest, opts ...grpc.CallOption) (*GetAddressResponse, error)
+	UpdateAddress(ctx context.Context, in *UpdateAddressRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	RemoveAddress(ctx context.Context, in *RemoveAddressRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 }
 
 type consumerServiceClient struct {
@@ -48,12 +54,62 @@ func (c *consumerServiceClient) GetConsumer(ctx context.Context, in *GetConsumer
 	return out, nil
 }
 
+func (c *consumerServiceClient) UpdateConsumer(ctx context.Context, in *UpdateConsumerRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+	out := new(emptypb.Empty)
+	err := c.cc.Invoke(ctx, "/consumerpb.ConsumerService/UpdateConsumer", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *consumerServiceClient) AddAddress(ctx context.Context, in *AddAddressRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+	out := new(emptypb.Empty)
+	err := c.cc.Invoke(ctx, "/consumerpb.ConsumerService/AddAddress", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *consumerServiceClient) GetAddress(ctx context.Context, in *GetAddressRequest, opts ...grpc.CallOption) (*GetAddressResponse, error) {
+	out := new(GetAddressResponse)
+	err := c.cc.Invoke(ctx, "/consumerpb.ConsumerService/GetAddress", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *consumerServiceClient) UpdateAddress(ctx context.Context, in *UpdateAddressRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+	out := new(emptypb.Empty)
+	err := c.cc.Invoke(ctx, "/consumerpb.ConsumerService/UpdateAddress", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *consumerServiceClient) RemoveAddress(ctx context.Context, in *RemoveAddressRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+	out := new(emptypb.Empty)
+	err := c.cc.Invoke(ctx, "/consumerpb.ConsumerService/RemoveAddress", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // ConsumerServiceServer is the server API for ConsumerService service.
 // All implementations must embed UnimplementedConsumerServiceServer
 // for forward compatibility
 type ConsumerServiceServer interface {
 	RegisterConsumer(context.Context, *RegisterConsumerRequest) (*RegisterConsumerResponse, error)
 	GetConsumer(context.Context, *GetConsumerRequest) (*GetConsumerResponse, error)
+	UpdateConsumer(context.Context, *UpdateConsumerRequest) (*emptypb.Empty, error)
+	AddAddress(context.Context, *AddAddressRequest) (*emptypb.Empty, error)
+	GetAddress(context.Context, *GetAddressRequest) (*GetAddressResponse, error)
+	UpdateAddress(context.Context, *UpdateAddressRequest) (*emptypb.Empty, error)
+	RemoveAddress(context.Context, *RemoveAddressRequest) (*emptypb.Empty, error)
 	mustEmbedUnimplementedConsumerServiceServer()
 }
 
@@ -66,6 +122,21 @@ func (UnimplementedConsumerServiceServer) RegisterConsumer(context.Context, *Reg
 }
 func (UnimplementedConsumerServiceServer) GetConsumer(context.Context, *GetConsumerRequest) (*GetConsumerResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetConsumer not implemented")
+}
+func (UnimplementedConsumerServiceServer) UpdateConsumer(context.Context, *UpdateConsumerRequest) (*emptypb.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdateConsumer not implemented")
+}
+func (UnimplementedConsumerServiceServer) AddAddress(context.Context, *AddAddressRequest) (*emptypb.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method AddAddress not implemented")
+}
+func (UnimplementedConsumerServiceServer) GetAddress(context.Context, *GetAddressRequest) (*GetAddressResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetAddress not implemented")
+}
+func (UnimplementedConsumerServiceServer) UpdateAddress(context.Context, *UpdateAddressRequest) (*emptypb.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdateAddress not implemented")
+}
+func (UnimplementedConsumerServiceServer) RemoveAddress(context.Context, *RemoveAddressRequest) (*emptypb.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method RemoveAddress not implemented")
 }
 func (UnimplementedConsumerServiceServer) mustEmbedUnimplementedConsumerServiceServer() {}
 
@@ -116,6 +187,96 @@ func _ConsumerService_GetConsumer_Handler(srv interface{}, ctx context.Context, 
 	return interceptor(ctx, in, info, handler)
 }
 
+func _ConsumerService_UpdateConsumer_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateConsumerRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ConsumerServiceServer).UpdateConsumer(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/consumerpb.ConsumerService/UpdateConsumer",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ConsumerServiceServer).UpdateConsumer(ctx, req.(*UpdateConsumerRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ConsumerService_AddAddress_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(AddAddressRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ConsumerServiceServer).AddAddress(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/consumerpb.ConsumerService/AddAddress",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ConsumerServiceServer).AddAddress(ctx, req.(*AddAddressRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ConsumerService_GetAddress_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetAddressRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ConsumerServiceServer).GetAddress(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/consumerpb.ConsumerService/GetAddress",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ConsumerServiceServer).GetAddress(ctx, req.(*GetAddressRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ConsumerService_UpdateAddress_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateAddressRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ConsumerServiceServer).UpdateAddress(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/consumerpb.ConsumerService/UpdateAddress",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ConsumerServiceServer).UpdateAddress(ctx, req.(*UpdateAddressRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ConsumerService_RemoveAddress_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(RemoveAddressRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ConsumerServiceServer).RemoveAddress(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/consumerpb.ConsumerService/RemoveAddress",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ConsumerServiceServer).RemoveAddress(ctx, req.(*RemoveAddressRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // ConsumerService_ServiceDesc is the grpc.ServiceDesc for ConsumerService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -130,6 +291,26 @@ var ConsumerService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetConsumer",
 			Handler:    _ConsumerService_GetConsumer_Handler,
+		},
+		{
+			MethodName: "UpdateConsumer",
+			Handler:    _ConsumerService_UpdateConsumer_Handler,
+		},
+		{
+			MethodName: "AddAddress",
+			Handler:    _ConsumerService_AddAddress_Handler,
+		},
+		{
+			MethodName: "GetAddress",
+			Handler:    _ConsumerService_GetAddress_Handler,
+		},
+		{
+			MethodName: "UpdateAddress",
+			Handler:    _ConsumerService_UpdateAddress_Handler,
+		},
+		{
+			MethodName: "RemoveAddress",
+			Handler:    _ConsumerService_RemoveAddress_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

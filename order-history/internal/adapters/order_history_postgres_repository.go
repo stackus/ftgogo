@@ -9,7 +9,7 @@ import (
 	"github.com/stackus/edat-pgx"
 
 	"github.com/stackus/ftgogo/order-history/internal/domain"
-	"serviceapis/orderapi"
+	"github.com/stackus/ftgogo/serviceapis/orderapi"
 )
 
 const (

@@ -4,8 +4,7 @@ import (
 	"net/http"
 
 	"github.com/go-chi/render"
-
-	"shared-go/errs"
+	"github.com/stackus/errors"
 )
 
 type ErrorResponse struct {
@@ -15,10 +14,10 @@ type ErrorResponse struct {
 }
 
 func NewErrorResponse(err error) render.Renderer {
-	if dErr, ok := err.(errs.Error); ok {
+	if dErr, ok := err.(errors.Error); ok {
 		return &ErrorResponse{
-			StatusCode: dErr.Code,
-			Message:    dErr.Message,
+			StatusCode: dErr.HTTPCode(),
+			Message:    errors.Message(err),
 			Err:        dErr,
 		}
 	}

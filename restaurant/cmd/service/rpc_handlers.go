@@ -2,10 +2,12 @@ package main
 
 import (
 	"context"
+
 	"github.com/stackus/ftgogo/restaurant/internal/application/commands"
 	"github.com/stackus/ftgogo/restaurant/internal/application/queries"
-	"serviceapis/restaurantapi"
-	"serviceapis/restaurantapi/pb"
+	"github.com/stackus/ftgogo/serviceapis/commonapi/pb"
+	"github.com/stackus/ftgogo/serviceapis/restaurantapi"
+	"github.com/stackus/ftgogo/serviceapis/restaurantapi/pb"
 )
 
 type rpcHandlers struct {
@@ -65,7 +67,7 @@ func (h rpcHandlers) GetRestaurant(ctx context.Context, request *restaurantpb.Ge
 	return &restaurantpb.GetRestaurantResponse{
 		RestaurantID: restaurant.ID(),
 		Name:         restaurant.Name,
-		Address: &restaurantpb.GetRestaurantResponseAddress{
+		Address: &commonpb.Address{
 			Street1: restaurant.Address.Street1,
 			Street2: restaurant.Address.Street2,
 			City:    restaurant.Address.City,

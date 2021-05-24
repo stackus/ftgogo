@@ -3,7 +3,7 @@ package domain
 import (
 	"time"
 
-	"serviceapis/orderapi"
+	"github.com/stackus/ftgogo/serviceapis/orderapi"
 )
 
 type OrderHistory struct {

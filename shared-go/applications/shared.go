@@ -1,10 +1,13 @@
 package applications
 
 import (
+	"context"
 	"time"
 
 	"shared-go/web"
 )
+
+type CleanupFunc func(ctx context.Context) error
 
 var envFiles []string
 

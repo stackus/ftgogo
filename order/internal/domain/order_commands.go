@@ -1,11 +1,12 @@
 package domain
 
 import (
+	"github.com/stackus/ftgogo/serviceapis/commonapi"
 	"time"
 
 	"github.com/stackus/edat/core"
 
-	"serviceapis/orderapi"
+	"github.com/stackus/ftgogo/serviceapis/orderapi"
 )
 
 func registerOrderCommands() {
@@ -24,7 +25,7 @@ type CreateOrder struct {
 	LineItems      []orderapi.LineItem
 	OrderTotal     int
 	DeliverAt      time.Time
-	DeliverTo      orderapi.Address
+	DeliverTo      commonapi.Address
 }
 
 // CommandName command method

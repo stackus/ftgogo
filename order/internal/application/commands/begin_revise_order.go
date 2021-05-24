@@ -12,14 +12,12 @@ type BeginReviseOrder struct {
 }
 
 type BeginReviseOrderHandler struct {
-	repo      domain.OrderRepository
-	publisher domain.OrderPublisher
+	repo domain.OrderRepository
 }
 
-func NewBeginReviseOrderHandler(orderRepo domain.OrderRepository, orderPublisher domain.OrderPublisher) BeginReviseOrderHandler {
+func NewBeginReviseOrderHandler(repo domain.OrderRepository) BeginReviseOrderHandler {
 	return BeginReviseOrderHandler{
-		repo:      orderRepo,
-		publisher: orderPublisher,
+		repo: repo,
 	}
 }
 
@@ -33,5 +31,5 @@ func (h BeginReviseOrderHandler) Handle(ctx context.Context, cmd BeginReviseOrde
 
 	order := root.Aggregate().(*domain.Order)
 
-	return order.RevisedOrderTotal(order.OrderTotal(), cmd.RevisedQuantities), h.publisher.PublishEntityEvents(ctx, root)
+	return order.RevisedOrderTotal(order.OrderTotal(), cmd.RevisedQuantities), nil
 }
