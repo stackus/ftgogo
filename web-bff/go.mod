@@ -12,7 +12,7 @@ require (
 	github.com/go-chi/jwtauth/v5 v5.0.1
 	github.com/go-chi/render v1.0.1
 	github.com/lestrrat-go/jwx v1.2.0
-	github.com/stackus/errors v0.0.1
+	github.com/stackus/errors v0.0.2
 	github.com/stackus/ftgogo/serviceapis v0.0.0-00010101000000-000000000000
 	google.golang.org/grpc v1.38.0
 	google.golang.org/protobuf v1.26.0

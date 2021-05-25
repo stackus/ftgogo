@@ -2,10 +2,12 @@ package main
 
 import (
 	"context"
+
 	"github.com/stackus/edat/msg"
 	"github.com/stackus/edat/saga"
+
 	"github.com/stackus/ftgogo/order/internal/application/commands"
-	"serviceapis/orderapi"
+	"github.com/stackus/ftgogo/serviceapis/orderapi"
 )
 
 type CommandHandlers struct{ app Application }

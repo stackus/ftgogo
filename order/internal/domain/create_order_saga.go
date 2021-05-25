@@ -7,7 +7,7 @@ import (
 	"github.com/stackus/edat/msg"
 	"github.com/stackus/edat/saga"
 
-	"serviceapis/orderapi"
+	"github.com/stackus/ftgogo/serviceapis/orderapi"
 )
 
 func registerCreateOrderSagaData() {

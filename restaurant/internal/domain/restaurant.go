@@ -32,7 +32,7 @@ func (r Restaurant) ID() string {
 	return r.RestaurantID
 }
 
-//CreateRestaurant builds a new Restaurant instance
+// CreateRestaurant builds a new Restaurant instance
 func CreateRestaurant(name string, address restaurantapi.Address, menuItems []restaurantapi.MenuItem) *Restaurant {
 	r := &Restaurant{
 		RestaurantID: uuid.New().String(),

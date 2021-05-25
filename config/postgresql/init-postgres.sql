@@ -1,7 +1,8 @@
 -- common schema
 CREATE DATABASE commondb TEMPLATE template0;
 \c commondb
-CREATE TABLE events (
+CREATE TABLE events
+(
     entity_name    text        NOT NULL,
     entity_id      text        NOT NULL,
     correlation_id text        NOT NULL,
@@ -12,7 +13,8 @@ CREATE TABLE events (
     created_at     timestamptz NOT NULL DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (entity_name, entity_id, event_version)
 );
-CREATE TABLE messages (
+CREATE TABLE messages
+(
     message_id  text        NOT NULL,
     destination text        NOT NULL,
     payload     bytea       NOT NULL,
@@ -24,7 +26,8 @@ CREATE TABLE messages (
 );
 CREATE INDEX unpublished_idx ON messages (created_at) WHERE not published;
 CREATE INDEX published_idx ON messages (modified_at) WHERE published;
-CREATE TABLE saga_instances (
+CREATE TABLE saga_instances
+(
     saga_name      text        NOT NULL,
     saga_id        text        NOT NULL,
     saga_data_name text        NOT NULL,
@@ -35,7 +38,8 @@ CREATE TABLE saga_instances (
     modified_at    timestamptz NOT NULL DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (saga_name, saga_id)
 );
-CREATE TABLE snapshots (
+CREATE TABLE snapshots
+(
     entity_name      text        NOT NULL,
     entity_id        text        NOT NULL,
     snapshot_name    text        NOT NULL,
@@ -64,7 +68,8 @@ GRANT INSERT, UPDATE, DELETE, SELECT ON ALL TABLES IN SCHEMA public TO consumer_
 -- delivery service
 CREATE DATABASE delivery TEMPLATE commondb;
 \c delivery;
-CREATE TABLE couriers (
+CREATE TABLE couriers
+(
     id          text,
     plan        bytea,
     available   boolean,
@@ -72,7 +77,8 @@ CREATE TABLE couriers (
     PRIMARY KEY (id)
 );
 CREATE INDEX first_available_courier_idx ON couriers (modified_at DESC) WHERE available;
-CREATE TABLE deliveries (
+CREATE TABLE deliveries
+(
     id               text,
     restaurant_id    text,
     courier_id       text,
@@ -83,7 +89,8 @@ CREATE TABLE deliveries (
     status           text,
     PRIMARY KEY (id)
 );
-CREATE TABLE restaurants (
+CREATE TABLE restaurants
+(
     id      text,
     name    text,
     address bytea,
@@ -98,7 +105,8 @@ GRANT INSERT, UPDATE, DELETE, SELECT ON ALL TABLES IN SCHEMA public TO delivery_
 -- kitchen service
 CREATE DATABASE kitchen TEMPLATE commondb;
 \c kitchen;
-CREATE TABLE restaurants (
+CREATE TABLE restaurants
+(
     id      text,
     name    text,
     address bytea,
@@ -113,7 +121,8 @@ GRANT INSERT, UPDATE, DELETE, SELECT ON ALL TABLES IN SCHEMA public TO kitchen_u
 -- ordering service
 CREATE DATABASE ordering TEMPLATE commondb;
 \c ordering;
-CREATE TABLE restaurants (
+CREATE TABLE restaurants
+(
     id      text,
     name    text,
     address bytea,
@@ -128,7 +137,8 @@ GRANT INSERT, UPDATE, DELETE, SELECT ON ALL TABLES IN SCHEMA public TO ordering_
 -- order history service
 CREATE DATABASE order_history TEMPLATE commondb;
 \c order_history;
-CREATE TABLE orders (
+CREATE TABLE orders
+(
     id              text,
     consumer_id     text,
     restaurant_id   text,
@@ -149,7 +159,8 @@ GRANT INSERT, UPDATE, DELETE, SELECT ON ALL TABLES IN SCHEMA public TO order_his
 -- restaurant service
 CREATE DATABASE restaurant TEMPLATE commondb;
 \c restaurant;
-CREATE TABLE restaurants (
+CREATE TABLE restaurants
+(
     id      text,
     name    text,
     address bytea,

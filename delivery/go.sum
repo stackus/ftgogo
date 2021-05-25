@@ -528,8 +528,8 @@ github.com/stackus/edat-pgx v0.0.1 h1:dJ4mJJRVl9/86NsIEb0qvbKKIEWitsHvJe5MwWELVL
 github.com/stackus/edat-pgx v0.0.1/go.mod h1:lO5Y6Hz/nzbnIbfL7VOerBXdIg997n8gdseJ+cH8Eqs=
 github.com/stackus/edat-stan v0.0.1 h1:N268+444YC1kDQQybCk2TkkaPCyAqxhXaK5esAJpmQY=
 github.com/stackus/edat-stan v0.0.1/go.mod h1:8XB1RBECxyO9e9IwVC070CHyE1U7NyDhz8Ojb2M/0MI=
-github.com/stackus/errors v0.0.1 h1:m0nupZqSk0TP7Hr5zIMw3tbrRdu9e27Iu4LVA3w3KYU=
-github.com/stackus/errors v0.0.1/go.mod h1:iCmKUIunlXnwUz6LsPmDE6PmYyWU3EwMdsalQbwLHc0=
+github.com/stackus/errors v0.0.2 h1:BN/gKGkRLCMiANsFUlKURC3xrsGnT+lKN2Tr1AmEk9g=
+github.com/stackus/errors v0.0.2/go.mod h1:IZ9ebiv0ckz0arFJB8jzqEsh1m2fQjaGvAqIQzBoNPY=
 github.com/streadway/amqp v0.0.0-20190404075320-75d898a42a94/go.mod h1:AZpEONHx3DKn8O/DFsRAY58/XVQiIPMTMB1SddzLXVw=
 github.com/streadway/amqp v0.0.0-20190827072141-edfb9018d271/go.mod h1:AZpEONHx3DKn8O/DFsRAY58/XVQiIPMTMB1SddzLXVw=
 github.com/streadway/handy v0.0.0-20190108123426-d5acb3125c2a/go.mod h1:qNTQ5P5JnDBl6z3cMAg/SywNDC5ABu5ApDIw6lUbRmI=

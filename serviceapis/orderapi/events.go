@@ -1,8 +1,9 @@
 package orderapi
 
 import (
-	"github.com/stackus/ftgogo/serviceapis/commonapi"
 	"time"
+
+	"github.com/stackus/ftgogo/serviceapis/commonapi"
 
 	"github.com/stackus/edat/core"
 )

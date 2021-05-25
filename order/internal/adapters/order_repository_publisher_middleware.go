@@ -2,8 +2,10 @@ package adapters
 
 import (
 	"context"
+
 	"github.com/stackus/edat/core"
 	"github.com/stackus/edat/es"
+
 	"github.com/stackus/ftgogo/order/internal/domain"
 )
 

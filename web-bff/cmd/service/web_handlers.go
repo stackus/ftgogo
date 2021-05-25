@@ -35,6 +35,7 @@ const consumerCtxKey = "consumerID"
 
 func newWebHandlers(app Application) webHandlers {
 	// Generate a new set of keys with each start; for reasons
+	// Can use this until scaling the web-bff is added to the demo
 	privateKey, err := rsa.GenerateKey(rand.Reader, 2048)
 	if err != nil {
 		panic(err)

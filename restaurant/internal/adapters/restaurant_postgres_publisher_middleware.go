@@ -2,6 +2,7 @@ package adapters
 
 import (
 	"context"
+
 	"github.com/stackus/ftgogo/restaurant/internal/domain"
 )
 

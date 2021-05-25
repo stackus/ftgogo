@@ -8,10 +8,10 @@ import (
 	"github.com/stackus/edat/saga"
 
 	"github.com/stackus/ftgogo/order/internal/domain"
-	"serviceapis/accountingapi"
-	"serviceapis/consumerapi"
-	"serviceapis/kitchenapi"
-	"serviceapis/orderapi"
+	"github.com/stackus/ftgogo/serviceapis/accountingapi"
+	"github.com/stackus/ftgogo/serviceapis/consumerapi"
+	"github.com/stackus/ftgogo/serviceapis/kitchenapi"
+	"github.com/stackus/ftgogo/serviceapis/orderapi"
 )
 
 type CreateOrderSaga struct {

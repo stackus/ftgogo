@@ -7,10 +7,11 @@ import (
 	"github.com/stackus/edat/msg"
 	"github.com/stackus/edat/saga"
 
+	"github.com/stackus/ftgogo/serviceapis/accountingapi"
+	"github.com/stackus/ftgogo/serviceapis/kitchenapi"
+	"github.com/stackus/ftgogo/serviceapis/orderapi"
+
 	"github.com/stackus/ftgogo/order/internal/domain"
-	"serviceapis/accountingapi"
-	"serviceapis/kitchenapi"
-	"serviceapis/orderapi"
 )
 
 type CancelOrderSaga struct {
