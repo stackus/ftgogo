@@ -22,7 +22,7 @@ func NewUpdateConsumerAddressHandler(repo domain.ConsumerRepository) UpdateConsu
 }
 
 func (h UpdateConsumerAddressHandler) Handle(ctx context.Context, cmd UpdateConsumerAddress) error {
-	return h.repo.UpdateAddress(ctx, domain.ModifyConsumerAddress{
+	return h.repo.UpdateAddress(ctx, domain.UpdateConsumerAddress{
 		ConsumerID: cmd.ConsumerID,
 		AddressID:  cmd.AddressID,
 		Address:    cmd.Address,

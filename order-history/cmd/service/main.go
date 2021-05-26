@@ -23,8 +23,8 @@ type Commands struct {
 }
 
 type Queries struct {
-	GetConsumerOrderHistory queries.GetConsumerOrderHistoryHandler
-	GetOrderHistory         queries.GetOrderHistoryHandler
+	SearchOrderHistories queries.SearchOrderHistoriesHandler
+	GetOrderHistory      queries.GetOrderHistoryHandler
 }
 
 func main() {
@@ -45,8 +45,8 @@ func initService(svc *applications.Service) error {
 			UpdateOrderStatus:  commands.NewUpdateOrderStatusHandler(orderHistoryRepo),
 		},
 		Queries: Queries{
-			GetConsumerOrderHistory: queries.NewGetConsumerOrderHistoryHandler(orderHistoryRepo),
-			GetOrderHistory:         queries.NewGetOrderHistoryHandler(orderHistoryRepo),
+			SearchOrderHistories: queries.NewSearchOrderHistoriesHandler(orderHistoryRepo),
+			GetOrderHistory:      queries.NewGetOrderHistoryHandler(orderHistoryRepo),
 		},
 	}
 

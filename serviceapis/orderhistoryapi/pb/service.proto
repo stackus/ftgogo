@@ -3,19 +3,29 @@ syntax = "proto3";
 option go_package = "github.com/stackus/ftgogo/serviceapis/orderhistoryapi/pb;orderhistorypb";
 
 import "google/protobuf/timestamp.proto";
+import "orderapi/pb/service.proto";
 
 package orderhistorypb;
 
 service OrderHistoryService {
-  rpc GetConsumerOrderHistory(GetConsumerOrderHistoryRequest) returns (GetConsumerOrderHistoryResponse);
+  rpc SearchOrderHistories(SearchOrderHistoriesRequest) returns (SearchOrderHistoriesResponse);
   rpc GetOrderHistory(GetOrderHistoryRequest) returns (GetOrderHistoryResponse);
 }
 
-message GetConsumerOrderHistoryRequest {
+message OrderHistory {
+  string OrderID = 1;
+  string ConsumerID = 2;
+  string RestaurantID = 3;
+  string RestaurantName = 4;
+  orderpb.OrderState Status = 5;
+  google.protobuf.Timestamp CreatedAt = 6;
+}
+
+message SearchOrderHistoriesRequest {
   message filters {
     google.protobuf.Timestamp Since = 1;
     repeated string Keywords = 2;
-    int64 Status = 3;
+    orderpb.OrderState Status = 3;
   }
 
   string ConsumerID = 1;
@@ -24,16 +34,8 @@ message GetConsumerOrderHistoryRequest {
   int64 Limit = 4;
 }
 
-message GetConsumerOrderHistoryResponse {
-  message orderHistory {
-    string OrderID = 1;
-    string Status = 2;
-    string RestaurantID = 3;
-    string RestaurantName = 4;
-    google.protobuf.Timestamp CreatedAt = 5;
-  }
-
-  repeated orderHistory Orders = 1;
+message SearchOrderHistoriesResponse {
+  repeated OrderHistory Orders = 1;
   string Next = 2;
 }
 
@@ -42,9 +44,5 @@ message GetOrderHistoryRequest {
 }
 
 message GetOrderHistoryResponse {
-  string OrderID = 1;
-  string Status = 2;
-  string RestaurantID = 3;
-  string RestaurantName = 4;
-  google.protobuf.Timestamp CreatedAt = 5;
+  OrderHistory Order = 1;
 }

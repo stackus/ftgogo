@@ -4,7 +4,6 @@ import (
 	"context"
 
 	"github.com/stackus/ftgogo/serviceapis/commonapi"
-	commonpb "github.com/stackus/ftgogo/serviceapis/commonapi/pb"
 	consumerpb "github.com/stackus/ftgogo/serviceapis/consumerapi/pb"
 	"github.com/stackus/ftgogo/web-bff/internal/domain"
 )
@@ -19,8 +18,8 @@ func NewConsumerGrpcClient(client consumerpb.ConsumerServiceClient) *ConsumerGRP
 	return &ConsumerGRPCRepository{client: client}
 }
 
-func (r ConsumerGRPCRepository) Register(ctx context.Context, name string) (string, error) {
-	resp, err := r.client.RegisterConsumer(ctx, &consumerpb.RegisterConsumerRequest{Name: name})
+func (r ConsumerGRPCRepository) Register(ctx context.Context, registerConsumer domain.RegisterConsumer) (string, error) {
+	resp, err := r.client.RegisterConsumer(ctx, &consumerpb.RegisterConsumerRequest{Name: registerConsumer.Name})
 	if err != nil {
 		return "", err
 	}
@@ -28,8 +27,8 @@ func (r ConsumerGRPCRepository) Register(ctx context.Context, name string) (stri
 	return resp.ConsumerID, nil
 }
 
-func (r ConsumerGRPCRepository) Find(ctx context.Context, consumerID string) (*domain.Consumer, error) {
-	resp, err := r.client.GetConsumer(ctx, &consumerpb.GetConsumerRequest{ConsumerID: consumerID})
+func (r ConsumerGRPCRepository) Find(ctx context.Context, findConsumer domain.FindConsumer) (*domain.Consumer, error) {
+	resp, err := r.client.GetConsumer(ctx, &consumerpb.GetConsumerRequest{ConsumerID: findConsumer.ConsumerID})
 	if err != nil {
 		return nil, err
 	}
@@ -40,18 +39,18 @@ func (r ConsumerGRPCRepository) Find(ctx context.Context, consumerID string) (*d
 	}, nil
 }
 
-func (r ConsumerGRPCRepository) Update(ctx context.Context, updateConsumer domain.Consumer) error {
+func (r ConsumerGRPCRepository) Update(ctx context.Context, updateConsumer domain.UpdateConsumer) error {
 	// _, err := r.client.UpdateConsumer(ctx, ...)
 	panic("implement me")
 }
 
 // NOTE All of the address additions have been added to demonstrate BFF use cases (gather data from multiple services)
 
-func (r ConsumerGRPCRepository) AddAddress(ctx context.Context, addAddress domain.ModifyConsumerAddress) error {
+func (r ConsumerGRPCRepository) AddAddress(ctx context.Context, addAddress domain.AddConsumerAddress) error {
 	_, err := r.client.AddAddress(ctx, &consumerpb.AddAddressRequest{
 		ConsumerID: addAddress.ConsumerID,
 		AddressID:  addAddress.AddressID,
-		Address:    r.toAddressProto(addAddress.Address),
+		Address:    commonapi.ToAddressProto(addAddress.Address),
 	})
 	return err
 }
@@ -64,42 +63,22 @@ func (r ConsumerGRPCRepository) FindAddress(ctx context.Context, findAddress dom
 	if err != nil {
 		return nil, err
 	}
-	return r.fromAddressProto(resp.Address), nil
+	return commonapi.FromAddressProto(resp.Address), nil
 }
 
-func (r ConsumerGRPCRepository) UpdateAddress(ctx context.Context, updateAddress domain.ModifyConsumerAddress) error {
+func (r ConsumerGRPCRepository) UpdateAddress(ctx context.Context, updateAddress domain.UpdateConsumerAddress) error {
 	_, err := r.client.UpdateAddress(ctx, &consumerpb.UpdateAddressRequest{
 		ConsumerID: updateAddress.ConsumerID,
 		AddressID:  updateAddress.AddressID,
-		Address:    r.toAddressProto(updateAddress.Address),
+		Address:    commonapi.ToAddressProto(updateAddress.Address),
 	})
 	return err
 }
 
-func (r ConsumerGRPCRepository) RemoveAddress(ctx context.Context, removeAddress domain.FindConsumerAddress) error {
+func (r ConsumerGRPCRepository) RemoveAddress(ctx context.Context, removeAddress domain.RemoveConsumerAddress) error {
 	_, err := r.client.RemoveAddress(ctx, &consumerpb.RemoveAddressRequest{
 		ConsumerID: removeAddress.ConsumerID,
 		AddressID:  removeAddress.AddressID,
 	})
 	return err
-}
-
-func (r ConsumerGRPCRepository) toAddressProto(address *commonapi.Address) *commonpb.Address {
-	return &commonpb.Address{
-		Street1: address.Street1,
-		Street2: address.Street2,
-		City:    address.City,
-		State:   address.State,
-		Zip:     address.Zip,
-	}
-}
-
-func (r ConsumerGRPCRepository) fromAddressProto(address *commonpb.Address) *commonapi.Address {
-	return &commonapi.Address{
-		Street1: address.Street1,
-		Street2: address.Street2,
-		City:    address.City,
-		State:   address.State,
-		Zip:     address.Zip,
-	}
 }

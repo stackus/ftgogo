@@ -3,5 +3,6 @@ package: main
 generate:
   - types
   - chi-server
+  - spec
 import-mapping:
   ../../../serviceapis/commonapi/spec.yaml: github.com/stackus/ftgogo/serviceapis/commonapi

@@ -8,7 +8,6 @@ import (
 	"github.com/stackus/ftgogo/consumer/internal/application/commands"
 	"github.com/stackus/ftgogo/consumer/internal/application/queries"
 	"github.com/stackus/ftgogo/serviceapis/commonapi"
-	commonpb "github.com/stackus/ftgogo/serviceapis/commonapi/pb"
 	"github.com/stackus/ftgogo/serviceapis/consumerapi/pb"
 )
 
@@ -54,7 +53,7 @@ func (h rpcHandlers) AddAddress(ctx context.Context, request *consumerpb.AddAddr
 	err := h.app.Commands.AddAddress.Handle(ctx, commands.AddAddress{
 		ConsumerID: request.ConsumerID,
 		AddressID:  request.AddressID,
-		Address:    h.fromAddressProto(request.Address),
+		Address:    commonapi.FromAddressProto(request.Address),
 	})
 	return &emptypb.Empty{}, err
 }
@@ -71,7 +70,7 @@ func (h rpcHandlers) GetAddress(ctx context.Context, request *consumerpb.GetAddr
 	return &consumerpb.GetAddressResponse{
 		ConsumerID: request.ConsumerID,
 		AddressID:  request.AddressID,
-		Address:    h.toAddressProto(address),
+		Address:    commonapi.ToAddressProto(address),
 	}, nil
 }
 
@@ -79,7 +78,7 @@ func (h rpcHandlers) UpdateAddress(ctx context.Context, request *consumerpb.Upda
 	err := h.app.Commands.UpdateAddress.Handle(ctx, commands.UpdateAddress{
 		ConsumerID: request.ConsumerID,
 		AddressID:  request.AddressID,
-		Address:    h.fromAddressProto(request.Address),
+		Address:    commonapi.FromAddressProto(request.Address),
 	})
 	return &emptypb.Empty{}, err
 }
@@ -90,24 +89,4 @@ func (h rpcHandlers) RemoveAddress(ctx context.Context, request *consumerpb.Remo
 		AddressID:  request.AddressID,
 	})
 	return &emptypb.Empty{}, err
-}
-
-func (h rpcHandlers) toAddressProto(address *commonapi.Address) *commonpb.Address {
-	return &commonpb.Address{
-		Street1: address.Street1,
-		Street2: address.Street2,
-		City:    address.City,
-		State:   address.State,
-		Zip:     address.Zip,
-	}
-}
-
-func (h rpcHandlers) fromAddressProto(address *commonpb.Address) *commonapi.Address {
-	return &commonapi.Address{
-		Street1: address.Street1,
-		Street2: address.Street2,
-		City:    address.City,
-		State:   address.State,
-		Zip:     address.Zip,
-	}
 }

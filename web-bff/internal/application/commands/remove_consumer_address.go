@@ -20,7 +20,7 @@ func NewRemoveConsumerAddressHandler(repo domain.ConsumerRepository) RemoveConsu
 }
 
 func (h RemoveConsumerAddressHandler) Handle(ctx context.Context, cmd RemoveConsumerAddress) error {
-	return h.repo.RemoveAddress(ctx, domain.FindConsumerAddress{
+	return h.repo.RemoveAddress(ctx, domain.RemoveConsumerAddress{
 		ConsumerID: cmd.ConsumerID,
 		AddressID:  cmd.AddressID,
 	})

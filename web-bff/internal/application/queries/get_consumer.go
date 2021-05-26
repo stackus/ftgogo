@@ -19,5 +19,7 @@ func NewGetConsumerHandler(repo domain.ConsumerRepository) GetConsumerHandler {
 }
 
 func (h GetConsumerHandler) Handle(ctx context.Context, cmd GetConsumer) (*domain.Consumer, error) {
-	return h.repo.Find(ctx, cmd.ConsumerID)
+	return h.repo.Find(ctx, domain.FindConsumer{
+		ConsumerID: cmd.ConsumerID,
+	})
 }

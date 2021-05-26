@@ -81,7 +81,7 @@ func (r *OrderHistoryPostgresRepository) FindConsumerOrders(ctx context.Context,
 	}
 	defer rows.Close()
 
-	orders := []*domain.OrderHistory{}
+	var orders []*domain.OrderHistory
 
 	for rows.Next() {
 		lineItemData := []byte{}

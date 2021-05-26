@@ -22,7 +22,7 @@ func NewAddConsumerAddressHandler(repo domain.ConsumerRepository) AddConsumerAdd
 }
 
 func (h AddConsumerAddressHandler) Handle(ctx context.Context, cmd AddConsumerAddress) error {
-	return h.repo.AddAddress(ctx, domain.ModifyConsumerAddress{
+	return h.repo.AddAddress(ctx, domain.AddConsumerAddress{
 		ConsumerID: cmd.ConsumerID,
 		AddressID:  cmd.AddressID,
 		Address:    cmd.Address,

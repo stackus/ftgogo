@@ -1,5 +1,9 @@
 package orderapi
 
+import (
+	orderpb "github.com/stackus/ftgogo/serviceapis/orderapi/pb"
+)
+
 type Address struct {
 	Street1 string
 	Street2 string
@@ -56,5 +60,43 @@ func (s OrderState) String() string {
 		return "RevisionPending"
 	default:
 		return "Unknown"
+	}
+}
+
+func ToOrderStateProto(orderState OrderState) orderpb.OrderState {
+	switch orderState {
+	case ApprovalPending:
+		return orderpb.OrderState_ApprovalPending
+	case Approved:
+		return orderpb.OrderState_Approved
+	case CancelPending:
+		return orderpb.OrderState_CancelPending
+	case Cancelled:
+		return orderpb.OrderState_Cancelled
+	case RevisionPending:
+		return orderpb.OrderState_RevisionPending
+	case Rejected:
+		return orderpb.OrderState_Rejected
+	default:
+		return orderpb.OrderState_Unknown
+	}
+}
+
+func FromOrderStateProto(orderState orderpb.OrderState) OrderState {
+	switch orderState {
+	case orderpb.OrderState_ApprovalPending:
+		return ApprovalPending
+	case orderpb.OrderState_Approved:
+		return Approved
+	case orderpb.OrderState_Rejected:
+		return Rejected
+	case orderpb.OrderState_CancelPending:
+		return CancelPending
+	case orderpb.OrderState_Cancelled:
+		return Cancelled
+	case orderpb.OrderState_RevisionPending:
+		return RevisionPending
+	default:
+		return UnknownOrderState
 	}
 }

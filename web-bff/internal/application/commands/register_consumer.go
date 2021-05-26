@@ -19,7 +19,9 @@ func NewRegisterConsumerHandler(repo domain.ConsumerRepository) RegisterConsumer
 }
 
 func (h RegisterConsumerHandler) Handle(ctx context.Context, cmd RegisterConsumer) (string, error) {
-	consumerID, err := h.repo.Register(ctx, cmd.Name)
+	consumerID, err := h.repo.Register(ctx, domain.RegisterConsumer{
+		Name: cmd.Name,
+	})
 	if err != nil {
 		return "", err
 	}

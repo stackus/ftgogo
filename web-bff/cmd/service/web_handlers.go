@@ -4,9 +4,11 @@ import (
 	"context"
 	"crypto/rand"
 	"crypto/rsa"
+	"fmt"
 	"net/http"
 	"time"
 
+	"github.com/deepmap/oapi-codegen/pkg/runtime"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/jwtauth/v5"
 	"github.com/go-chi/render"
@@ -14,8 +16,10 @@ import (
 	"github.com/lestrrat-go/jwx/jwt"
 	"github.com/stackus/errors"
 
+	"github.com/stackus/ftgogo/serviceapis/orderapi"
 	"github.com/stackus/ftgogo/web-bff/internal/application/commands"
 	"github.com/stackus/ftgogo/web-bff/internal/application/queries"
+	"github.com/stackus/ftgogo/web-bff/internal/domain"
 	"shared-go/web"
 )
 
@@ -29,6 +33,8 @@ type webHandlers struct {
 	app     Application
 	jwtAuth *jwtauth.JWTAuth
 }
+
+var _ ServerInterface = (*webHandlers)(nil)
 
 const jwtAudience = "web"
 const consumerCtxKey = "consumerID"
@@ -318,14 +324,84 @@ func (h webHandlers) withOrderID(next func(http.ResponseWriter, *http.Request, O
 }
 
 func (h webHandlers) GetOrder(w http.ResponseWriter, r *http.Request, orderID OrderID) {
-	panic("implement me")
+	consumerID := h.consumerID(r.Context())
+	order, err := h.app.Queries.GetOrder.Handle(r.Context(), queries.GetOrder{
+		OrderID:    string(orderID),
+		ConsumerID: consumerID,
+	})
+	if err != nil {
+		render.Render(w, r, web.NewErrorResponse(err))
+		return
+	}
+
+	render.Respond(w, r, OrderResponse{
+		Order: h.toOrderJson(order),
+	})
 }
 
 func (h webHandlers) CancelOrder(w http.ResponseWriter, r *http.Request, orderID OrderID) {
-	panic("implement me")
+	consumerID := h.consumerID(r.Context())
+	status, err := h.app.Commands.CancelOrder.Handle(r.Context(), commands.CancelOrder{
+		ConsumerID: consumerID,
+		OrderID:    string(orderID),
+	})
+	if err != nil {
+		render.Render(w, r, web.NewErrorResponse(err))
+		return
+	}
+
+	render.Respond(w, r, OrderStatusResponse{
+		Status: h.toOrderStateJson(status),
+	})
 }
 
 func (h webHandlers) ReviseOrder(w http.ResponseWriter, r *http.Request, orderID OrderID) {
+	consumerID := h.consumerID(r.Context())
+	status, err := h.app.Commands.ReviseOrder.Handle(r.Context(), commands.ReviseOrder{
+		ConsumerID: consumerID,
+		OrderID:    string(orderID),
+	})
+	if err != nil {
+		render.Render(w, r, web.NewErrorResponse(err))
+		return
+	}
+
+	render.Respond(w, r, OrderStatusResponse{
+		Status: h.toOrderStateJson(status),
+	})
+}
+
+func (h webHandlers) withSearchOrderHistoriesParams(next func(w http.ResponseWriter, r *http.Request, params SearchOrderHistoriesParams)) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		var err error
+
+		// FRAGILE: Copied from generated code
+		// Parameter object where we will unmarshal all parameters from the context
+		var params SearchOrderHistoriesParams
+
+		err = runtime.BindQueryParameter("deepObject", true, false, "filter", r.URL.Query(), &params.Filter)
+		if err != nil {
+			http.Error(w, fmt.Sprintf("Invalid format for parameter filter: %s", err), http.StatusBadRequest)
+			return
+		}
+
+		err = runtime.BindQueryParameter("form", true, false, "next", r.URL.Query(), &params.Next)
+		if err != nil {
+			http.Error(w, fmt.Sprintf("Invalid format for parameter next: %s", err), http.StatusBadRequest)
+			return
+		}
+
+		err = runtime.BindQueryParameter("form", true, false, "limit", r.URL.Query(), &params.Limit)
+		if err != nil {
+			http.Error(w, fmt.Sprintf("Invalid format for parameter limit: %s", err), http.StatusBadRequest)
+			return
+		}
+
+		next(w, r, params)
+	}
+}
+
+func (h webHandlers) SearchOrderHistories(w http.ResponseWriter, r *http.Request, params SearchOrderHistoriesParams) {
 	panic("implement me")
 }
 
@@ -337,4 +413,31 @@ func (h webHandlers) withRestaurantID(next func(http.ResponseWriter, *http.Reque
 
 func (h webHandlers) GetRestaurant(w http.ResponseWriter, r *http.Request, restaurantID RestaurantID) {
 	panic("implement me")
+}
+
+func (h webHandlers) toOrderJson(order *domain.Order) Order {
+	return Order{
+		OrderId:    order.OrderID,
+		OrderTotal: order.Total,
+		State:      h.toOrderStateJson(order.Status),
+	}
+}
+
+func (h webHandlers) toOrderStateJson(orderState orderapi.OrderState) OrderState {
+	switch orderState {
+	case orderapi.ApprovalPending:
+		return OrderStateApprovalPending
+	case orderapi.Approved:
+		return OrderStateApproved
+	case orderapi.CancelPending:
+		return OrderStateCancelPending
+	case orderapi.Cancelled:
+		return OrderStateCancelled
+	case orderapi.RevisionPending:
+		return OrderStateRevisionPending
+	case orderapi.Rejected:
+		return OrderStateRejected
+	default:
+		return OrderStateUnknown
+	}
 }

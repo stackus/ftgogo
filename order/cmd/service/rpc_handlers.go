@@ -7,7 +7,6 @@ import (
 	"github.com/stackus/ftgogo/order/internal/application/queries"
 	"github.com/stackus/ftgogo/order/internal/domain"
 	"github.com/stackus/ftgogo/serviceapis/commonapi"
-	"github.com/stackus/ftgogo/serviceapis/commonapi/pb"
 	"github.com/stackus/ftgogo/serviceapis/orderapi"
 	"github.com/stackus/ftgogo/serviceapis/orderapi/pb"
 )
@@ -66,19 +65,19 @@ func (h rpcHandlers) CancelOrder(ctx context.Context, request *orderpb.CancelOrd
 		return nil, err
 	}
 
-	return &orderpb.CancelOrderResponse{Status: h.toOrderStateProto(status)}, nil
+	return &orderpb.CancelOrderResponse{Status: orderapi.ToOrderStateProto(status)}, nil
 }
 
 func (h rpcHandlers) ReviseOrder(ctx context.Context, request *orderpb.ReviseOrderRequest) (*orderpb.ReviseOrderResponse, error) {
 	status, err := h.app.Commands.StartReviseOrderSaga.Handle(ctx, commands.StartReviseOrderSaga{
 		OrderID:           request.OrderID,
-		RevisedQuantities: h.fromMenuItemQuantitiesProto(request.RevisedQuantities),
+		RevisedQuantities: commonapi.FromMenuItemQuantitiesProto(request.RevisedQuantities),
 	})
 	if err != nil {
 		return nil, err
 	}
 
-	return &orderpb.ReviseOrderResponse{Status: h.toOrderStateProto(status)}, nil
+	return &orderpb.ReviseOrderResponse{Status: orderapi.ToOrderStateProto(status)}, nil
 }
 
 func (h rpcHandlers) toOrderProto(order *domain.Order) *orderpb.Order {
@@ -87,43 +86,6 @@ func (h rpcHandlers) toOrderProto(order *domain.Order) *orderpb.Order {
 		RestaurantID: order.RestaurantID,
 		ConsumerID:   order.ConsumerID,
 		OrderTotal:   int64(order.OrderTotal()),
-		Status:       h.toOrderStateProto(order.State),
+		Status:       orderapi.ToOrderStateProto(order.State),
 	}
-}
-
-func (h rpcHandlers) toOrderStateProto(state orderapi.OrderState) orderpb.OrderState {
-	switch state {
-	case orderapi.ApprovalPending:
-		return orderpb.OrderState_ApprovalPending
-	case orderapi.Approved:
-		return orderpb.OrderState_Approved
-	case orderapi.CancelPending:
-		return orderpb.OrderState_CancelPending
-	case orderapi.Cancelled:
-		return orderpb.OrderState_Cancelled
-	case orderapi.RevisionPending:
-		return orderpb.OrderState_RevisionPending
-	case orderapi.Rejected:
-		return orderpb.OrderState_Rejected
-	default:
-		return orderpb.OrderState_Unknown
-	}
-}
-
-func (h rpcHandlers) toMenuItemsQuantitiesProto(quantities commonapi.MenuItemQuantities) *commonpb.MenuItemQuantities {
-	lineItems := make(map[string]int64, len(quantities))
-	for itemID, qty := range quantities {
-		lineItems[itemID] = int64(qty)
-	}
-
-	return &commonpb.MenuItemQuantities{Items: lineItems}
-}
-
-func (h rpcHandlers) fromMenuItemQuantitiesProto(quantities *commonpb.MenuItemQuantities) commonapi.MenuItemQuantities {
-	lineItems := make(commonapi.MenuItemQuantities, len(quantities.Items))
-	for itemID, qty := range quantities.Items {
-		lineItems[itemID] = int(qty)
-	}
-
-	return lineItems
 }

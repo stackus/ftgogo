@@ -22,6 +22,8 @@ type Application struct {
 type Commands struct {
 	RegisterConsumer      commands.RegisterConsumerHandler
 	CreateOrder           commands.CreateOrderHandler
+	ReviseOrder           commands.ReviseOrderHandler
+	CancelOrder           commands.CancelOrderHandler
 	AddConsumerAddress    commands.AddConsumerAddressHandler
 	UpdateConsumerAddress commands.UpdateConsumerAddressHandler
 	RemoveConsumerAddress commands.RemoveConsumerAddressHandler
@@ -61,6 +63,8 @@ func initService(svc *applications.Service) error {
 		Commands: Commands{
 			RegisterConsumer:      commands.NewRegisterConsumerHandler(consumerClient),
 			CreateOrder:           commands.NewCreateOrderHandler(orderClient, consumerClient),
+			ReviseOrder:           commands.NewReviseOrderHandler(orderClient),
+			CancelOrder:           commands.NewCancelOrderHandler(orderClient),
 			AddConsumerAddress:    commands.NewAddConsumerAddressHandler(consumerClient),
 			UpdateConsumerAddress: commands.NewUpdateConsumerAddressHandler(consumerClient),
 			RemoveConsumerAddress: commands.NewRemoveConsumerAddressHandler(consumerClient),

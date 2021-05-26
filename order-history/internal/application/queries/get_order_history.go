@@ -18,17 +18,6 @@ func NewGetOrderHistoryHandler(orderHistoryRepo domain.OrderHistoryRepository) G
 	return GetOrderHistoryHandler{repo: orderHistoryRepo}
 }
 
-func (h GetOrderHistoryHandler) Handle(ctx context.Context, query GetOrderHistory) (OrderHistory, error) {
-	order, err := h.repo.Find(ctx, query.OrderID)
-	if err != nil {
-		return OrderHistory{}, err
-	}
-
-	return OrderHistory{
-		OrderID:        order.OrderID,
-		Status:         order.Status.String(),
-		RestaurantID:   order.RestaurantID,
-		RestaurantName: order.RestaurantName,
-		CreatedAt:      order.CreatedAt,
-	}, nil
+func (h GetOrderHistoryHandler) Handle(ctx context.Context, query GetOrderHistory) (*domain.OrderHistory, error) {
+	return h.repo.Find(ctx, query.OrderID)
 }

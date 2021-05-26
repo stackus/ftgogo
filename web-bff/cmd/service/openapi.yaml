@@ -6,17 +6,19 @@ info:
   contact:
     name: FTGOGO Issues
     url: https://github.com/stackus/ftgogo/issues
-servers:
-  - url: https://{host}:{port}/api
-    variables:
-      host:
-        default: localhost
-      port:
-        default: "80"
+#servers:
+#  - url: https://{host}:{port}/api
+#    variables:
+#      host:
+#        default: localhost
+#      port:
+#        default: "80"
 paths:
   /signin:
     post:
       operationId: signInConsumer
+      security:
+        - {}
       requestBody:
         description: sign in consumer request
         required: true
@@ -36,6 +38,8 @@ paths:
   /register:
     post:
       operationId: registerConsumer
+      security:
+        - {}
       requestBody:
         description: register consumer request
         required: true
@@ -52,11 +56,16 @@ paths:
           $ref: '#/components/responses/ConsumerIDResponse'
         default:
           $ref: '../../../shared-go/web/spec.yaml#/components/responses/ErrorResponse'
+  /consumer:
     get:
       operationId: getConsumer
+      security:
+        - bearerAuth: []
       responses:
         '200':
           $ref: '#/components/responses/ConsumerResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedResponse'
         default:
           $ref: '../../../shared-go/web/spec.yaml#/components/responses/ErrorResponse'
   /addresses:
@@ -185,6 +194,33 @@ paths:
           $ref: '#/components/responses/OrderStatusResponse'
         default:
           $ref: '#/components/responses/ErrorResponse'
+  /orders/history:
+    get:
+      operationId: searchOrderHistories
+      parameters:
+        - in: query
+          name: filter
+          description: search filters
+          style: deepObject
+          schema:
+            type: object
+            properties:
+              since:
+                type: string
+                format: date-time
+              keywords:
+                type: array
+                items:
+                  type: string
+              status:
+                $ref: '#/components/schemas/OrderState'
+        - $ref: '#/components/parameters/NextQuery'
+        - $ref: '#/components/parameters/LimitQuery'
+      responses:
+        '200':
+          $ref: '#/components/responses/SearchOrderHistoriesResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
   /restaurants/{restaurantID}:
     get:
       operationId: getRestaurant
@@ -195,8 +231,15 @@ paths:
           $ref: '#/components/responses/RestaurantIDResponse'
         default:
           $ref: '#/components/responses/ErrorResponse'
-
+security:
+  - {}
+  - bearerAuth: []
 components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
   schemas:
     Address:
       type: object
@@ -214,8 +257,64 @@ components:
           type: string
     OrderState:
       type: string
-      enum: [ ApprovalPending, Approved, Rejected, CancelPending, Cancelled, RevisionPending ]
+      enum: [ Unknown, ApprovalPending, Approved, Rejected, CancelPending, Cancelled, RevisionPending ]
+    Order:
+      type: object
+      required: [ order_id, state, order_total ]
+      properties:
+        order_id:
+          type: string
+        state:
+          $ref: '#/components/schemas/OrderState'
+        order_total:
+          type: integer
+    OrderHistory:
+      type: object
+      required: [ order_id, status, restaurant_id, restaurant_name ]
+      properties:
+        order_id:
+          type: string
+          format: uuid
+        status:
+          type: string
+        restaurant_id:
+          type: string
+          format: uuid
+        restaurant_name:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+    OrderHistoryFilters:
+      type: object
+      properties:
+        since:
+          type: string
+          format: date-time
+        keywords:
+          type: array
+          items:
+            type: string
+        status:
+          $ref: '#/components/schemas/OrderState'
   parameters:
+    NextQuery:
+      in: query
+      name: next
+      description: provide to read the next page of results
+      required: false
+      schema:
+        type: string
+    LimitQuery:
+      in: query
+      name: limit
+      description: provide to set the results page size
+      required: false
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 50
+        default: 20
     ConsumerID:
       in: path
       name: consumerID
@@ -260,6 +359,8 @@ components:
             properties:
               message:
                 type: string
+    UnauthorizedResponse:
+      description: Access token is missing or invalid
     SignInResponse:
       description: OK
       content:
@@ -333,21 +434,17 @@ components:
             required: [ status ]
             properties:
               status:
-                type: string
+                $ref: '#/components/schemas/OrderState'
     OrderResponse:
       description: OK
       content:
         application/json:
           schema:
             type: object
-            required: [ order_id, state, order_total ]
+            required: [ order ]
             properties:
-              order_id:
-                type: string
-              state:
-                $ref: '#/components/schemas/OrderState'
-              order_total:
-                type: integer
+              order:
+                $ref: '#/components/schemas/Order'
     RestaurantIDResponse:
       description: OK
       content:
@@ -357,4 +454,18 @@ components:
             required: [ id ]
             properties:
               id:
+                type: string
+    SearchOrderHistoriesResponse:
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            required: [ orders, next ]
+            properties:
+              orders:
+                type: array
+                items:
+                  $ref: '#/components/schemas/OrderHistory'
+              next:
                 type: string

@@ -5,12 +5,16 @@ import (
 	"time"
 
 	"github.com/stackus/ftgogo/serviceapis/commonapi"
+	"github.com/stackus/ftgogo/serviceapis/orderapi"
 )
 
 type Order struct {
-	OrderID string
-	Total   int
-	Status  string
+	OrderID        string
+	ConsumerID     string
+	RestaurantID   string
+	RestaurantName string
+	Total          int
+	Status         orderapi.OrderState
 	// TODO EstimatedDelivery time.Duration
 	// TODO other data
 }
@@ -24,16 +28,21 @@ type (
 		LineItems    commonapi.MenuItemQuantities
 	}
 
+	FindOrder struct {
+		OrderID string
+	}
+
+	CancelOrder FindOrder
+
 	ReviseOrder struct {
 		OrderID           string
-		ConsumerID        string
 		RevisedQuantities commonapi.MenuItemQuantities
 	}
 )
 
 type OrderRepository interface {
 	Create(ctx context.Context, createOrder CreateOrder) (string, error)
-	Find(ctx context.Context, orderID string) (*Order, error)
-	Revise(ctx context.Context, reviseOrder ReviseOrder) error
-	Cancel(ctx context.Context, orderID string) error
+	Find(ctx context.Context, findOrder FindOrder) (*Order, error)
+	Revise(ctx context.Context, reviseOrder ReviseOrder) (orderapi.OrderState, error)
+	Cancel(ctx context.Context, cancelOrder CancelOrder) (orderapi.OrderState, error)
 }

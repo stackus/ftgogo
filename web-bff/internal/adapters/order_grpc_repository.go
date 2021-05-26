@@ -3,11 +3,10 @@ package adapters
 import (
 	"context"
 
-	"github.com/stackus/errors"
 	"google.golang.org/protobuf/types/known/timestamppb"
 
 	"github.com/stackus/ftgogo/serviceapis/commonapi"
-	"github.com/stackus/ftgogo/serviceapis/commonapi/pb"
+	"github.com/stackus/ftgogo/serviceapis/orderapi"
 	"github.com/stackus/ftgogo/serviceapis/orderapi/pb"
 	"github.com/stackus/ftgogo/web-bff/internal/domain"
 )
@@ -27,15 +26,9 @@ func (r OrderGRPCRepository) Create(ctx context.Context, createOrder domain.Crea
 		ctx, &orderpb.CreateOrderRequest{
 			ConsumerID:   createOrder.ConsumerID,
 			RestaurantID: createOrder.RestaurantID,
-			DeliverTo: &commonpb.Address{
-				Street1: createOrder.DeliverTo.Street1,
-				Street2: createOrder.DeliverTo.Street2,
-				City:    createOrder.DeliverTo.City,
-				State:   createOrder.DeliverTo.State,
-				Zip:     createOrder.DeliverTo.Zip,
-			},
-			DeliverAt: timestamppb.New(createOrder.DeliverAt),
-			LineItems: r.toMenuItemQuantitiesProto(createOrder.LineItems),
+			DeliverTo:    commonapi.ToAddressProto(createOrder.DeliverTo),
+			DeliverAt:    timestamppb.New(createOrder.DeliverAt),
+			LineItems:    commonapi.ToMenuItemQuantitiesProto(createOrder.LineItems),
 		},
 	)
 	if err != nil {
@@ -45,8 +38,8 @@ func (r OrderGRPCRepository) Create(ctx context.Context, createOrder domain.Crea
 	return res.OrderID, nil
 }
 
-func (r OrderGRPCRepository) Find(ctx context.Context, orderID string) (*domain.Order, error) {
-	resp, err := r.client.GetOrder(ctx, &orderpb.GetOrderRequest{OrderID: orderID})
+func (r OrderGRPCRepository) Find(ctx context.Context, findOrder domain.FindOrder) (*domain.Order, error) {
+	resp, err := r.client.GetOrder(ctx, &orderpb.GetOrderRequest{OrderID: findOrder.OrderID})
 	if err != nil {
 		return nil, err
 	}
@@ -54,44 +47,31 @@ func (r OrderGRPCRepository) Find(ctx context.Context, orderID string) (*domain.
 	return r.fromOrderProto(resp.Order), nil
 }
 
-func (r OrderGRPCRepository) Revise(ctx context.Context, reviseOrder domain.ReviseOrder) error {
-	var err error
-
-	var resp *orderpb.GetOrderResponse
-	resp, err = r.client.GetOrder(ctx, &orderpb.GetOrderRequest{OrderID: reviseOrder.OrderID})
-	if err != nil {
-		return err
-	}
-
-	if resp.Order.ConsumerID != reviseOrder.ConsumerID {
-		return errors.Wrap(errors.ErrPermissionDenied, "you are not permitted to revise orders other than your own")
-	}
-
-	_, err = r.client.ReviseOrder(ctx, &orderpb.ReviseOrderRequest{
+func (r OrderGRPCRepository) Revise(ctx context.Context, reviseOrder domain.ReviseOrder) (orderapi.OrderState, error) {
+	resp, err := r.client.ReviseOrder(ctx, &orderpb.ReviseOrderRequest{
 		OrderID:           reviseOrder.OrderID,
-		RevisedQuantities: r.toMenuItemQuantitiesProto(reviseOrder.RevisedQuantities),
+		RevisedQuantities: commonapi.ToMenuItemQuantitiesProto(reviseOrder.RevisedQuantities),
 	})
-
-	return err
-}
-
-func (r OrderGRPCRepository) Cancel(ctx context.Context, orderID string) error {
-	panic("implement me")
-}
-
-func (r OrderGRPCRepository) toMenuItemQuantitiesProto(quantities commonapi.MenuItemQuantities) *commonpb.MenuItemQuantities {
-	lineItems := make(map[string]int64, len(quantities))
-	for itemID, qty := range quantities {
-		lineItems[itemID] = int64(qty)
+	if err != nil {
+		return orderapi.UnknownOrderState, err
 	}
+	return orderapi.FromOrderStateProto(resp.Status), err
+}
 
-	return &commonpb.MenuItemQuantities{Items: lineItems}
+func (r OrderGRPCRepository) Cancel(ctx context.Context, cancelOrder domain.CancelOrder) (orderapi.OrderState, error) {
+	resp, err := r.client.CancelOrder(ctx, &orderpb.CancelOrderRequest{
+		OrderID: cancelOrder.OrderID,
+	})
+	if err != nil {
+		return orderapi.UnknownOrderState, err
+	}
+	return orderapi.FromOrderStateProto(resp.Status), err
 }
 
 func (r OrderGRPCRepository) fromOrderProto(order *orderpb.Order) *domain.Order {
 	return &domain.Order{
 		OrderID: order.OrderID,
 		Total:   int(order.OrderTotal),
-		Status:  order.Status.String(),
+		Status:  orderapi.FromOrderStateProto(order.Status),
 	}
 }

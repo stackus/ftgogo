@@ -18,7 +18,7 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type OrderHistoryServiceClient interface {
-	GetConsumerOrderHistory(ctx context.Context, in *GetConsumerOrderHistoryRequest, opts ...grpc.CallOption) (*GetConsumerOrderHistoryResponse, error)
+	SearchOrderHistories(ctx context.Context, in *SearchOrderHistoriesRequest, opts ...grpc.CallOption) (*SearchOrderHistoriesResponse, error)
 	GetOrderHistory(ctx context.Context, in *GetOrderHistoryRequest, opts ...grpc.CallOption) (*GetOrderHistoryResponse, error)
 }
 
@@ -30,9 +30,9 @@ func NewOrderHistoryServiceClient(cc grpc.ClientConnInterface) OrderHistoryServi
 	return &orderHistoryServiceClient{cc}
 }
 
-func (c *orderHistoryServiceClient) GetConsumerOrderHistory(ctx context.Context, in *GetConsumerOrderHistoryRequest, opts ...grpc.CallOption) (*GetConsumerOrderHistoryResponse, error) {
-	out := new(GetConsumerOrderHistoryResponse)
-	err := c.cc.Invoke(ctx, "/orderhistorypb.OrderHistoryService/GetConsumerOrderHistory", in, out, opts...)
+func (c *orderHistoryServiceClient) SearchOrderHistories(ctx context.Context, in *SearchOrderHistoriesRequest, opts ...grpc.CallOption) (*SearchOrderHistoriesResponse, error) {
+	out := new(SearchOrderHistoriesResponse)
+	err := c.cc.Invoke(ctx, "/orderhistorypb.OrderHistoryService/SearchOrderHistories", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -52,7 +52,7 @@ func (c *orderHistoryServiceClient) GetOrderHistory(ctx context.Context, in *Get
 // All implementations must embed UnimplementedOrderHistoryServiceServer
 // for forward compatibility
 type OrderHistoryServiceServer interface {
-	GetConsumerOrderHistory(context.Context, *GetConsumerOrderHistoryRequest) (*GetConsumerOrderHistoryResponse, error)
+	SearchOrderHistories(context.Context, *SearchOrderHistoriesRequest) (*SearchOrderHistoriesResponse, error)
 	GetOrderHistory(context.Context, *GetOrderHistoryRequest) (*GetOrderHistoryResponse, error)
 	mustEmbedUnimplementedOrderHistoryServiceServer()
 }
@@ -61,8 +61,8 @@ type OrderHistoryServiceServer interface {
 type UnimplementedOrderHistoryServiceServer struct {
 }
 
-func (UnimplementedOrderHistoryServiceServer) GetConsumerOrderHistory(context.Context, *GetConsumerOrderHistoryRequest) (*GetConsumerOrderHistoryResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetConsumerOrderHistory not implemented")
+func (UnimplementedOrderHistoryServiceServer) SearchOrderHistories(context.Context, *SearchOrderHistoriesRequest) (*SearchOrderHistoriesResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SearchOrderHistories not implemented")
 }
 func (UnimplementedOrderHistoryServiceServer) GetOrderHistory(context.Context, *GetOrderHistoryRequest) (*GetOrderHistoryResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetOrderHistory not implemented")
@@ -80,20 +80,20 @@ func RegisterOrderHistoryServiceServer(s grpc.ServiceRegistrar, srv OrderHistory
 	s.RegisterService(&OrderHistoryService_ServiceDesc, srv)
 }
 
-func _OrderHistoryService_GetConsumerOrderHistory_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetConsumerOrderHistoryRequest)
+func _OrderHistoryService_SearchOrderHistories_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SearchOrderHistoriesRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(OrderHistoryServiceServer).GetConsumerOrderHistory(ctx, in)
+		return srv.(OrderHistoryServiceServer).SearchOrderHistories(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/orderhistorypb.OrderHistoryService/GetConsumerOrderHistory",
+		FullMethod: "/orderhistorypb.OrderHistoryService/SearchOrderHistories",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(OrderHistoryServiceServer).GetConsumerOrderHistory(ctx, req.(*GetConsumerOrderHistoryRequest))
+		return srv.(OrderHistoryServiceServer).SearchOrderHistories(ctx, req.(*SearchOrderHistoriesRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -124,8 +124,8 @@ var OrderHistoryService_ServiceDesc = grpc.ServiceDesc{
 	HandlerType: (*OrderHistoryServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "GetConsumerOrderHistory",
-			Handler:    _OrderHistoryService_GetConsumerOrderHistory_Handler,
+			MethodName: "SearchOrderHistories",
+			Handler:    _OrderHistoryService_SearchOrderHistories_Handler,
 		},
 		{
 			MethodName: "GetOrderHistory",
