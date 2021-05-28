@@ -1,4 +1,4 @@
-package main
+package ports
 
 import (
 	"context"
@@ -17,6 +17,7 @@ import (
 	"github.com/stackus/errors"
 
 	"github.com/stackus/ftgogo/serviceapis/orderapi"
+	"github.com/stackus/ftgogo/web-bff/internal/application"
 	"github.com/stackus/ftgogo/web-bff/internal/application/commands"
 	"github.com/stackus/ftgogo/web-bff/internal/application/queries"
 	"github.com/stackus/ftgogo/web-bff/internal/domain"
@@ -29,17 +30,17 @@ import (
 // The generated Chi server components are not used to construct the server it
 // is instead used to verify our web handlers cover the API completely.
 
-type webHandlers struct {
-	app     Application
+type WebHandlers struct {
+	app     application.Application
 	jwtAuth *jwtauth.JWTAuth
 }
 
-var _ ServerInterface = (*webHandlers)(nil)
+var _ ServerInterface = (*WebHandlers)(nil)
 
 const jwtAudience = "web"
 const consumerCtxKey = "consumerID"
 
-func newWebHandlers(app Application) webHandlers {
+func NewWebHandlers(app application.Application) WebHandlers {
 	// Generate a new set of keys with each start; for reasons
 	// Can use this until scaling the web-bff is added to the demo
 	privateKey, err := rsa.GenerateKey(rand.Reader, 2048)
@@ -47,13 +48,13 @@ func newWebHandlers(app Application) webHandlers {
 		panic(err)
 	}
 
-	return webHandlers{
+	return WebHandlers{
 		app:     app,
 		jwtAuth: jwtauth.New(jwa.RS256.String(), privateKey, privateKey.PublicKey),
 	}
 }
 
-func (h webHandlers) Mount(r chi.Router) http.Handler {
+func (h WebHandlers) Mount(r chi.Router) http.Handler {
 	// Public Routes
 	r.Post("/register", h.RegisterConsumer)
 	r.Post("/signin", h.SignInConsumer)
@@ -67,7 +68,7 @@ func (h webHandlers) Mount(r chi.Router) http.Handler {
 			h.decodeClaimsIntoContext,
 		)
 
-		r.Route("/consumers", func(r chi.Router) {
+		r.Route("/consumer", func(r chi.Router) {
 			r.Get("/", h.GetConsumer)
 		})
 
@@ -82,6 +83,7 @@ func (h webHandlers) Mount(r chi.Router) http.Handler {
 
 		r.Route("/orders", func(r chi.Router) {
 			r.Post("/", h.CreateOrder)
+			r.Get("/", h.withSearchOrdersParams(h.SearchOrders))
 			r.Route("/{orderID}", func(r chi.Router) {
 				r.Get("/", h.withOrderID(h.GetOrder))
 				r.Put("/revise", h.withOrderID(h.ReviseOrder))
@@ -99,7 +101,7 @@ func (h webHandlers) Mount(r chi.Router) http.Handler {
 	return r
 }
 
-func (h webHandlers) decodeClaimsIntoContext(next http.Handler) http.Handler {
+func (h WebHandlers) decodeClaimsIntoContext(next http.Handler) http.Handler {
 	fn := func(w http.ResponseWriter, r *http.Request) {
 		_, claims, err := jwtauth.FromContext(r.Context())
 		if err != nil {
@@ -135,7 +137,7 @@ func (h webHandlers) decodeClaimsIntoContext(next http.Handler) http.Handler {
 //
 // The application (commands, queries), the domain, and the adapters don't know and should not know where any
 // session values might come from.
-func (h webHandlers) consumerID(ctx context.Context) string {
+func (h WebHandlers) consumerID(ctx context.Context) string {
 	v := ctx.Value(consumerCtxKey)
 	switch s := v.(type) {
 	case string:
@@ -145,7 +147,7 @@ func (h webHandlers) consumerID(ctx context.Context) string {
 	}
 }
 
-func (h webHandlers) SignInConsumer(w http.ResponseWriter, r *http.Request) {
+func (h WebHandlers) SignInConsumer(w http.ResponseWriter, r *http.Request) {
 	// Simple JWT authentication
 	request := SignInConsumerJSONRequestBody{}
 	if err := render.Decode(r, &request); err != nil {
@@ -176,7 +178,7 @@ func (h webHandlers) SignInConsumer(w http.ResponseWriter, r *http.Request) {
 	render.Respond(w, r, SignInResponse{Token: token})
 }
 
-func (h webHandlers) RegisterConsumer(w http.ResponseWriter, r *http.Request) {
+func (h WebHandlers) RegisterConsumer(w http.ResponseWriter, r *http.Request) {
 	request := RegisterConsumerJSONRequestBody{}
 	if err := render.Decode(r, &request); err != nil {
 		render.Render(w, r, web.NewErrorResponse(err))
@@ -195,7 +197,7 @@ func (h webHandlers) RegisterConsumer(w http.ResponseWriter, r *http.Request) {
 	render.Respond(w, r, ConsumerIDResponse{Id: consumerID})
 }
 
-func (h webHandlers) GetConsumer(w http.ResponseWriter, r *http.Request) {
+func (h WebHandlers) GetConsumer(w http.ResponseWriter, r *http.Request) {
 	consumer, err := h.app.Queries.GetConsumer.Handle(r.Context(), queries.GetConsumer{
 		ConsumerID: h.consumerID(r.Context()),
 	})
@@ -210,7 +212,7 @@ func (h webHandlers) GetConsumer(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
-func (h webHandlers) AddConsumerAddress(w http.ResponseWriter, r *http.Request) {
+func (h WebHandlers) AddConsumerAddress(w http.ResponseWriter, r *http.Request) {
 	request := AddConsumerAddressJSONRequestBody{}
 	if err := render.Decode(r, &request); err != nil {
 		render.Render(w, r, web.NewErrorResponse(err))
@@ -235,13 +237,13 @@ func (h webHandlers) AddConsumerAddress(w http.ResponseWriter, r *http.Request) 
 	})
 }
 
-func (h webHandlers) withConsumerAddressID(next func(http.ResponseWriter, *http.Request, ConsumerAddressID)) http.HandlerFunc {
+func (h WebHandlers) withConsumerAddressID(next func(http.ResponseWriter, *http.Request, ConsumerAddressID)) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		next(w, r, ConsumerAddressID(chi.URLParam(r, "consumerAddressID")))
 	}
 }
 
-func (h webHandlers) RemoveConsumerAddress(w http.ResponseWriter, r *http.Request, consumerAddressID ConsumerAddressID) {
+func (h WebHandlers) RemoveConsumerAddress(w http.ResponseWriter, r *http.Request, consumerAddressID ConsumerAddressID) {
 	consumerID := h.consumerID(r.Context())
 	err := h.app.Commands.RemoveConsumerAddress.Handle(r.Context(), commands.RemoveConsumerAddress{
 		ConsumerID: consumerID,
@@ -255,7 +257,7 @@ func (h webHandlers) RemoveConsumerAddress(w http.ResponseWriter, r *http.Reques
 	render.Status(r, http.StatusCreated)
 }
 
-func (h webHandlers) GetConsumerAddress(w http.ResponseWriter, r *http.Request, consumerAddressID ConsumerAddressID) {
+func (h WebHandlers) GetConsumerAddress(w http.ResponseWriter, r *http.Request, consumerAddressID ConsumerAddressID) {
 	consumerID := h.consumerID(r.Context())
 	address, err := h.app.Queries.GetConsumerAddress.Handle(r.Context(), queries.GetConsumerAddress{
 		ConsumerID: consumerID,
@@ -271,7 +273,7 @@ func (h webHandlers) GetConsumerAddress(w http.ResponseWriter, r *http.Request, 
 	})
 }
 
-func (h webHandlers) UpdateConsumerAddress(w http.ResponseWriter, r *http.Request, consumerAddressID ConsumerAddressID) {
+func (h WebHandlers) UpdateConsumerAddress(w http.ResponseWriter, r *http.Request, consumerAddressID ConsumerAddressID) {
 	request := UpdateConsumerAddressJSONRequestBody{}
 	if err := render.Decode(r, &request); err != nil {
 		render.Render(w, r, web.NewErrorResponse(err))
@@ -295,7 +297,7 @@ func (h webHandlers) UpdateConsumerAddress(w http.ResponseWriter, r *http.Reques
 	})
 }
 
-func (h webHandlers) CreateOrder(w http.ResponseWriter, r *http.Request) {
+func (h WebHandlers) CreateOrder(w http.ResponseWriter, r *http.Request) {
 	request := CreateOrderJSONRequestBody{}
 	if err := render.Decode(r, &request); err != nil {
 		render.Render(w, r, web.NewErrorResponse(err))
@@ -317,13 +319,13 @@ func (h webHandlers) CreateOrder(w http.ResponseWriter, r *http.Request) {
 	render.Respond(w, r, OrderIDResponse{Id: orderID})
 }
 
-func (h webHandlers) withOrderID(next func(http.ResponseWriter, *http.Request, OrderID)) http.HandlerFunc {
+func (h WebHandlers) withOrderID(next func(http.ResponseWriter, *http.Request, OrderID)) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		next(w, r, OrderID(chi.URLParam(r, "orderID")))
 	}
 }
 
-func (h webHandlers) GetOrder(w http.ResponseWriter, r *http.Request, orderID OrderID) {
+func (h WebHandlers) GetOrder(w http.ResponseWriter, r *http.Request, orderID OrderID) {
 	consumerID := h.consumerID(r.Context())
 	order, err := h.app.Queries.GetOrder.Handle(r.Context(), queries.GetOrder{
 		OrderID:    string(orderID),
@@ -339,7 +341,7 @@ func (h webHandlers) GetOrder(w http.ResponseWriter, r *http.Request, orderID Or
 	})
 }
 
-func (h webHandlers) CancelOrder(w http.ResponseWriter, r *http.Request, orderID OrderID) {
+func (h WebHandlers) CancelOrder(w http.ResponseWriter, r *http.Request, orderID OrderID) {
 	consumerID := h.consumerID(r.Context())
 	status, err := h.app.Commands.CancelOrder.Handle(r.Context(), commands.CancelOrder{
 		ConsumerID: consumerID,
@@ -355,7 +357,7 @@ func (h webHandlers) CancelOrder(w http.ResponseWriter, r *http.Request, orderID
 	})
 }
 
-func (h webHandlers) ReviseOrder(w http.ResponseWriter, r *http.Request, orderID OrderID) {
+func (h WebHandlers) ReviseOrder(w http.ResponseWriter, r *http.Request, orderID OrderID) {
 	consumerID := h.consumerID(r.Context())
 	status, err := h.app.Commands.ReviseOrder.Handle(r.Context(), commands.ReviseOrder{
 		ConsumerID: consumerID,
@@ -371,13 +373,13 @@ func (h webHandlers) ReviseOrder(w http.ResponseWriter, r *http.Request, orderID
 	})
 }
 
-func (h webHandlers) withSearchOrderHistoriesParams(next func(w http.ResponseWriter, r *http.Request, params SearchOrderHistoriesParams)) http.HandlerFunc {
+func (h WebHandlers) withSearchOrdersParams(next func(w http.ResponseWriter, r *http.Request, params SearchOrdersParams)) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var err error
 
 		// FRAGILE: Copied from generated code
 		// Parameter object where we will unmarshal all parameters from the context
-		var params SearchOrderHistoriesParams
+		var params SearchOrdersParams
 
 		err = runtime.BindQueryParameter("deepObject", true, false, "filter", r.URL.Query(), &params.Filter)
 		if err != nil {
@@ -401,29 +403,48 @@ func (h webHandlers) withSearchOrderHistoriesParams(next func(w http.ResponseWri
 	}
 }
 
-func (h webHandlers) SearchOrderHistories(w http.ResponseWriter, r *http.Request, params SearchOrderHistoriesParams) {
+func (h WebHandlers) SearchOrders(w http.ResponseWriter, r *http.Request, params SearchOrdersParams) {
+	consumerID := h.consumerID(r.Context())
+
+	filters, next, limit := h.fromSearchOrdersParamsJson(params)
+
+	results, err := h.app.Queries.SearchOrders.Handle(r.Context(), queries.SearchOrders{
+		ConsumerID: consumerID,
+		Filters:    filters,
+		Next:       next,
+		Limit:      limit,
+	})
+	if err != nil {
+		render.Render(w, r, web.NewErrorResponse(err))
+		return
+	}
+
+	render.Respond(w, r, SearchOrdersResponse{
+		Next:   results.Next,
+		Orders: nil,
+	})
 	panic("implement me")
 }
 
-func (h webHandlers) withRestaurantID(next func(http.ResponseWriter, *http.Request, RestaurantID)) http.HandlerFunc {
+func (h WebHandlers) withRestaurantID(next func(http.ResponseWriter, *http.Request, RestaurantID)) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		next(w, r, RestaurantID(chi.URLParam(r, "restaurantID")))
 	}
 }
 
-func (h webHandlers) GetRestaurant(w http.ResponseWriter, r *http.Request, restaurantID RestaurantID) {
+func (h WebHandlers) GetRestaurant(w http.ResponseWriter, r *http.Request, restaurantID RestaurantID) {
 	panic("implement me")
 }
 
-func (h webHandlers) toOrderJson(order *domain.Order) Order {
+func (h WebHandlers) toOrderJson(order *domain.Order) Order {
 	return Order{
 		OrderId:    order.OrderID,
 		OrderTotal: order.Total,
-		State:      h.toOrderStateJson(order.Status),
+		Status:     h.toOrderStateJson(order.Status),
 	}
 }
 
-func (h webHandlers) toOrderStateJson(orderState orderapi.OrderState) OrderState {
+func (h WebHandlers) toOrderStateJson(orderState orderapi.OrderState) OrderState {
 	switch orderState {
 	case orderapi.ApprovalPending:
 		return OrderStateApprovalPending
@@ -439,5 +460,64 @@ func (h webHandlers) toOrderStateJson(orderState orderapi.OrderState) OrderState
 		return OrderStateRejected
 	default:
 		return OrderStateUnknown
+	}
+}
+
+func (h WebHandlers) fromOrderStateJson(orderState OrderState) orderapi.OrderState {
+	switch orderState {
+	case OrderStateApprovalPending:
+		return orderapi.ApprovalPending
+	case OrderStateApproved:
+		return orderapi.Approved
+	case OrderStateCancelPending:
+		return orderapi.CancelPending
+	case OrderStateCancelled:
+		return orderapi.Cancelled
+	case OrderStateRevisionPending:
+		return orderapi.RevisionPending
+	case OrderStateRejected:
+		return orderapi.Rejected
+	default:
+		return orderapi.UnknownOrderState
+	}
+}
+
+func (h WebHandlers) fromSearchOrdersParamsJson(params SearchOrdersParams) (*domain.SearchOrdersFilters, string, int) {
+	keywords := []string{}
+	if params.Filter.Keywords != nil {
+		keywords = *params.Filter.Keywords
+	}
+	since := time.Time{}
+	if params.Filter.Since != nil {
+		since = *params.Filter.Since
+	}
+	status := orderapi.UnknownOrderState
+	if params.Filter.Status != nil {
+		status = h.fromOrderStateJson(*params.Filter.Status)
+	}
+
+	filters := &domain.SearchOrdersFilters{
+		Keywords: keywords,
+		Since:    since,
+		Status:   status,
+	}
+	next := ""
+	if params.Next != nil {
+		next = string(*params.Next)
+	}
+	limit := 0
+	if params.Limit != nil {
+		limit = int(*params.Limit)
+	}
+	return filters, next, limit
+}
+
+func (h WebHandlers) toOrderDetailJson(order *domain.OrderHistory) OrderDetail {
+	return OrderDetail{
+		CreatedAt:      order.CreatedAt,
+		OrderId:        order.OrderID,
+		RestaurantId:   order.RestaurantID,
+		RestaurantName: order.RestaurantName,
+		Status:         h.toOrderStateJson(order.Status),
 	}
 }

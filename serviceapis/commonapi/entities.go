@@ -5,7 +5,7 @@ import (
 )
 
 // Generate spec imports for openapi documentation
-//go:generate oapi-codegen -generate spec -o spec.gen.go -package commonapi  .\spec.yaml
+//go:generate oapi-codegen -generate spec,skip-prune -o spec.gen.go -package commonapi  .\spec.yaml
 
 type Address struct {
 	Street1 string

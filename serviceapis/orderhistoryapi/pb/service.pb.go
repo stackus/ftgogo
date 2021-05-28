@@ -506,9 +506,9 @@ var file_orderhistoryapi_pb_service_proto_depIdxs = []int32{
 	0, // 4: orderhistorypb.GetOrderHistoryResponse.Order:type_name -> orderhistorypb.OrderHistory
 	7, // 5: orderhistorypb.SearchOrderHistoriesRequest.filters.Since:type_name -> google.protobuf.Timestamp
 	6, // 6: orderhistorypb.SearchOrderHistoriesRequest.filters.Status:type_name -> orderpb.OrderState
-	1, // 7: orderhistorypb.OrderHistoryService.SearchOrderHistories:input_type -> orderhistorypb.SearchOrderHistoriesRequest
+	1, // 7: orderhistorypb.OrderHistoryService.SearchOrders:input_type -> orderhistorypb.SearchOrderHistoriesRequest
 	3, // 8: orderhistorypb.OrderHistoryService.GetOrderHistory:input_type -> orderhistorypb.GetOrderHistoryRequest
-	2, // 9: orderhistorypb.OrderHistoryService.SearchOrderHistories:output_type -> orderhistorypb.SearchOrderHistoriesResponse
+	2, // 9: orderhistorypb.OrderHistoryService.SearchOrders:output_type -> orderhistorypb.SearchOrderHistoriesResponse
 	4, // 10: orderhistorypb.OrderHistoryService.GetOrderHistory:output_type -> orderhistorypb.GetOrderHistoryResponse
 	9, // [9:11] is the sub-list for method output_type
 	7, // [7:9] is the sub-list for method input_type

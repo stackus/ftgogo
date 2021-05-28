@@ -2,25 +2,14 @@ package main
 
 import (
 	"github.com/stackus/ftgogo/restaurant/internal/adapters"
+	"github.com/stackus/ftgogo/restaurant/internal/application"
 	"github.com/stackus/ftgogo/restaurant/internal/application/commands"
 	"github.com/stackus/ftgogo/restaurant/internal/application/queries"
+	"github.com/stackus/ftgogo/restaurant/internal/ports"
 	"github.com/stackus/ftgogo/serviceapis"
 	"github.com/stackus/ftgogo/serviceapis/restaurantapi/pb"
 	"shared-go/applications"
 )
-
-type Application struct {
-	Commands Commands
-	Queries  Queries
-}
-
-type Commands struct {
-	CreateRestaurant commands.CreateRestaurantHandler
-}
-
-type Queries struct {
-	GetRestaurant queries.GetRestaurantHandler
-}
 
 func main() {
 	svc := applications.NewService(initService)
@@ -37,16 +26,16 @@ func initService(svc *applications.Service) error {
 		adapters.NewRestaurantPublisher(svc.Publisher),
 	)
 
-	application := Application{
-		Commands: Commands{
+	app := application.Application{
+		Commands: application.Commands{
 			CreateRestaurant: commands.NewCreateRestaurantHandler(restaurantRepo),
 		},
-		Queries: Queries{
+		Queries: application.Queries{
 			GetRestaurant: queries.NewGetRestaurantHandler(restaurantRepo),
 		},
 	}
 
-	restaurantpb.RegisterRestaurantServiceServer(svc.RpcServer, newRpcHandlers(application))
+	restaurantpb.RegisterRestaurantServiceServer(svc.RpcServer, ports.NewRpcHandlers(app))
 
 	return nil
 }

@@ -18,8 +18,10 @@ import (
 // Base64 encoded, gzipped, json marshaled Swagger object
 var swaggerSpec = []string{
 
-	"H4sIAAAAAAAC/6pWSs7PLcjPS80rKVayqq7VUcrMS8tXssorzcnRUcovSM1LLMhUslJS0lEqSCzJKIbI",
-	"1AICAAD//90sQDE3AAAA",
+	"H4sIAAAAAAAC/3yPsU4EMQxE/8V1GijTUVIgQY0oQjLcGe06xnGK47T/jrLLIoGOq+L46Y3GZ8p11ioQ",
+	"bxTP1PIRc1rHu1IMbR3VqsKcsf4y+2m8flJQpObGcqAlUPPk+IcY4DdX2O1F9sl6Yb8EMnx0NhSKzz/h",
+	"YWu299jsl7Db9fUd2UfqA6TfO+annsR5PyuVws5V0vT469xvncVxgA3/T+Dow/JWKUqfpkBVIUmZIlEg",
+	"TX5sG1m+AgAA//8LeJS2bQEAAA==",
 }
 
 // GetSwagger returns the content of the embedded swagger specification file

@@ -9,7 +9,7 @@ import (
 func registerConsumerCommands() {
 	core.RegisterCommands(
 		RegisterConsumer{}, UpdateConsumer{},
-		AddAddress{},
+		AddAddress{}, UpdateAddress{}, RemoveAddress{},
 	)
 }
 

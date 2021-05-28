@@ -8,21 +8,6 @@ x-environment: &default-environment
   NATS_CLUSTER_ID: test-cluster
 
 services:
-  consul:
-    container_name: consul
-    hostname: consul
-    image: consul:latest
-    restart: on-failure
-    command: agent -server -data-dir=/consul/data -bind 0.0.0.0 -client 0.0.0.0 -bootstrap-expect=1
-    networks:
-      - mononet
-    ports:
-      - '8500:8500'
-      - '8300:8300'
-    volumes:
-      - './config/consul:/config'
-      - 'consuldata:/consul/data'
-
   postgres:
     container_name: postgres
     hostname: postgres
@@ -53,6 +38,21 @@ services:
     volumes:
       - 'standata:/data'
 
+  web-bff-service:
+    hostname: web-bff
+    restart: on-failure
+    build:
+      context: .
+      args:
+        service: web-bff
+    environment:
+      <<: *default-environment
+      SERVICE_ID: web-bff-service
+    networks:
+      - mononet
+    ports:
+      - '8000:80'
+
   accounting-service:
     hostname: accountingservice
     restart: on-failure
@@ -69,8 +69,6 @@ services:
       - stan
     networks:
       - mononet
-    ports:
-      - '8001:80'
   accounting-cdc:
     container_name: accountingcdc
     hostname: accountingcdc
@@ -105,8 +103,6 @@ services:
       - stan
     networks:
       - mononet
-    ports:
-      - '8002:80'
   consumer-cdc:
     container_name: consumercdc
     hostname: consumercdc
@@ -141,8 +137,6 @@ services:
       - stan
     networks:
       - mononet
-    ports:
-      - '8003:80'
   kitchen-service:
     hostname: kitchenservice
     restart: on-failure
@@ -159,8 +153,8 @@ services:
       - stan
     networks:
       - mononet
-    ports:
-      - '8004:80'
+#    ports:
+#      - '8004:8000'
   kitchen-cdc:
     container_name: kitchencdc
     hostname: kitchencdc
@@ -195,8 +189,6 @@ services:
       - stan
     networks:
       - mononet
-    ports:
-      - '8005:80'
   order-history-service:
     hostname: orderhistoryservice
     restart: on-failure
@@ -213,8 +205,6 @@ services:
       - stan
     networks:
       - mononet
-    ports:
-      - '8015:80'
   order-cdc:
     container_name: ordercdc
     hostname: ordercdc
@@ -249,8 +239,6 @@ services:
       - stan
     networks:
       - mononet
-    ports:
-      - '8006:80'
   restaurant-cdc:
     container_name: restaurantcdc
     hostname: restaurantcdc

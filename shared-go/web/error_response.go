@@ -1,6 +1,7 @@
 package web
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/go-chi/render"
@@ -17,7 +18,7 @@ func NewErrorResponse(err error) render.Renderer {
 	if dErr, ok := err.(errors.Error); ok {
 		return &ErrorResponse{
 			StatusCode: dErr.HTTPCode(),
-			Message:    errors.Message(err),
+			Message:    fmt.Sprintf("%s: %s", errors.TypeCode(err), err.Error()),
 			Err:        dErr,
 		}
 	}

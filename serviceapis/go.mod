@@ -4,10 +4,12 @@ go 1.16
 
 require (
 	github.com/getkin/kin-openapi v0.62.0
+	github.com/go-openapi/swag v0.19.15 // indirect
+	github.com/mailru/easyjson v0.7.7 // indirect
 	github.com/stackus/edat v0.0.3
-	golang.org/x/net v0.0.0-20210510120150-4163338589ed // indirect
-	golang.org/x/sys v0.0.0-20210514084401-e8d321eab015 // indirect
-	google.golang.org/genproto v0.0.0-20210517163617-5e0236093d7a // indirect
-	google.golang.org/grpc v1.37.1
+	golang.org/x/net v0.0.0-20210525063256-abc453219eb5 // indirect
+	golang.org/x/sys v0.0.0-20210525143221-35b2ab0089ea // indirect
+	google.golang.org/genproto v0.0.0-20210524171403-669157292da3 // indirect
+	google.golang.org/grpc v1.38.0
 	google.golang.org/protobuf v1.26.0
 )

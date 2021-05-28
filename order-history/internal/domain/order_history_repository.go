@@ -31,6 +31,8 @@ type OrderHistoryFilters struct {
 	Limit    int                 // default to OrderHistoryLimit if not provided
 }
 
+// TODO update FindConsumerOrders to return a (*FindConsumerOrdersResult, error) pair
+
 type OrderHistoryRepository interface {
 	FindConsumerOrders(ctx context.Context, consumerID string, filters OrderHistoryFilters) ([]*OrderHistory, string, error)
 	Find(ctx context.Context, orderHistoryID string) (*OrderHistory, error)

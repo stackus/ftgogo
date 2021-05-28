@@ -9,6 +9,7 @@ import (
 func registerEvents() {
 	core.RegisterEvents(
 		ConsumerRegistered{}, ConsumerUpdated{},
+		AddressAdded{}, AddressUpdated{}, AddressRemoved{},
 	)
 }
 

@@ -1,8 +1,9 @@
-package main
+package ports
 
 import (
 	"context"
 
+	"github.com/stackus/ftgogo/restaurant/internal/application"
 	"github.com/stackus/ftgogo/restaurant/internal/application/commands"
 	"github.com/stackus/ftgogo/restaurant/internal/application/queries"
 	"github.com/stackus/ftgogo/serviceapis/commonapi/pb"
@@ -10,18 +11,18 @@ import (
 	"github.com/stackus/ftgogo/serviceapis/restaurantapi/pb"
 )
 
-type rpcHandlers struct {
-	app Application
+type RpcHandlers struct {
+	app application.Application
 	restaurantpb.UnimplementedRestaurantServiceServer
 }
 
-var _ restaurantpb.RestaurantServiceServer = (*rpcHandlers)(nil)
+var _ restaurantpb.RestaurantServiceServer = (*RpcHandlers)(nil)
 
-func newRpcHandlers(app Application) rpcHandlers {
-	return rpcHandlers{app: app}
+func NewRpcHandlers(app application.Application) RpcHandlers {
+	return RpcHandlers{app: app}
 }
 
-func (h rpcHandlers) CreateRestaurant(ctx context.Context, request *restaurantpb.CreateRestaurantRequest) (*restaurantpb.CreateRestaurantResponse, error) {
+func (h RpcHandlers) CreateRestaurant(ctx context.Context, request *restaurantpb.CreateRestaurantRequest) (*restaurantpb.CreateRestaurantResponse, error) {
 	menuItems := make([]restaurantapi.MenuItem, 0)
 	for _, item := range request.Menu.MenuItems {
 		menuItems = append(menuItems, restaurantapi.MenuItem{
@@ -49,7 +50,7 @@ func (h rpcHandlers) CreateRestaurant(ctx context.Context, request *restaurantpb
 	return &restaurantpb.CreateRestaurantResponse{RestaurantID: restaurantID}, nil
 }
 
-func (h rpcHandlers) GetRestaurant(ctx context.Context, request *restaurantpb.GetRestaurantRequest) (*restaurantpb.GetRestaurantResponse, error) {
+func (h RpcHandlers) GetRestaurant(ctx context.Context, request *restaurantpb.GetRestaurantRequest) (*restaurantpb.GetRestaurantResponse, error) {
 	restaurant, err := h.app.Queries.GetRestaurant.Handle(ctx, queries.GetRestaurant{RestaurantID: request.RestaurantID})
 	if err != nil {
 		return nil, err

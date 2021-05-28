@@ -1,18 +1,18 @@
 openapi: "3.0.0"
 info:
   version: "1.0.0"
-  title: Web BFF API
-  description: The web-service API is part of the FTGOGO demonstration application
+  title: Customer API
+  description: The customer API is part of the FTGOGO demonstration application
   contact:
     name: FTGOGO Issues
     url: https://github.com/stackus/ftgogo/issues
-#servers:
-#  - url: https://{host}:{port}/api
-#    variables:
-#      host:
-#        default: localhost
-#      port:
-#        default: "80"
+servers:
+  - url: http://{host}:{port}/api
+    variables:
+      host:
+        default: localhost
+      port:
+        default: "8000"
 paths:
   /signin:
     post:
@@ -34,7 +34,7 @@ paths:
         '200':
           $ref: '#/components/responses/SignInResponse'
         default:
-          $ref: '../../../shared-go/web/spec.yaml#/components/responses/ErrorResponse'
+          $ref: '#/components/responses/ErrorResponse'
   /register:
     post:
       operationId: registerConsumer
@@ -55,7 +55,7 @@ paths:
         '201':
           $ref: '#/components/responses/ConsumerIDResponse'
         default:
-          $ref: '../../../shared-go/web/spec.yaml#/components/responses/ErrorResponse'
+          $ref: '#/components/responses/ErrorResponse'
   /consumer:
     get:
       operationId: getConsumer
@@ -67,10 +67,12 @@ paths:
         '401':
           $ref: '#/components/responses/UnauthorizedResponse'
         default:
-          $ref: '../../../shared-go/web/spec.yaml#/components/responses/ErrorResponse'
+          $ref: '#/components/responses/ErrorResponse'
   /addresses:
     post:
       operationId: addConsumerAddress
+      security:
+        - bearerAuth: [ ]
       requestBody:
         description: add consumer address
         required: true
@@ -88,19 +90,23 @@ paths:
         '201':
           $ref: '#/components/responses/ConsumerAddressIDResponse'
         default:
-          $ref: '../../../shared-go/web/spec.yaml#/components/responses/ErrorResponse'
+          $ref: '#/components/responses/ErrorResponse'
   /addresses/{consumerAddressID}:
     get:
       operationId: getConsumerAddress
+      security:
+        - bearerAuth: [ ]
       parameters:
         - $ref: '#/components/parameters/ConsumerAddressID'
       responses:
         '200':
           $ref: '#/components/responses/ConsumerAddressResponse'
         default:
-          $ref: '../../../shared-go/web/spec.yaml#/components/responses/ErrorResponse'
+          $ref: '#/components/responses/ErrorResponse'
     put:
       operationId: updateConsumerAddress
+      security:
+        - bearerAuth: [ ]
       parameters:
         - $ref: '#/components/parameters/ConsumerAddressID'
       requestBody:
@@ -118,19 +124,23 @@ paths:
         '200':
           $ref: '#/components/responses/ConsumerAddressIDResponse'
         default:
-          $ref: '../../../shared-go/web/spec.yaml#/components/responses/ErrorResponse'
+          $ref: '#/components/responses/ErrorResponse'
     delete:
       operationId: removeConsumerAddress
+      security:
+        - bearerAuth: [ ]
       parameters:
         - $ref: '#/components/parameters/ConsumerAddressID'
       responses:
         '204':
           $ref: '#/components/responses/EmptyResponse'
         default:
-          $ref: '../../../shared-go/web/spec.yaml#/components/responses/ErrorResponse'
+          $ref: '#/components/responses/ErrorResponse'
   /orders:
     post:
       operationId: createOrder
+      security:
+        - bearerAuth: [ ]
       requestBody:
         description: create order request
         required: true
@@ -153,50 +163,10 @@ paths:
           $ref: '#/components/responses/OrderIDResponse'
         default:
           $ref: '#/components/responses/ErrorResponse'
-  /orders/{orderID}:
     get:
-      operationId: getOrder
-      parameters:
-        - $ref: '#/components/parameters/OrderID'
-      responses:
-        '200':
-          $ref: '#/components/responses/OrderResponse'
-        default:
-          $ref: '#/components/responses/ErrorResponse'
-  /orders/{orderID}/cancel:
-    put:
-      operationId: cancelOrder
-      parameters:
-        - $ref: '#/components/parameters/OrderID'
-      responses:
-        '202':
-          $ref: '#/components/responses/OrderStatusResponse'
-        default:
-          $ref: '#/components/responses/ErrorResponse'
-  /orders/{orderID}/revise:
-    put:
-      operationId: reviseOrder
-      parameters:
-        - $ref: '#/components/parameters/OrderID'
-      requestBody:
-        description: revise order request
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              required: [ revised_quantities ]
-              properties:
-                revised_quantities:
-                  $ref: '../../../serviceapis/commonapi/spec.yaml#/components/schemas/MenuItemQuantities'
-      responses:
-        '202':
-          $ref: '#/components/responses/OrderStatusResponse'
-        default:
-          $ref: '#/components/responses/ErrorResponse'
-  /orders/history:
-    get:
-      operationId: searchOrderHistories
+      operationId: searchOrders
+      security:
+        - bearerAuth: [ ]
       parameters:
         - in: query
           name: filter
@@ -218,12 +188,61 @@ paths:
         - $ref: '#/components/parameters/LimitQuery'
       responses:
         '200':
-          $ref: '#/components/responses/SearchOrderHistoriesResponse'
+          $ref: '#/components/responses/SearchOrdersResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+  /orders/{orderID}:
+    get:
+      operationId: getOrder
+      security:
+        - bearerAuth: [ ]
+      parameters:
+        - $ref: '#/components/parameters/OrderID'
+      responses:
+        '200':
+          $ref: '#/components/responses/OrderResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+  /orders/{orderID}/cancel:
+    put:
+      operationId: cancelOrder
+      security:
+        - bearerAuth: [ ]
+      parameters:
+        - $ref: '#/components/parameters/OrderID'
+      responses:
+        '202':
+          $ref: '#/components/responses/OrderStatusResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+  /orders/{orderID}/revise:
+    put:
+      operationId: reviseOrder
+      security:
+        - bearerAuth: [ ]
+      parameters:
+        - $ref: '#/components/parameters/OrderID'
+      requestBody:
+        description: revise order request
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [ revised_quantities ]
+              properties:
+                revised_quantities:
+                  $ref: '../../../serviceapis/commonapi/spec.yaml#/components/schemas/MenuItemQuantities'
+      responses:
+        '202':
+          $ref: '#/components/responses/OrderStatusResponse'
         default:
           $ref: '#/components/responses/ErrorResponse'
   /restaurants/{restaurantID}:
     get:
       operationId: getRestaurant
+      security:
+        - bearerAuth: [ ]
       parameters:
         - $ref: '#/components/parameters/RestaurantID'
       responses:
@@ -241,42 +260,28 @@ components:
       scheme: bearer
       bearerFormat: JWT
   schemas:
-    Address:
-      type: object
-      required: [ street1, city, state, zip ]
-      properties:
-        street1:
-          type: string
-        street2:
-          type: string
-        city:
-          type: string
-        state:
-          type: string
-        zip:
-          type: string
     OrderState:
       type: string
       enum: [ Unknown, ApprovalPending, Approved, Rejected, CancelPending, Cancelled, RevisionPending ]
     Order:
       type: object
-      required: [ order_id, state, order_total ]
+      required: [ order_id, status, order_total ]
       properties:
         order_id:
           type: string
-        state:
+        status:
           $ref: '#/components/schemas/OrderState'
         order_total:
           type: integer
-    OrderHistory:
+    OrderDetail:
       type: object
-      required: [ order_id, status, restaurant_id, restaurant_name ]
+      required: [ order_id, status, restaurant_id, restaurant_name, created_at ]
       properties:
         order_id:
           type: string
           format: uuid
         status:
-          type: string
+          $ref: '#/components/schemas/OrderState'
         restaurant_id:
           type: string
           format: uuid
@@ -285,7 +290,7 @@ components:
         created_at:
           type: string
           format: date-time
-    OrderHistoryFilters:
+    OrderDetailFilters:
       type: object
       properties:
         since:
@@ -455,7 +460,7 @@ components:
             properties:
               id:
                 type: string
-    SearchOrderHistoriesResponse:
+    SearchOrdersResponse:
       description: OK
       content:
         application/json:
@@ -466,6 +471,6 @@ components:
               orders:
                 type: array
                 items:
-                  $ref: '#/components/schemas/OrderHistory'
+                  $ref: '#/components/schemas/OrderDetail'
               next:
                 type: string

@@ -8,23 +8,34 @@ import (
 )
 
 type OrderHistory struct {
+	OrderID        string
+	ConsumerID     string
+	RestaurantID   string
+	RestaurantName string
+	Status         orderapi.OrderState
+	CreatedAt      time.Time
 }
 
-type SearchOrderHistoriesFilters struct {
+type SearchOrdersFilters struct {
 	Keywords []string
 	Since    time.Time
 	Status   orderapi.OrderState
 }
 
 type (
-	SearchOrderHistories struct {
+	SearchOrders struct {
 		ConsumerID string
-		Filters    SearchOrderHistoriesFilters
+		Filters    *SearchOrdersFilters
 		Next       string
 		Limit      int
+	}
+
+	SearchOrdersResult struct {
+		Orders []*OrderHistory
+		Next   string
 	}
 )
 
 type OrderHistoryRepository interface {
-	SearchOrderHistories(ctx context.Context, search SearchOrderHistories) ([]*OrderHistory, string, error)
+	SearchOrders(ctx context.Context, search SearchOrders) (*SearchOrdersResult, error)
 }
