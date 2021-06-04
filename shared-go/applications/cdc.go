@@ -13,6 +13,7 @@ import (
 	"github.com/nats-io/stan.go"
 	"github.com/rs/zerolog"
 	"github.com/spf13/cobra"
+	edatkafkago "github.com/stackus/edat-kafka-go"
 	_ "github.com/stackus/edat-msgpack"
 	"github.com/stackus/edat-pgx"
 	"github.com/stackus/edat-stan"
@@ -21,7 +22,6 @@ import (
 	"github.com/stackus/edat/outbox"
 	"golang.org/x/sync/errgroup"
 
-	"shared-go/eddsarama"
 	"shared-go/egress"
 	"shared-go/logging"
 	"shared-go/logging/zerologto"
@@ -120,15 +120,15 @@ func (s *CDC) run(*cobra.Command, []string) error {
 		panic(err)
 	}
 
-	s.PgConn = pgConn
-
-	s.MessageStore = edatpgx.NewMessageStore(s.PgConn)
-
 	defer func() {
 		if pgConn != nil {
 			pgConn.Close()
 		}
 	}()
+
+	s.PgConn = pgConn
+
+	s.MessageStore = edatpgx.NewMessageStore(s.PgConn)
 
 	var msgProducer msg.Producer
 
@@ -141,10 +141,7 @@ func (s *CDC) run(*cobra.Command, []string) error {
 		}
 		msgProducer = edatstan.NewProducer(conn)
 	case s.cfg.EventDriver == "kafka":
-		msgProducer, err = eddsarama.NewProducer(s.cfg.Kafka.Brokers, s.cfg.ServiceID)
-		if err != nil {
-			panic(err)
-		}
+		msgProducer = edatkafkago.NewProducer(s.cfg.Kafka.Brokers)
 	default:
 		panic("cdc services cannot be started with an inmem destination")
 	}

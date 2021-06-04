@@ -4,6 +4,7 @@ import (
 	"context"
 	"time"
 
+	"github.com/stackus/ftgogo/delivery/internal/adapters"
 	"github.com/stackus/ftgogo/delivery/internal/domain"
 	"github.com/stackus/ftgogo/serviceapis/deliveryapi"
 )
@@ -15,11 +16,11 @@ type CreateDelivery struct {
 }
 
 type CreateDeliveryHandler struct {
-	deliveryRepo   domain.DeliveryRepository
-	restaurantRepo domain.RestaurantRepository
+	deliveryRepo   adapters.DeliveryRepository
+	restaurantRepo adapters.RestaurantRepository
 }
 
-func NewCreateDeliveryHandler(deliveryRepo domain.DeliveryRepository, restaurantRepo domain.RestaurantRepository) CreateDeliveryHandler {
+func NewCreateDeliveryHandler(deliveryRepo adapters.DeliveryRepository, restaurantRepo adapters.RestaurantRepository) CreateDeliveryHandler {
 	return CreateDeliveryHandler{
 		deliveryRepo:   deliveryRepo,
 		restaurantRepo: restaurantRepo,

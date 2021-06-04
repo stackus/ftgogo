@@ -3,7 +3,7 @@ package commands
 import (
 	"context"
 
-	"github.com/stackus/ftgogo/order-history/internal/domain"
+	"github.com/stackus/ftgogo/order-history/internal/adapters"
 	"github.com/stackus/ftgogo/serviceapis/orderapi"
 )
 
@@ -13,10 +13,10 @@ type UpdateOrderStatus struct {
 }
 
 type UpdateOrderStatusHandler struct {
-	repo domain.OrderHistoryRepository
+	repo adapters.OrderHistoryRepository
 }
 
-func NewUpdateOrderStatusHandler(orderHistoryRepo domain.OrderHistoryRepository) UpdateOrderStatusHandler {
+func NewUpdateOrderStatusHandler(orderHistoryRepo adapters.OrderHistoryRepository) UpdateOrderStatusHandler {
 	return UpdateOrderStatusHandler{repo: orderHistoryRepo}
 }
 

@@ -4,6 +4,7 @@ import (
 	"context"
 	"time"
 
+	"github.com/stackus/ftgogo/order-history/internal/adapters"
 	"github.com/stackus/ftgogo/order-history/internal/domain"
 	"github.com/stackus/ftgogo/serviceapis/orderapi"
 )
@@ -16,7 +17,7 @@ type SearchOrderHistories struct {
 }
 
 type SearchOrderHistoriesHandler struct {
-	repo domain.OrderHistoryRepository
+	repo adapters.OrderHistoryRepository
 }
 
 type OrderHistoryFilters struct {
@@ -30,12 +31,12 @@ type SearchOrderHistoriesResponse struct {
 	Next   string
 }
 
-func NewSearchOrderHistoriesHandler(orderHistoryRepo domain.OrderHistoryRepository) SearchOrderHistoriesHandler {
+func NewSearchOrderHistoriesHandler(orderHistoryRepo adapters.OrderHistoryRepository) SearchOrderHistoriesHandler {
 	return SearchOrderHistoriesHandler{repo: orderHistoryRepo}
 }
 
 func (h SearchOrderHistoriesHandler) Handle(ctx context.Context, query SearchOrderHistories) (*SearchOrderHistoriesResponse, error) {
-	filters := domain.OrderHistoryFilters{}
+	filters := adapters.OrderHistoryFilters{}
 
 	if query.Next != "" {
 		filters.Next = query.Next

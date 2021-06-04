@@ -4,6 +4,7 @@ import (
 	"context"
 	"time"
 
+	"github.com/stackus/ftgogo/kitchen/internal/adapters"
 	"github.com/stackus/ftgogo/kitchen/internal/domain"
 )
 
@@ -13,10 +14,10 @@ type AcceptTicket struct {
 }
 
 type AcceptTicketHandler struct {
-	repo domain.TicketRepository
+	repo adapters.TicketRepository
 }
 
-func NewAcceptTicketHandler(repo domain.TicketRepository) AcceptTicketHandler {
+func NewAcceptTicketHandler(repo adapters.TicketRepository) AcceptTicketHandler {
 	return AcceptTicketHandler{
 		repo: repo,
 	}

@@ -1,36 +1,15 @@
 package main
 
 import (
-	"github.com/stackus/edat/saga"
-
 	"github.com/stackus/ftgogo/consumer/internal/adapters"
+	"github.com/stackus/ftgogo/consumer/internal/application"
 	"github.com/stackus/ftgogo/consumer/internal/application/commands"
 	"github.com/stackus/ftgogo/consumer/internal/application/queries"
 	"github.com/stackus/ftgogo/consumer/internal/domain"
+	"github.com/stackus/ftgogo/consumer/internal/handlers"
 	"github.com/stackus/ftgogo/serviceapis"
-	"github.com/stackus/ftgogo/serviceapis/consumerapi"
-	"github.com/stackus/ftgogo/serviceapis/consumerapi/pb"
 	"shared-go/applications"
 )
-
-type Application struct {
-	Commands Commands
-	Queries  Queries
-}
-
-type Commands struct {
-	RegisterConsumer        commands.RegisterConsumerHandler
-	UpdateConsumer          commands.UpdateConsumerHandler
-	ValidateOrderByConsumer commands.ValidateOrderByConsumerHandler
-	AddAddress              commands.AddAddressHandler
-	UpdateAddress           commands.UpdateAddressHandler
-	RemoveAddress           commands.RemoveAddressHandler
-}
-
-type Queries struct {
-	GetConsumer queries.GetConsumerHandler
-	GetAddress  queries.GetAddressHandler
-}
 
 func main() {
 	svc := applications.NewService(initService)
@@ -43,13 +22,14 @@ func initService(svc *applications.Service) error {
 	serviceapis.RegisterTypes()
 	domain.RegisterTypes()
 
+	// Driven
 	consumerRepo := adapters.NewConsumerRepositoryPublisherMiddleware(
-		adapters.NewConsumerRepository(svc.AggregateStore),
-		adapters.NewConsumerPublisher(svc.Publisher),
+		adapters.NewConsumerAggregateRootRepository(svc.AggregateStore),
+		adapters.NewConsumerEntityEventPublisher(svc.Publisher),
 	)
 
-	application := Application{
-		Commands: Commands{
+	app := application.Service{
+		Commands: application.Commands{
 			RegisterConsumer:        commands.NewRegisterConsumerHandler(consumerRepo),
 			UpdateConsumer:          commands.NewUpdateConsumerHandler(consumerRepo),
 			ValidateOrderByConsumer: commands.NewValidateOrderByConsumerHandler(consumerRepo),
@@ -57,17 +37,15 @@ func initService(svc *applications.Service) error {
 			UpdateAddress:           commands.NewUpdateAddressHandler(consumerRepo),
 			RemoveAddress:           commands.NewRemoveAddressHandler(consumerRepo),
 		},
-		Queries: Queries{
+		Queries: application.Queries{
 			GetConsumer: queries.NewGetConsumerHandler(consumerRepo),
 			GetAddress:  queries.NewGetAddressHandler(consumerRepo),
 		},
 	}
 
-	cmdHandlers := NewCommandHandlers(application)
-	svc.Subscriber.Subscribe(consumerapi.ConsumerServiceCommandChannel, saga.NewCommandDispatcher(svc.Publisher).
-		Handle(consumerapi.ValidateOrderByConsumer{}, cmdHandlers.ValidateOrderByConsumer))
-
-	consumerpb.RegisterConsumerServiceServer(svc.RpcServer, newRpcHandlers(application))
+	// Drivers
+	handlers.NewCommandHandlers(app).Mount(svc.Subscriber, svc.Publisher)
+	handlers.NewRpcHandlers(app).Mount(svc.RpcServer)
 
 	return nil
 }

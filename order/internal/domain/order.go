@@ -51,12 +51,29 @@ func (o *Order) ProcessCommand(command core.Command) error {
 			return ErrOrderInvalidState
 		}
 
+		total := 0
+		lineItems := make([]orderapi.LineItem, 0, len(cmd.LineItems))
+		for menuItemID, quantity := range cmd.LineItems {
+			menuItem, err := cmd.Restaurant.FindMenuItem(menuItemID)
+			if err != nil {
+				return err
+			}
+			item := orderapi.LineItem{
+				MenuItemID: menuItemID,
+				Name:       menuItem.Name,
+				Price:      menuItem.Price,
+				Quantity:   quantity,
+			}
+			total += item.GetTotal()
+			lineItems = append(lineItems, item)
+		}
+
 		o.AddEvent(&orderapi.OrderCreated{
 			ConsumerID:     cmd.ConsumerID,
-			RestaurantID:   cmd.RestaurantID,
-			RestaurantName: cmd.RestaurantName,
-			LineItems:      cmd.LineItems,
-			OrderTotal:     cmd.OrderTotal,
+			RestaurantID:   cmd.Restaurant.RestaurantID,
+			RestaurantName: cmd.Restaurant.Name,
+			LineItems:      lineItems,
+			OrderTotal:     total,
 			DeliverAt:      cmd.DeliverAt,
 			DeliverTo:      cmd.DeliverTo,
 		})

@@ -21,10 +21,11 @@ require (
 	github.com/shamaton/msgpack v1.2.1 // indirect
 	github.com/spf13/cobra v1.1.3
 	github.com/stackus/edat v0.0.3
+	github.com/stackus/edat-kafka-go v0.0.1
 	github.com/stackus/edat-msgpack v0.0.2
 	github.com/stackus/edat-pgx v0.0.2
 	github.com/stackus/edat-stan v0.0.1
-	github.com/stackus/errors v0.0.2
+	github.com/stackus/errors v0.0.3
 	go.uber.org/multierr v1.7.0 // indirect
 	go.uber.org/zap v1.17.0
 	golang.org/x/crypto v0.0.0-20210513164829-c07d793c2f9a // indirect

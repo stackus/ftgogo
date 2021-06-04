@@ -13,6 +13,10 @@ that [Eventuate](https://eventuate.io/), the framework used by FTGO, provides fo
 This repository exists to demonstrate the patterns and processes involved when constructing a distributed application
 using event-driven architecture.
 
+This repository started as a Golang clone of the FTGO demonstration application but as time goes on it will grow to
+demonstrate additional microservice patterns and techniques.
+
+![FTGOGO ARchitecture](docs/architecture.png)
 ## Prerequisites
 
 [Docker](https://www.docker.com/) - Everything is built and run from a docker compose environment.
@@ -61,23 +65,21 @@ Several services also have sibling CDC services.
 
 ### Design
 
-- Services exist within a "domain" folder. Within that folder you'll find the following layout.
+- Services exist within a capability or domain folder. Within that folder you'll find the following layout.
   ```
-  /"domain"        - Domain that is a subdomain in the application domain
+  /"domain"        - A capability or domain that is a subdomain in the application domain
   |-/cmd           - Parent for servers, cli, and tools that are built using the code in this domain
   | |-/cdc         - CDC (Change Data Capture) server. If the service publishes messages it will also have this
-  | |-/service     - Primary domain service
+  | |-/service     - Primary service for this capability
   |-/internal      - Use Golangs special treatment of "internal" to sequester our code from the other services
-    |-/adapters    - The "Adapters" from "Ports & Adapters". These are the implementations of domain interfaces
-    |-/application - CQRS parent. Processes under this will implement business rules and logic
+    |-/adapters    - "Driven Ports" and implementations.
+    |-/application - CQRS parent folder. Processes under this will implement business rules and logic
     | |-/commands  - Application commands. Processes that apply some change to the subdomain
     | |-/queries   - Application queries. Processes that request information from the subdomain
-    |-/domain      - The definitions, interfaces, and the domain rules and logic
-    |-/sagas       - The definitions for complex multi-service interactions
+    |-/domain      - The definitions and the domain rules and logic
+    |-/handlers    - "Driver Ports" implementations
   ```
 
-- The api for each service has been defined in an `/"domain"/cmd/service/openapi.yaml` file.
-  > An issue in the openapi library being used prevents the serving the openapi document via HTTP request. A swagger UI may be added sometime later if this is resolved, or a different solution is used.
 - Each "domain" uses go modules for dependency management and has a `go.mod` file just for it.
 - The services use the following components from [edat](https://github.com/stackus/edat)
   - [edat/es](https://github.com/stackus/edat/blob/master/es) - implements event sourcing
@@ -89,13 +91,13 @@ Several services also have sibling CDC services.
 ### DDD / Hexagonal Architecture / Ports & Adapters
 
 The organizational layout of the services is to bring separation to the layers.
-The `/"domain"/cmd/service/application.go` file found in all the services is where ports (web handlers, message
-receivers) are combined with the application commands and queries.
+The `/"domain"/internal/application/service.go` file found in all the services is what is used to combine primary or "
+Driver" adapters with secondary or "Driven" adapters.
 
 - The application is connected to the `/internal/domain` using interfaces backed by real implementations found in
   the `/internal/adapters` folder.
-- Commands and queries have no dependencies on any primary ports or on any adapters directly. In fact, they may only
-  receive adapters that implement secondary ports defined by interfaces in the `/internal/domain` folder.
+- Commands and queries have no dependencies on any primary ports or to any infrastructure directly. In fact, they may
+  only receive adapters that implement secondary ports defined by interfaces in the `/internal/adapters` folder.
 - No dependencies exist on any ports or adapters from the code in `/internal/domain` and this is crucial to having a
   clean architecture.
 
@@ -120,12 +122,15 @@ example.
 The same three sagas found in [FTGO](https://github.com/microservices-patterns/ftgo-application) have been implemented
 here in the [order-service](https://github.com/stackus/ftgogo/blob/master/order/cmd/service).
 
-- [CreateOrderSaga](https://github.com/stackus/ftgogo/blob/master/order/internal/sagas/create_order_saga.go) - saga
-  responsible for the creation of a new order
-- [CancelOrderSaga](https://github.com/stackus/ftgogo/blob/master/order/internal/sagas/cancel_order_saga.go) - saga
-  responsible for the cancelling and releasing of order resources like tickets and accounting reserves
-- [ReviseOrderSaga](https://github.com/stackus/ftgogo/blob/master/order/internal/sagas/revise_order_saga.go) - saga
-  responsible for the processing the changes made to an open order
+- [CreateOrderSaga](https://github.com/stackus/ftgogo/blob/master/order/internal/adapters/create_order_orchestration_saga.go) - saga
+  responsible for the creation of a new order  
+  ![Steps](docs/createOrderSaga.png)
+- [CancelOrderSaga](https://github.com/stackus/ftgogo/blob/master/order/internal/adapters/cancel_order_orchestration_saga.go) - saga
+  responsible for the cancelling and releasing of order resources like tickets and accounting reserves  
+  ![Steps](docs/cancelOrderSaga.png)
+- [ReviseOrderSaga](https://github.com/stackus/ftgogo/blob/master/order/internal/adapters/revise_order_orchestration_saga.go) - saga
+  responsible for the processing the changes made to an open order  
+  ![Steps](docs/reviseOrderSaga.png)
 
 ### Event-driven architecture
 
@@ -140,6 +145,21 @@ publishes the message into NATS Streaming. This process provides at-least-once d
 
 > Services can be made to publish messages directly without having to use an outbox and CDC. The pattern works best, only?, with backends that provide transactional support.
 
+### Backend-For-Frontend (BFF)
+
+The project now demonstrates the backend-for-frontend pattern with the addition of a Customer-Web service. These types
+of services are purpose built API Gateways that serve a specific client experience.
+
+The addition of these BFFs also provide a place to implement cross-cutting concerns such as authorization and
+authentication. I've tried to add demonstrations of the capabilities of what a BFF might do for a microservices
+application.
+
+#### GRPC and Protocol Buffers
+
+With the addition of the first BFF all HTTP handlers were converted to GRPC. GRPC is a better choice for communication
+between your applications Api Gateway or BFF. The contract for each service was left unchanged as much as possible with
+the switch to GRPC.
+
 ### Other
 
 #### Metrics/Instrumentation
@@ -152,9 +172,17 @@ information.
 #### Mono-repository
 
 This demonstration application is a mono-repository for the Golang services. I chose to use as few additional frameworks
-as possible so you'll find there is also quite a bit of shared code in packages under `/shared-go`
+as possible, so you'll find there is also quite a bit of shared code in packages under `/shared-go`
 
 > `/shared-go` is named the way it is because I intended to build one of the services in another language. I didn't but left the name the way it was.
+
+#### Always start with a Monolith
+
+Before developing an application using microservices the strongly suggested advice is to start with a monolith. Whether
+you have a legacy monolith application or are starting a new application the last step before microservices is to
+refactor or design the monolith to be loosely-coupled.
+
+The service capabilities can all be run together in a loosely-coupled monolith to demonstrate what that might look like.
 
 #### Type Registration
 
@@ -187,14 +215,14 @@ because of opinion or is necessary due of the particulars of Go, I will try my b
 ### Missing
 
 - Tests. Examples of testing these services. Both Unit and Integration
-- Api-Gateway. I haven't gotten around to creating the gateway.
+- ~~Api-Gateway. I haven't gotten around to creating the gateway.~~ Backend-for-Frontends have been added.
 
 ## Out Of Scope
 
 Just like the original the following are outside the scope of the demonstration.
 
-- Logins & Authentication
-- Accounts & Authorization
+- ~~Logins & Authentication~~ The Backend-for-Frontend has implemented this.
+- ~~Accounts & Authorization~~ The Backend-for-Frontend has implemented this.
 - AWS/Azure/GCP or any other cloud deployment instructions or scripts
 - Tuning guidance
 - CI/CD guidance

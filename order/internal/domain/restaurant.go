@@ -27,7 +27,7 @@ func (r *Restaurant) FindMenuItem(menuItemID string) (restaurantapi.MenuItem, er
 		}
 	}
 
-	return restaurantapi.MenuItem{}, ErrMenuItemNotFound
+	return restaurantapi.MenuItem{}, errors.Wrap(ErrMenuItemNotFound, menuItemID)
 }
 
 // ReviseMenu updates the local menu

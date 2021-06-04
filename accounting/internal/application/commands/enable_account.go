@@ -3,7 +3,8 @@ package commands
 import (
 	"context"
 
-	"github.com/stackus/ftgogo/account/internal/domain"
+	"github.com/stackus/ftgogo/accounting/internal/adapters"
+	"github.com/stackus/ftgogo/accounting/internal/domain"
 )
 
 type EnableAccount struct {
@@ -11,10 +12,10 @@ type EnableAccount struct {
 }
 
 type EnableAccountHandler struct {
-	repo domain.AccountRepository
+	repo adapters.AccountRepository
 }
 
-func NewEnableAccountHandler(accountRepo domain.AccountRepository) EnableAccountHandler {
+func NewEnableAccountHandler(accountRepo adapters.AccountRepository) EnableAccountHandler {
 	return EnableAccountHandler{repo: accountRepo}
 }
 

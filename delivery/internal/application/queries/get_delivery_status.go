@@ -3,7 +3,7 @@ package queries
 import (
 	"context"
 
-	"github.com/stackus/ftgogo/delivery/internal/domain"
+	"github.com/stackus/ftgogo/delivery/internal/adapters"
 )
 
 type GetDeliveryStatus struct {
@@ -11,8 +11,8 @@ type GetDeliveryStatus struct {
 }
 
 type GetDeliveryStatusHandler struct {
-	deliveryRepo domain.DeliveryRepository
-	courierRepo  domain.CourierRepository
+	deliveryRepo adapters.DeliveryRepository
+	courierRepo  adapters.CourierRepository
 }
 
 type DeliveryStatus struct {
@@ -22,7 +22,7 @@ type DeliveryStatus struct {
 	Status          string   `json:"status"`
 }
 
-func NewGetDeliveryStatusHandler(deliveryRepo domain.DeliveryRepository, courierRepo domain.CourierRepository) GetDeliveryStatusHandler {
+func NewGetDeliveryStatusHandler(deliveryRepo adapters.DeliveryRepository, courierRepo adapters.CourierRepository) GetDeliveryStatusHandler {
 	return GetDeliveryStatusHandler{deliveryRepo: deliveryRepo}
 }
 

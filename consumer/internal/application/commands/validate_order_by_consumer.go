@@ -3,6 +3,7 @@ package commands
 import (
 	"context"
 
+	"github.com/stackus/ftgogo/consumer/internal/adapters"
 	"github.com/stackus/ftgogo/consumer/internal/domain"
 )
 
@@ -13,10 +14,10 @@ type ValidateOrderByConsumer struct {
 }
 
 type ValidateOrderByConsumerHandler struct {
-	repo domain.ConsumerRepository
+	repo adapters.ConsumerRepository
 }
 
-func NewValidateOrderByConsumerHandler(consumerRepo domain.ConsumerRepository) ValidateOrderByConsumerHandler {
+func NewValidateOrderByConsumerHandler(consumerRepo adapters.ConsumerRepository) ValidateOrderByConsumerHandler {
 	return ValidateOrderByConsumerHandler{repo: consumerRepo}
 }
 

@@ -3,6 +3,7 @@ package queries
 import (
 	"context"
 
+	"github.com/stackus/ftgogo/order/internal/adapters"
 	"github.com/stackus/ftgogo/order/internal/domain"
 )
 
@@ -11,10 +12,10 @@ type GetOrder struct {
 }
 
 type GetOrderHandler struct {
-	orderRepo domain.OrderRepository
+	orderRepo adapters.OrderRepository
 }
 
-func NewGetOrderHandler(orderRepo domain.OrderRepository) GetOrderHandler {
+func NewGetOrderHandler(orderRepo adapters.OrderRepository) GetOrderHandler {
 	return GetOrderHandler{orderRepo: orderRepo}
 }
 

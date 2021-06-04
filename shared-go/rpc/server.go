@@ -11,7 +11,8 @@ import (
 )
 
 type ServerCfg struct {
-	Port     string `envconfig:"PORT" default:":8000"`
+	Network  string `envconfig:"NETWORK" default:"tcp"`
+	Address  string `envconfig:"ADDRESS" default:":8000"`
 	CertPath string `envconfig:"CERT_PATH"`
 	KeyPath  string `envconfig:"KEY_PATH"`
 }
@@ -23,8 +24,9 @@ type Server interface {
 }
 
 type server struct {
-	s    *grpc.Server
-	port string
+	s       *grpc.Server
+	network string
+	address string
 }
 
 var _ Server = (*server)(nil)
@@ -51,8 +53,9 @@ func NewServer(cfg ServerCfg, options ...ServerOption) Server {
 	reflection.Register(s)
 
 	return server{
-		s:    s,
-		port: cfg.Port,
+		s:       s,
+		network: cfg.Network,
+		address: cfg.Address,
 	}
 }
 
@@ -61,7 +64,7 @@ func (s server) RegisterService(desc *grpc.ServiceDesc, impl interface{}) {
 }
 
 func (s server) Start() error {
-	listener, err := net.Listen("tcp", s.port)
+	listener, err := net.Listen(s.network, s.address)
 	if err != nil {
 		panic(err)
 	}

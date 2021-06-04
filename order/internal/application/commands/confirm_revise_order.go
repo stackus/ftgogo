@@ -3,6 +3,7 @@ package commands
 import (
 	"context"
 
+	"github.com/stackus/ftgogo/order/internal/adapters"
 	"github.com/stackus/ftgogo/order/internal/domain"
 )
 
@@ -12,10 +13,10 @@ type ConfirmReviseOrder struct {
 }
 
 type ConfirmReviseOrderHandler struct {
-	repo domain.OrderRepository
+	repo adapters.OrderRepository
 }
 
-func NewConfirmReviseOrderHandler(repo domain.OrderRepository) ConfirmReviseOrderHandler {
+func NewConfirmReviseOrderHandler(repo adapters.OrderRepository) ConfirmReviseOrderHandler {
 	return ConfirmReviseOrderHandler{
 		repo: repo,
 	}

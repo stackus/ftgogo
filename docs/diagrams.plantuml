@@ -1,0 +1,235 @@
+@startuml
+skinparam linetype ortho
+skinparam shadowing false
+skinparam backgroundColor #ccc
+
+skinparam ArrowColor black
+skinparam ArrowFontStyle bold
+
+skinparam queue {
+  BorderColor black
+}
+skinparam note {
+  BorderColor black
+}
+
+title "FTGOGO Microservices Architecture"
+
+cloud "Internet" as net
+node "UI Layer" as ui
+node "Services Layer" as svc
+database "Schemas" <<PostgreSQL>> as db
+queue "Event Bus" <<NATS Streaming>> as events
+node "Change Data Capture" as cdc
+
+note right of ui
+**Microservice UIs:**
+- Customer Web API
+- Store Web API
+end note
+
+note right of svc
+**Microservices:**
+- Accounting Service
+- Consumer Service
+- Delivery Service
+- Kitchen Service
+- Order Service
+- Order History Service
+- Restaurant Service
+end note
+
+note left of cdc
+**Microservice CDCs:**
+- Accounting CDC
+- Consumer CDC
+- Kitchen CDC
+- Order CDC
+- Restaurant CDC
+end note
+
+note left of db
+**Microservice Schemas:**
+- Accounting
+- Consumer
+- Delivery
+- Kitchen
+- Order
+- Order History
+- Restaurant
+end note
+
+net <--> ui: HTTP
+ui <--> svc: GRPC
+svc <--> db
+db <--> cdc
+cdc -> events
+svc <---> events
+
+footer high-level conceptual architecture diagram v1
+
+@enduml
+
+@startuml
+skinparam shadowing false
+skinparam backgroundColor #ccc
+skinparam ArrowColor black
+skinparam ArrowFontStyle bold
+
+skinparam responseMessageBelowArrow true
+
+participant "Orchestrator" as saga
+participant "Order Service" as orders
+participant "Consumer Service" as consumers
+participant "Kitchen Service" as kitchens
+participant "Accounting Service" as accounts
+
+title Create Order Saga
+
+saga<-orders: Start
+autonumber 1.1
+saga->consumers: ValidateOrderByConsumer
+saga<-[#green]-consumers: <font color=green>success
+autonumber inc A
+saga->kitchens: CreateTicket
+saga<-[#green]-kitchens: <font color=green>CreateTicketReply
+note right: Add "TicketID" to saga state
+autonumber inc A
+saga->accounts: AuthorizeOrder
+saga<-[#green]-accounts: <font color=green>success
+autonumber inc A
+saga->kitchens: ConfirmTicket
+saga<-[#green]-kitchens: <font color=green>success
+autonumber inc A
+saga->orders: ApproveOrder
+saga<-[#green]-orders: <font color=green>success
+autonumber stop
+saga->saga: Completed
+
+group Compensation: After Step 1.2
+  autonumber stop
+  saga<-[#red]-: <font color=red>failure
+  saga->orders: RejectOrder
+  saga<-[#green]-orders: <font color=green>success
+  saga->saga: Compensated
+end
+
+group Compensation: After Step 2.2
+  autonumber stop
+  saga<-[#red]-: <font color=red>failure
+  saga->kitchens: CancelTicket
+  saga<-[#green]-kitchens: <font color=green>success
+  saga->orders: RejectOrder
+  saga<-[#green]-orders: <font color=green>success
+  saga->saga: Compensated
+end
+
+footer create order saga sequence v1
+@enduml
+
+@startuml
+skinparam shadowing false
+skinparam backgroundColor #ccc
+skinparam ArrowColor black
+skinparam ArrowFontStyle bold
+
+skinparam responseMessageBelowArrow true
+
+participant "Orchestrator" as saga
+participant "Order Service" as orders
+participant "Kitchen Service" as kitchens
+participant "Accounting Service" as accounts
+
+title Cancel Order Saga
+
+saga<-orders: Start
+autonumber 1.1
+saga->orders: BeginCancelOrder
+saga<-[#green]-orders: <font color=green>success
+autonumber inc A
+saga->kitchens: BeginCancelTicket
+saga<-[#green]-kitchens: <font color=green>success
+autonumber inc A
+saga->accounts: ReverseAuthorization
+saga<-[#green]-accounts: <font color=green>success
+autonumber inc A
+saga->kitchens: ConfirmCancelTicket
+saga<-[#green]-kitchens: <font color=green>success
+autonumber inc A
+saga->orders: ConfirmCancelOrder
+saga<-[#green]-orders: <font color=green>success
+
+group Compensation: After Step 1.2
+  autonumber stop
+  saga<-[#red]-: <font color=red>failure
+  saga->orders: UndoBeginCancelOrder
+  saga<-[#green]-orders: <font color=green>success
+  saga->saga: Compensated
+end
+
+group Compensation: After Step 2.2
+  autonumber stop
+  saga<-[#red]-: <font color=red>failure
+  saga->kitchens: UndoBeginCancelTicket
+  saga<-[#green]-kitchens: <font color=green>success
+  saga->orders: UndoBeginCancelOrder
+  saga<-[#green]-orders: <font color=green>success
+  saga->saga: Compensated
+end
+
+footer cancel order saga sequence v1
+@enduml
+
+@startuml
+skinparam shadowing false
+skinparam backgroundColor #ccc
+skinparam ArrowColor black
+skinparam ArrowFontStyle bold
+
+skinparam responseMessageBelowArrow true
+
+participant "Orchestrator" as saga
+participant "Order Service" as orders
+participant "Kitchen Service" as kitchens
+participant "Accounting Service" as accounts
+
+title Revise Order Saga
+
+saga<-orders: Start
+autonumber 1.1
+saga->orders: BeginReviseOrder
+saga<-[#green]-orders: <font color=green>BeginReviseOrderReply
+note right: Update "OrderTotal" in saga state
+autonumber inc A
+saga->kitchens: BeginReviseTicket
+saga<-[#green]-kitchens: <font color=green>success
+autonumber inc A
+saga->accounts: ReviseAuthorization
+saga<-[#green]-accounts: <font color=green>success
+autonumber inc A
+saga->kitchens: ConfirmReviseTicket
+saga<-[#green]-kitchens: <font color=green>success
+autonumber inc A
+saga->orders: ConfirmReviseOrder
+saga<-[#green]-orders: <font color=green>success
+
+group Compensation: After Step 1.2
+  autonumber stop
+  saga<-[#red]-: <font color=red>failure
+  saga->orders: UndoBeginReviseOrder
+  saga<-[#green]-orders: <font color=green>success
+  saga->saga: Compensated
+end
+
+group Compensation: After Step 2.2
+  autonumber stop
+  saga<-[#red]-: <font color=red>failure
+  saga->kitchens: UndoBeginReviseTicket
+  saga<-[#green]-kitchens: <font color=green>success
+  saga->orders: UndoBeginReviseOrder
+  saga<-[#green]-orders: <font color=green>success
+  saga->saga: Compensated
+end
+
+footer revise order saga sequence v1
+@enduml

@@ -6,7 +6,6 @@ import (
 	"github.com/stackus/edat/core"
 
 	"github.com/stackus/ftgogo/serviceapis/commonapi"
-	"github.com/stackus/ftgogo/serviceapis/orderapi"
 )
 
 func registerOrderCommands() {
@@ -20,9 +19,10 @@ func registerOrderCommands() {
 // CreateOrder order command
 type CreateOrder struct {
 	ConsumerID     string
+	Restaurant     *Restaurant
 	RestaurantID   string
 	RestaurantName string
-	LineItems      []orderapi.LineItem
+	LineItems      commonapi.MenuItemQuantities
 	OrderTotal     int
 	DeliverAt      time.Time
 	DeliverTo      commonapi.Address

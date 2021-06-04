@@ -13,17 +13,19 @@ import (
 )
 
 const (
-	findOrderHistorySQL   = "SELECT consumer_id, restaurant_id, restaurant_name, line_items, order_total, status, keywords, created_at FROM orders WHERE id = $1"
-	saveOrderHistorySQL   = "INSERT INTO orders (id, consumer_id, restaurant_id, restaurant_name, line_items, order_total, status, keywords, created_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)"
-	updateOrderStatusSQL  = "UPDATE orders SET status = $1 WHERE id = $2"
-	updateOrderHistorySQL = "UPDATE orders SET consumer_id = $1, restaurant_id = $2, restaurant_name = $3, line_items = $4, order_total = $5, status = $6, keywords = $7 WHERE id = $8"
+	findOrderHistorySQL   = "SELECT consumer_id, restaurant_id, restaurant_name, line_items, order_total, status, keywords, created_at FROM %s WHERE id = $1"
+	saveOrderHistorySQL   = "INSERT INTO %s (id, consumer_id, restaurant_id, restaurant_name, line_items, order_total, status, keywords, created_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)"
+	updateOrderStatusSQL  = "UPDATE %s SET status = $1 WHERE id = $2"
+	updateOrderHistorySQL = "UPDATE %s SET consumer_id = $1, restaurant_id = $2, restaurant_name = $3, line_items = $4, order_total = $5, status = $6, keywords = $7 WHERE id = $8"
 )
 
 type OrderHistoryPostgresRepository struct {
 	client edatpgx.Client
 }
 
-var _ domain.OrderHistoryRepository = (*OrderHistoryPostgresRepository)(nil)
+var OrderHistoriesTableName = "orders"
+
+var _ OrderHistoryRepository = (*OrderHistoryPostgresRepository)(nil)
 
 func NewOrderHistoryPostgresRepository(client edatpgx.Client) *OrderHistoryPostgresRepository {
 	return &OrderHistoryPostgresRepository{
@@ -31,13 +33,13 @@ func NewOrderHistoryPostgresRepository(client edatpgx.Client) *OrderHistoryPostg
 	}
 }
 
-func (r *OrderHistoryPostgresRepository) FindConsumerOrders(ctx context.Context, consumerID string, filters domain.OrderHistoryFilters) ([]*domain.OrderHistory, string, error) {
+func (r *OrderHistoryPostgresRepository) FindConsumerOrders(ctx context.Context, consumerID string, filters OrderHistoryFilters) ([]*domain.OrderHistory, string, error) {
 	type cursor struct {
 		CreatedAt time.Time `json:"created_at"`
 		ID        string    `json:"id"`
 	}
 
-	query := "SELECT id, restaurant_id, restaurant_name, line_items, order_total, status, keywords, created_at FROM orders WHERE consumer_id = $1"
+	query := fmt.Sprintf("SELECT id, restaurant_id, restaurant_name, line_items, order_total, status, keywords, created_at FROM %s WHERE consumer_id = $1", OrderHistoriesTableName)
 
 	paramCount := 1
 	params := []interface{}{consumerID}
@@ -126,7 +128,7 @@ func (r *OrderHistoryPostgresRepository) FindConsumerOrders(ctx context.Context,
 }
 
 func (r *OrderHistoryPostgresRepository) Find(ctx context.Context, orderHistoryID string) (*domain.OrderHistory, error) {
-	row := r.client.QueryRow(ctx, findOrderHistorySQL, orderHistoryID)
+	row := r.client.QueryRow(ctx, fmt.Sprintf(findOrderHistorySQL, OrderHistoriesTableName), orderHistoryID)
 
 	lineItemData := []byte{}
 	order := &domain.OrderHistory{
@@ -155,7 +157,7 @@ func (r *OrderHistoryPostgresRepository) Save(ctx context.Context, orderHistory 
 		return err
 	}
 
-	_, err = r.client.Exec(ctx, saveOrderHistorySQL,
+	_, err = r.client.Exec(ctx, fmt.Sprintf(saveOrderHistorySQL, OrderHistoriesTableName),
 		orderHistory.OrderID, orderHistory.ConsumerID, orderHistory.RestaurantID,
 		orderHistory.RestaurantName, lineItemData, orderHistory.OrderTotal,
 		int(orderHistory.Status), orderHistory.Keywords, orderHistory.CreatedAt,
@@ -164,7 +166,7 @@ func (r *OrderHistoryPostgresRepository) Save(ctx context.Context, orderHistory 
 }
 
 func (r *OrderHistoryPostgresRepository) UpdateStatus(ctx context.Context, orderHistoryID string, status orderapi.OrderState) error {
-	_, err := r.client.Exec(ctx, updateOrderStatusSQL, int(status), orderHistoryID)
+	_, err := r.client.Exec(ctx, fmt.Sprintf(updateOrderStatusSQL, OrderHistoriesTableName), int(status), orderHistoryID)
 
 	return err
 }
@@ -175,7 +177,7 @@ func (r *OrderHistoryPostgresRepository) Update(ctx context.Context, orderHistor
 		return err
 	}
 
-	_, err = r.client.Exec(ctx, updateOrderHistorySQL,
+	_, err = r.client.Exec(ctx, fmt.Sprintf(updateOrderHistorySQL, OrderHistoriesTableName),
 		orderHistory.ConsumerID, orderHistory.RestaurantID, orderHistory.RestaurantName,
 		lineItemData, orderHistory.OrderTotal,
 		int(orderHistory.Status), orderHistory.Keywords,

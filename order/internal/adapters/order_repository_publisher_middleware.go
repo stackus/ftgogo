@@ -5,18 +5,16 @@ import (
 
 	"github.com/stackus/edat/core"
 	"github.com/stackus/edat/es"
-
-	"github.com/stackus/ftgogo/order/internal/domain"
 )
 
 type orderRepositoryPublisherMiddleware struct {
-	domain.OrderRepository
-	publisher domain.OrderPublisher
+	OrderRepository
+	publisher OrderPublisher
 }
 
-var _ domain.OrderRepository = (*orderRepositoryPublisherMiddleware)(nil)
+var _ OrderRepository = (*orderRepositoryPublisherMiddleware)(nil)
 
-func NewOrderRepositoryPublisherMiddleware(repository domain.OrderRepository, publisher domain.OrderPublisher) domain.OrderRepository {
+func NewOrderRepositoryPublisherMiddleware(repository OrderRepository, publisher OrderPublisher) OrderRepository {
 	return &orderRepositoryPublisherMiddleware{
 		OrderRepository: repository,
 		publisher:       publisher,

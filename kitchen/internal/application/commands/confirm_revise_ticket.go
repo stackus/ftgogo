@@ -3,6 +3,7 @@ package commands
 import (
 	"context"
 
+	"github.com/stackus/ftgogo/kitchen/internal/adapters"
 	"github.com/stackus/ftgogo/kitchen/internal/domain"
 )
 
@@ -13,10 +14,10 @@ type ConfirmReviseTicket struct {
 }
 
 type ConfirmReviseTicketHandler struct {
-	repo domain.TicketRepository
+	repo adapters.TicketRepository
 }
 
-func NewConfirmReviseTicketHandler(repo domain.TicketRepository) ConfirmReviseTicketHandler {
+func NewConfirmReviseTicketHandler(repo adapters.TicketRepository) ConfirmReviseTicketHandler {
 	return ConfirmReviseTicketHandler{
 		repo: repo,
 	}

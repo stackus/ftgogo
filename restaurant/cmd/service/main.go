@@ -5,9 +5,8 @@ import (
 	"github.com/stackus/ftgogo/restaurant/internal/application"
 	"github.com/stackus/ftgogo/restaurant/internal/application/commands"
 	"github.com/stackus/ftgogo/restaurant/internal/application/queries"
-	"github.com/stackus/ftgogo/restaurant/internal/ports"
+	"github.com/stackus/ftgogo/restaurant/internal/handlers"
 	"github.com/stackus/ftgogo/serviceapis"
-	"github.com/stackus/ftgogo/serviceapis/restaurantapi/pb"
 	"shared-go/applications"
 )
 
@@ -21,9 +20,10 @@ func main() {
 func initService(svc *applications.Service) error {
 	serviceapis.RegisterTypes()
 
+	// Driven
 	restaurantRepo := adapters.NewRestaurantPostgresPublisherMiddleware(
 		adapters.NewRestaurantPostgresRepository(svc.PgConn),
-		adapters.NewRestaurantPublisher(svc.Publisher),
+		adapters.NewRestaurantEntityEventPublisher(svc.Publisher),
 	)
 
 	app := application.Application{
@@ -35,7 +35,8 @@ func initService(svc *applications.Service) error {
 		},
 	}
 
-	restaurantpb.RegisterRestaurantServiceServer(svc.RpcServer, ports.NewRpcHandlers(app))
+	// Drivers
+	handlers.NewRpcHandlers(app).Mount(svc.RpcServer)
 
 	return nil
 }

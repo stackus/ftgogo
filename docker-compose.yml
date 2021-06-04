@@ -38,16 +38,16 @@ services:
     volumes:
       - 'standata:/data'
 
-  web-bff-service:
-    hostname: web-bff
+  customer-web-service:
+    hostname: customer-web
     restart: on-failure
     build:
       context: .
       args:
-        service: web-bff
+        service: customer-web
     environment:
       <<: *default-environment
-      SERVICE_ID: web-bff-service
+      SERVICE_ID: customer-web-service
     networks:
       - mononet
     ports:
@@ -153,8 +153,8 @@ services:
       - stan
     networks:
       - mononet
-#    ports:
-#      - '8004:8000'
+  #    handlers:
+  #      - '8004:8000'
   kitchen-cdc:
     container_name: kitchencdc
     hostname: kitchencdc

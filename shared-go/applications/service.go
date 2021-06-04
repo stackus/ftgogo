@@ -16,6 +16,7 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/rs/zerolog"
 	"github.com/spf13/cobra"
+	"github.com/stackus/edat-kafka-go"
 	_ "github.com/stackus/edat-msgpack"
 	"github.com/stackus/edat-pgx"
 	"github.com/stackus/edat-stan"
@@ -27,7 +28,6 @@ import (
 	"github.com/stackus/edat/saga"
 	"golang.org/x/sync/errgroup"
 
-	"shared-go/eddsarama"
 	"shared-go/egress"
 	"shared-go/instrumentation"
 	"shared-go/logging"
@@ -61,7 +61,6 @@ type Service struct {
 	Subscriber        *msg.Subscriber
 	WebServer         web.Server
 	RpcServer         rpc.Server
-	Cleanup           CleanupFunc
 }
 
 func NewService(appFn func(*Service) error) *Service {
@@ -160,14 +159,18 @@ func (s *Service) run(*cobra.Command, []string) error {
 		msgConsumer = edatstan.NewConsumer(conn, s.Cfg.ServiceID,
 			edatstan.WithConsumerActWait(s.Cfg.Nats.AckWaitTimeout),
 		)
+		msgProducer = edatstan.NewProducer(conn)
 	case s.Cfg.EventDriver == "kafka":
-		msgConsumer = eddsarama.NewConsumer(s.Cfg.Kafka.Brokers, s.Cfg.ServiceID)
+		msgConsumer = edatkafkago.NewConsumer(s.Cfg.Kafka.Brokers, s.Cfg.ServiceID)
+		msgProducer = edatkafkago.NewProducer(s.Cfg.Kafka.Brokers)
 	default:
 		msgConsumer = inmem.NewConsumer()
+		msgProducer = inmem.NewProducer()
 	}
 
 	// 2. Outbox: Producer publishes into the db
 	msgProducer = edatpgx.NewMessageStore(s.PgConn)
+	s.Publisher = msg.NewPublisher(msgProducer)
 
 	s.Subscriber = msg.NewSubscriber(msgConsumer)
 	s.Subscriber.Use(
@@ -175,7 +178,6 @@ func (s *Service) run(*cobra.Command, []string) error {
 		// 3. Outbox: Use a message receiver middleware to start a new transaction for each incoming message
 		edatpgx.ReceiverSessionMiddleware(pgConn, zerologto.Logger(s.Logger)),
 	)
-	s.Publisher = msg.NewPublisher(msgProducer)
 
 	s.RpcServer = rpc.NewServer(s.Cfg.Rpc,
 		rpc.WithServerUnaryInterceptors(
@@ -212,7 +214,6 @@ func (s *Service) run(*cobra.Command, []string) error {
 	waiter.Add(s.waitForRpcServer)
 	waiter.Add(s.waitForWebServer)
 	waiter.Add(s.waitForMessaging)
-	waiter.Add(s.waitForCleanup)
 
 	s.Logger.Debug().Msg("service starting")
 
@@ -324,30 +325,4 @@ func (s Service) waitForRpcServer(ctx context.Context) (err error) {
 	})
 
 	return group.Wait()
-}
-
-func (s Service) waitForCleanup(ctx context.Context) (err error) {
-	defer s.Logger.Debug().Msg("cleanup has been completed")
-
-	<-ctx.Done()
-
-	if s.Cleanup == nil {
-		return nil
-	}
-
-	sCtx, cancel := context.WithTimeout(context.Background(), s.Cfg.ShutdownTimeout)
-	defer cancel()
-
-	done := make(chan struct{})
-	go func() {
-		err = s.Cleanup(sCtx)
-		close(done)
-	}()
-
-	select {
-	case <-sCtx.Done():
-		return fmt.Errorf("cleanup failed to complete within allowed time")
-	case <-done:
-		return
-	}
 }

@@ -3,6 +3,7 @@ package commands
 import (
 	"context"
 
+	"github.com/stackus/ftgogo/kitchen/internal/adapters"
 	"github.com/stackus/ftgogo/kitchen/internal/domain"
 )
 
@@ -11,10 +12,10 @@ type CancelCreateTicket struct {
 }
 
 type CancelCreateTicketHandler struct {
-	repo domain.TicketRepository
+	repo adapters.TicketRepository
 }
 
-func NewCancelCreateTicketHandler(ticketRepo domain.TicketRepository) CancelCreateTicketHandler {
+func NewCancelCreateTicketHandler(ticketRepo adapters.TicketRepository) CancelCreateTicketHandler {
 	return CancelCreateTicketHandler{
 		repo: ticketRepo,
 	}

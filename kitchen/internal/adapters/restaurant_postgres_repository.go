@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"encoding/json"
+	"fmt"
 
 	"github.com/stackus/edat-pgx"
 
@@ -11,14 +12,16 @@ import (
 )
 
 const (
-	findRestaurantSQL   = "SELECT name, menu FROM restaurants WHERE id = $1"
-	saveRestaurantSQL   = "INSERT INTO restaurants (id, name, menu) VALUES ($1, $2, $3)"
-	updateRestaurantSQL = "UPDATE restaurants SET name = $1, menu = $2 WHERE id = $3"
+	findRestaurantSQL   = "SELECT name, menu FROM %s WHERE id = $1"
+	saveRestaurantSQL   = "INSERT INTO %s (id, name, menu) VALUES ($1, $2, $3)"
+	updateRestaurantSQL = "UPDATE %s SET name = $1, menu = $2 WHERE id = $3"
 )
 
 type RestaurantPostgresRepository struct {
 	client edatpgx.Client
 }
+
+var RestaurantsTableName = "restaurants"
 
 func NewRestaurantPostgresRepository(client edatpgx.Client) *RestaurantPostgresRepository {
 	return &RestaurantPostgresRepository{
@@ -27,7 +30,7 @@ func NewRestaurantPostgresRepository(client edatpgx.Client) *RestaurantPostgresR
 }
 
 func (s *RestaurantPostgresRepository) Find(ctx context.Context, restaurantID string) (*domain.Restaurant, error) {
-	row := s.client.QueryRow(ctx, findRestaurantSQL, restaurantID)
+	row := s.client.QueryRow(ctx, fmt.Sprintf(findRestaurantSQL, RestaurantsTableName), restaurantID)
 
 	var name string
 	var data []byte
@@ -59,7 +62,7 @@ func (s *RestaurantPostgresRepository) Save(ctx context.Context, restaurant *dom
 		return err
 	}
 
-	_, err = s.client.Exec(ctx, saveRestaurantSQL, restaurant.RestaurantID, restaurant.Name, menuItemData)
+	_, err = s.client.Exec(ctx, fmt.Sprintf(saveRestaurantSQL, RestaurantsTableName), restaurant.RestaurantID, restaurant.Name, menuItemData)
 	if err != nil {
 		return err
 	}
@@ -73,7 +76,7 @@ func (s *RestaurantPostgresRepository) Update(ctx context.Context, restaurantID 
 		return err
 	}
 
-	_, err = s.client.Exec(ctx, updateRestaurantSQL, restaurant.Name, menuItemData, restaurantID)
+	_, err = s.client.Exec(ctx, fmt.Sprintf(updateRestaurantSQL, RestaurantsTableName), restaurant.Name, menuItemData, restaurantID)
 	if err != nil {
 		return err
 	}

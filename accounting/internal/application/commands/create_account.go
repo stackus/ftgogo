@@ -5,7 +5,8 @@ import (
 
 	"github.com/stackus/edat/es"
 
-	"github.com/stackus/ftgogo/account/internal/domain"
+	"github.com/stackus/ftgogo/accounting/internal/adapters"
+	"github.com/stackus/ftgogo/accounting/internal/domain"
 )
 
 type CreateAccount struct {
@@ -14,10 +15,10 @@ type CreateAccount struct {
 }
 
 type CreateAccountHandler struct {
-	repo domain.AccountRepository
+	repo adapters.AccountRepository
 }
 
-func NewCreateAccountHandler(accountRepo domain.AccountRepository) CreateAccountHandler {
+func NewCreateAccountHandler(accountRepo adapters.AccountRepository) CreateAccountHandler {
 	return CreateAccountHandler{repo: accountRepo}
 }
 

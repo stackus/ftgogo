@@ -5,18 +5,16 @@ import (
 
 	"github.com/stackus/edat/core"
 	"github.com/stackus/edat/es"
-
-	"github.com/stackus/ftgogo/kitchen/internal/domain"
 )
 
 type ticketRepositoryPublisherMiddleware struct {
-	domain.TicketRepository
-	publisher domain.TicketPublisher
+	TicketRepository
+	publisher TicketPublisher
 }
 
-var _ domain.TicketRepository = (*ticketRepositoryPublisherMiddleware)(nil)
+var _ TicketRepository = (*ticketRepositoryPublisherMiddleware)(nil)
 
-func NewTicketRepositoryPublisherMiddleware(repository domain.TicketRepository, publisher domain.TicketPublisher) domain.TicketRepository {
+func NewTicketRepositoryPublisherMiddleware(repository TicketRepository, publisher TicketPublisher) TicketRepository {
 	return &ticketRepositoryPublisherMiddleware{
 		TicketRepository: repository,
 		publisher:        publisher,

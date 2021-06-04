@@ -3,7 +3,7 @@ package commands
 import (
 	"context"
 
-	"github.com/stackus/ftgogo/delivery/internal/domain"
+	"github.com/stackus/ftgogo/delivery/internal/adapters"
 )
 
 type CancelDelivery struct {
@@ -11,11 +11,11 @@ type CancelDelivery struct {
 }
 
 type CancelDeliveryHandler struct {
-	deliveryRepo domain.DeliveryRepository
-	courierRepo  domain.CourierRepository
+	deliveryRepo adapters.DeliveryRepository
+	courierRepo  adapters.CourierRepository
 }
 
-func NewCancelDeliveryHandler(deliveryRepo domain.DeliveryRepository, courierRepo domain.CourierRepository) CancelDeliveryHandler {
+func NewCancelDeliveryHandler(deliveryRepo adapters.DeliveryRepository, courierRepo adapters.CourierRepository) CancelDeliveryHandler {
 	return CancelDeliveryHandler{
 		deliveryRepo: deliveryRepo,
 		courierRepo:  courierRepo,

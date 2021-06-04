@@ -1,45 +1,15 @@
 package main
 
 import (
-	"github.com/stackus/edat/msg"
-	"github.com/stackus/edat/saga"
-
 	"github.com/stackus/ftgogo/order/internal/adapters"
+	"github.com/stackus/ftgogo/order/internal/application"
 	"github.com/stackus/ftgogo/order/internal/application/commands"
 	"github.com/stackus/ftgogo/order/internal/application/queries"
 	"github.com/stackus/ftgogo/order/internal/domain"
+	"github.com/stackus/ftgogo/order/internal/handlers"
 	"github.com/stackus/ftgogo/serviceapis"
-	"github.com/stackus/ftgogo/serviceapis/orderapi"
-	"github.com/stackus/ftgogo/serviceapis/orderapi/pb"
-	"github.com/stackus/ftgogo/serviceapis/restaurantapi"
 	"shared-go/applications"
 )
-
-type Application struct {
-	Commands Commands
-	Queries  Queries
-}
-
-type Commands struct {
-	CreateOrder          commands.CreateOrderHandler
-	ApproveOrder         commands.ApproveOrderHandler
-	RejectOrder          commands.RejectOrderHandler
-	BeginCancelOrder     commands.BeginCancelOrderHandler
-	UndoCancelOrder      commands.UndoCancelOrderHandler
-	ConfirmCancelOrder   commands.ConfirmCancelOrderHandler
-	BeginReviseOrder     commands.BeginReviseOrderHandler
-	UndoReviseOrder      commands.UndoReviseOrderHandler
-	ConfirmReviseOrder   commands.ConfirmReviseOrderHandler
-	StartCreateOrderSaga commands.StartCreateOrderSagaHandler
-	StartCancelOrderSaga commands.StartCancelOrderSagaHandler
-	StartReviseOrderSaga commands.StartReviseOrderSagaHandler
-	CreateRestaurant     commands.CreateRestaurantHandler
-	ReviseRestaurantMenu commands.ReviseRestaurantMenuHandler
-}
-
-type Queries struct {
-	GetOrder queries.GetOrderHandler
-}
 
 func main() {
 	svc := applications.NewService(initService)
@@ -52,27 +22,28 @@ func initService(svc *applications.Service) error {
 	serviceapis.RegisterTypes()
 	domain.RegisterTypes()
 
+	// Driven
 	orderRepo := adapters.NewOrderRepositoryPublisherMiddleware(
-		adapters.NewOrderRepository(svc.AggregateStore),
-		adapters.NewOrderPublisher(svc.Publisher),
+		adapters.NewOrderAggregateRootRepository(svc.AggregateStore),
+		adapters.NewOrderEntityEventPublisher(svc.Publisher),
 	)
 	restaurantRepo := adapters.NewRestaurantPostgresRepository(svc.PgConn)
 
-	createOrderSaga := adapters.NewCreateOrderSaga(svc.SagaInstanceStore, svc.Publisher)
+	createOrderSaga := adapters.NewCreateOrderOrchestrationSaga(svc.SagaInstanceStore, svc.Publisher)
 	svc.Subscriber.Subscribe(createOrderSaga.ReplyChannel(), createOrderSaga)
 
-	cancelOrderSaga := adapters.NewCancelOrderSaga(svc.SagaInstanceStore, svc.Publisher)
+	cancelOrderSaga := adapters.NewCancelOrderOrchestrationSaga(svc.SagaInstanceStore, svc.Publisher)
 	svc.Subscriber.Subscribe(cancelOrderSaga.ReplyChannel(), cancelOrderSaga)
 
-	reviseOrderSaga := adapters.NewReviseOrderSaga(svc.SagaInstanceStore, svc.Publisher)
+	reviseOrderSaga := adapters.NewReviseOrderOrchestrationSaga(svc.SagaInstanceStore, svc.Publisher)
 	svc.Subscriber.Subscribe(reviseOrderSaga.ReplyChannel(), reviseOrderSaga)
 
 	ordersPlacedCounter := adapters.NewOrdersPlacedCounter()
 	ordersApprovedCounter := adapters.NewOrdersApprovedCounter()
 	ordersRejectedCounter := adapters.NewOrdersRejectedCounter()
 
-	application := Application{
-		Commands: Commands{
+	app := application.Service{
+		Commands: application.Commands{
 			CreateOrder:          commands.NewCreateOrderHandler(orderRepo, restaurantRepo, svc.Logger),
 			ApproveOrder:         commands.NewApproveOrderHandler(orderRepo, ordersApprovedCounter),
 			RejectOrder:          commands.NewRejectOrderHandler(orderRepo, ordersRejectedCounter),
@@ -88,32 +59,17 @@ func initService(svc *applications.Service) error {
 			CreateRestaurant:     commands.NewCreateRestaurantHandler(restaurantRepo),
 			ReviseRestaurantMenu: commands.NewReviseRestaurantMenuHandler(restaurantRepo),
 		},
-		Queries: Queries{
-			GetOrder: queries.NewGetOrderHandler(orderRepo),
+		Queries: application.Queries{
+			GetOrder:      queries.NewGetOrderHandler(orderRepo),
+			GetRestaurant: queries.NewGetRestaurantHandler(restaurantRepo),
 		},
 	}
 
-	cmdHandlers := NewCommandHandlers(application)
-	svc.Subscriber.Subscribe(orderapi.OrderServiceCommandChannel, saga.NewCommandDispatcher(svc.Publisher).
-		Handle(orderapi.RejectOrder{}, cmdHandlers.RejectOrder).
-		Handle(orderapi.ApproveOrder{}, cmdHandlers.ApproveOrder).
-		Handle(orderapi.BeginCancelOrder{}, cmdHandlers.BeginCancel).
-		Handle(orderapi.UndoCancelOrder{}, cmdHandlers.UndoCancel).
-		Handle(orderapi.ConfirmCancelOrder{}, cmdHandlers.ConfirmCancel).
-		Handle(orderapi.BeginReviseOrder{}, cmdHandlers.BeginRevise).
-		Handle(orderapi.UndoReviseOrder{}, cmdHandlers.UndoRevise).
-		Handle(orderapi.ConfirmReviseOrder{}, cmdHandlers.ConfirmRevise))
-
-	restaurantEventHandlers := newRestaurantEventHandlers(application)
-	svc.Subscriber.Subscribe(restaurantapi.RestaurantAggregateChannel, msg.NewEntityEventDispatcher().
-		Handle(restaurantapi.RestaurantCreated{}, restaurantEventHandlers.RestaurantCreated).
-		Handle(restaurantapi.RestaurantMenuRevised{}, restaurantEventHandlers.RestaurantMenuRevised))
-
-	orderEventHandlers := newOrderEventHandlers(application)
-	svc.Subscriber.Subscribe(orderapi.OrderAggregateChannel, msg.NewEntityEventDispatcher().
-		Handle(orderapi.OrderCreated{}, orderEventHandlers.OrderCreated))
-
-	orderpb.RegisterOrderServiceServer(svc.RpcServer, newRpcHandlers(application))
+	// Drivers
+	handlers.NewCommandHandlers(app).Mount(svc.Subscriber, svc.Publisher)
+	handlers.NewRestaurantEventHandlers(app).Mount(svc.Subscriber)
+	handlers.NewOrderEventHandlers(app).Mount(svc.Subscriber)
+	handlers.NewRpcHandlers(app).Mount(svc.RpcServer)
 
 	return nil
 }

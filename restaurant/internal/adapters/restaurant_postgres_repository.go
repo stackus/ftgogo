@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"encoding/json"
 	"errors"
+	"fmt"
 
 	"github.com/stackus/edat-pgx"
 
@@ -12,14 +13,18 @@ import (
 )
 
 const (
-	findRestaurantSQL   = "SELECT name, address, menu FROM restaurants WHERE id = $1"
-	saveRestaurantSQL   = "INSERT INTO restaurants (id, name, address, menu) VALUES ($1, $2, $3, $4)"
-	updateRestaurantSQL = "UPDATE restaurants SET name = $1, address = $2, menu = $3 WHERE id = $4"
+	findRestaurantSQL   = "SELECT name, address, menu FROM %s WHERE id = $1"
+	saveRestaurantSQL   = "INSERT INTO %s (id, name, address, menu) VALUES ($1, $2, $3, $4)"
+	updateRestaurantSQL = "UPDATE %s SET name = $1, address = $2, menu = $3 WHERE id = $4"
 )
 
 type RestaurantPostgresRepository struct {
 	client edatpgx.Client
 }
+
+var RestaurantsTableName = "restaurants"
+
+var _ RestaurantRepository = (*RestaurantPostgresRepository)(nil)
 
 func NewRestaurantPostgresRepository(client edatpgx.Client) *RestaurantPostgresRepository {
 	return &RestaurantPostgresRepository{
@@ -28,7 +33,7 @@ func NewRestaurantPostgresRepository(client edatpgx.Client) *RestaurantPostgresR
 }
 
 func (s *RestaurantPostgresRepository) Find(ctx context.Context, restaurantID string) (*domain.Restaurant, error) {
-	row := s.client.QueryRow(ctx, findRestaurantSQL, restaurantID)
+	row := s.client.QueryRow(ctx, fmt.Sprintf(findRestaurantSQL, RestaurantsTableName), restaurantID)
 
 	var name string
 	var addressData []byte
@@ -71,7 +76,7 @@ func (s *RestaurantPostgresRepository) Save(ctx context.Context, r *domain.Resta
 		return err
 	}
 
-	_, err = s.client.Exec(ctx, saveRestaurantSQL, r.RestaurantID, r.Name, addressData, menuData)
+	_, err = s.client.Exec(ctx, fmt.Sprintf(saveRestaurantSQL, RestaurantsTableName), r.RestaurantID, r.Name, addressData, menuData)
 
 	return err
 }
@@ -87,7 +92,7 @@ func (s *RestaurantPostgresRepository) Update(ctx context.Context, restaurantID 
 		return err
 	}
 
-	_, err = s.client.Exec(ctx, updateRestaurantSQL, r.Name, addressData, menuData, restaurantID)
+	_, err = s.client.Exec(ctx, fmt.Sprintf(updateRestaurantSQL, RestaurantsTableName), r.Name, addressData, menuData, restaurantID)
 
 	return err
 }

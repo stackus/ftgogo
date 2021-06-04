@@ -3,6 +3,7 @@ package commands
 import (
 	"context"
 
+	"github.com/stackus/ftgogo/consumer/internal/adapters"
 	"github.com/stackus/ftgogo/consumer/internal/domain"
 )
 
@@ -11,10 +12,10 @@ type RegisterConsumer struct {
 }
 
 type RegisterConsumerHandler struct {
-	repo domain.ConsumerRepository
+	repo adapters.ConsumerRepository
 }
 
-func NewRegisterConsumerHandler(repo domain.ConsumerRepository) RegisterConsumerHandler {
+func NewRegisterConsumerHandler(repo adapters.ConsumerRepository) RegisterConsumerHandler {
 	return RegisterConsumerHandler{
 		repo: repo,
 	}

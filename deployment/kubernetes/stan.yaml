@@ -91,7 +91,7 @@ spec:
 #      containers:
 #        - name: stan
 #          image: nats-streaming:latest
-#          ports:
+#          handlers:
 #            - containerPort: 8222
 #              name: monitor
 #            - containerPort: 7777

@@ -1,12 +1,15 @@
 package adapters
 
 import (
+	"context"
+
+	"github.com/stackus/edat/core"
 	"github.com/stackus/edat/msg"
 	"github.com/stackus/edat/saga"
-
-	"github.com/stackus/ftgogo/order/internal/sagas"
 )
 
-func NewReviseOrderSaga(store saga.InstanceStore, publisher msg.CommandMessagePublisher, options ...saga.OrchestratorOption) *saga.Orchestrator {
-	return saga.NewOrchestrator(sagas.NewReviseOrderSagaDefinition(), store, publisher, options...)
+type ReviseOrderSaga interface {
+	Start(ctx context.Context, sagaData core.SagaData) (*saga.Instance, error)
+	ReplyChannel() string
+	ReceiveMessage(ctx context.Context, message msg.Message) error
 }

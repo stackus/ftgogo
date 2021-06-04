@@ -4,6 +4,7 @@ import (
 	"context"
 	"time"
 
+	"github.com/stackus/ftgogo/delivery/internal/adapters"
 	"github.com/stackus/ftgogo/delivery/internal/domain"
 )
 
@@ -13,11 +14,11 @@ type ScheduleDelivery struct {
 }
 
 type ScheduleDeliveryHandler struct {
-	deliveryRepo domain.DeliveryRepository
-	courierRepo  domain.CourierRepository
+	deliveryRepo adapters.DeliveryRepository
+	courierRepo  adapters.CourierRepository
 }
 
-func NewScheduleDeliveryHandler(deliveryRepo domain.DeliveryRepository, courierRepo domain.CourierRepository) ScheduleDeliveryHandler {
+func NewScheduleDeliveryHandler(deliveryRepo adapters.DeliveryRepository, courierRepo adapters.CourierRepository) ScheduleDeliveryHandler {
 	return ScheduleDeliveryHandler{
 		deliveryRepo: deliveryRepo,
 		courierRepo:  courierRepo,

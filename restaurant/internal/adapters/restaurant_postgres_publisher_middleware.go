@@ -7,13 +7,13 @@ import (
 )
 
 type restaurantPostgresPublisherMiddleware struct {
-	domain.RestaurantRepository
-	publisher domain.RestaurantPublisher
+	RestaurantRepository
+	publisher RestaurantPublisher
 }
 
-var _ domain.RestaurantRepository = (*restaurantPostgresPublisherMiddleware)(nil)
+var _ RestaurantRepository = (*restaurantPostgresPublisherMiddleware)(nil)
 
-func NewRestaurantPostgresPublisherMiddleware(repository domain.RestaurantRepository, publisher domain.RestaurantPublisher) domain.RestaurantRepository {
+func NewRestaurantPostgresPublisherMiddleware(repository RestaurantRepository, publisher RestaurantPublisher) RestaurantRepository {
 	return &restaurantPostgresPublisherMiddleware{
 		RestaurantRepository: repository,
 		publisher:            publisher,

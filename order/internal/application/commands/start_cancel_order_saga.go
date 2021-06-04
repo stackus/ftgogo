@@ -3,6 +3,7 @@ package commands
 import (
 	"context"
 
+	"github.com/stackus/ftgogo/order/internal/adapters"
 	"github.com/stackus/ftgogo/order/internal/domain"
 	"github.com/stackus/ftgogo/serviceapis/orderapi"
 )
@@ -12,11 +13,11 @@ type StartCancelOrderSaga struct {
 }
 
 type StartCancelOrderSagaHandler struct {
-	repo domain.OrderRepository
-	saga domain.CancelOrderSaga
+	repo adapters.OrderRepository
+	saga adapters.CancelOrderSaga
 }
 
-func NewStartCancelOrderSagaHandler(orderRepo domain.OrderRepository, cancelOrderSaga domain.CancelOrderSaga) StartCancelOrderSagaHandler {
+func NewStartCancelOrderSagaHandler(orderRepo adapters.OrderRepository, cancelOrderSaga adapters.CancelOrderSaga) StartCancelOrderSagaHandler {
 	return StartCancelOrderSagaHandler{
 		repo: orderRepo,
 		saga: cancelOrderSaga,

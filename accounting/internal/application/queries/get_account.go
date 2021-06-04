@@ -3,7 +3,8 @@ package queries
 import (
 	"context"
 
-	"github.com/stackus/ftgogo/account/internal/domain"
+	"github.com/stackus/ftgogo/accounting/internal/adapters"
+	"github.com/stackus/ftgogo/accounting/internal/domain"
 )
 
 type GetAccount struct {
@@ -11,10 +12,10 @@ type GetAccount struct {
 }
 
 type GetAccountHandler struct {
-	repo domain.AccountRepository
+	repo adapters.AccountRepository
 }
 
-func NewGetAccountHandler(accountRepo domain.AccountRepository) GetAccountHandler {
+func NewGetAccountHandler(accountRepo adapters.AccountRepository) GetAccountHandler {
 	return GetAccountHandler{repo: accountRepo}
 }
 
