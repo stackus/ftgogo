@@ -36,13 +36,13 @@ func (c serverConfig) ServerOptions() []grpc.ServerOption {
 
 type ServerOption func(config *serverConfig)
 
-func WithServerUnaryInterceptors(interceptors ...grpc.UnaryServerInterceptor) ServerOption {
+func WithUnaryServerInterceptors(interceptors ...grpc.UnaryServerInterceptor) ServerOption {
 	return func(config *serverConfig) {
 		config.AddUnaryInterceptor(interceptors...)
 	}
 }
 
-func WithServerStreamInterceptors(interceptors ...grpc.StreamServerInterceptor) ServerOption {
+func WithStreamServerInterceptors(interceptors ...grpc.StreamServerInterceptor) ServerOption {
 	return func(config *serverConfig) {
 		config.AddStreamInterceptor(interceptors...)
 	}

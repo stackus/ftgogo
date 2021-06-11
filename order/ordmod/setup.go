@@ -2,6 +2,7 @@ package ordmod
 
 import (
 	edatpgx "github.com/stackus/edat-pgx"
+	"github.com/stackus/edat/msg"
 	"github.com/stackus/edat/outbox"
 
 	"github.com/stackus/ftgogo/order/internal/adapters"
@@ -25,23 +26,26 @@ func Setup(svc *applications.Monolith) error {
 		edatpgx.WithEventStoreTableName("orders.events"),
 	))
 	sagaInstanceStore := edatpgx.NewSagaInstanceStore(svc.PgConn, edatpgx.WithSagaInstanceStoreTableName("orders.saga_instances"))
-	messageStore := edatpgx.NewMessageStore(svc.PgConn, edatpgx.WithMessageStoreTableName("orders.messages"))
+	messageStore := edatpgx.NewMessageStore(svc.CDCPgConn, edatpgx.WithMessageStoreTableName("orders.messages"))
+	publisher := msg.NewPublisher(messageStore)
+	svc.Publishers = append(svc.Publishers, publisher)
+	svc.Processors = append(svc.Processors, outbox.NewPollingProcessor(messageStore, svc.CDCPublisher))
 
 	// Driven
 	orderRepo := adapters.NewOrderRepositoryPublisherMiddleware(
 		adapters.NewOrderAggregateRootRepository(aggregateStore),
-		adapters.NewOrderEntityEventPublisher(svc.Publisher),
+		adapters.NewOrderEntityEventPublisher(publisher),
 	)
 	adapters.RestaurantsTableName = "orders.restaurants"
 	restaurantRepo := adapters.NewRestaurantPostgresRepository(svc.PgConn)
 
-	createOrderSaga := adapters.NewCreateOrderOrchestrationSaga(sagaInstanceStore, svc.Publisher)
+	createOrderSaga := adapters.NewCreateOrderOrchestrationSaga(sagaInstanceStore, publisher)
 	svc.Subscriber.Subscribe(createOrderSaga.ReplyChannel(), createOrderSaga)
 
-	cancelOrderSaga := adapters.NewCancelOrderOrchestrationSaga(sagaInstanceStore, svc.Publisher)
+	cancelOrderSaga := adapters.NewCancelOrderOrchestrationSaga(sagaInstanceStore, publisher)
 	svc.Subscriber.Subscribe(cancelOrderSaga.ReplyChannel(), cancelOrderSaga)
 
-	reviseOrderSaga := adapters.NewReviseOrderOrchestrationSaga(sagaInstanceStore, svc.Publisher)
+	reviseOrderSaga := adapters.NewReviseOrderOrchestrationSaga(sagaInstanceStore, publisher)
 	svc.Subscriber.Subscribe(reviseOrderSaga.ReplyChannel(), reviseOrderSaga)
 
 	ordersPlacedCounter := adapters.NewOrdersPlacedCounter()
@@ -72,11 +76,10 @@ func Setup(svc *applications.Monolith) error {
 	}
 
 	// Drivers
-	handlers.NewCommandHandlers(app).Mount(svc.Subscriber, svc.Publisher)
+	handlers.NewCommandHandlers(app).Mount(svc.Subscriber, publisher)
 	handlers.NewRestaurantEventHandlers(app).Mount(svc.Subscriber)
 	handlers.NewOrderEventHandlers(app).Mount(svc.Subscriber)
 	handlers.NewRpcHandlers(app).Mount(svc.RpcServer)
-	svc.Processors = append(svc.Processors, outbox.NewPollingProcessor(messageStore, svc.CDCPublisher))
 
 	return nil
 }

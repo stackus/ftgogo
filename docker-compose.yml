@@ -45,6 +45,7 @@ services:
       context: .
       args:
         service: customer-web
+        cmd: gateway
     environment:
       <<: *default-environment
       SERVICE_ID: customer-web-service

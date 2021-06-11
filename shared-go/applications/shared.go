@@ -2,6 +2,7 @@ package applications
 
 import (
 	"context"
+	"net"
 	"net/http"
 	"time"
 
@@ -10,8 +11,10 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/rs/zerolog"
 	edatpgx "github.com/stackus/edat-pgx"
-	http2 "github.com/stackus/edat/http"
+	"github.com/stackus/errors"
 	"google.golang.org/grpc"
+
+	http2 "github.com/stackus/edat/http"
 
 	"shared-go/instrumentation"
 	"shared-go/logging/zerologto"
@@ -62,9 +65,8 @@ func initWebServer(cfg webCfg, poolConn *pgxpool.Pool, logger zerolog.Logger) we
 		web.WithCors(cfg.Cors),
 		web.WithMiddleware(
 			instrumentation.WebInstrumentation(),
-			web.ZeroLogger(logger),
 			http2.RequestContext,
-			// 4. Outbox: Use a WEB request middleware to start a new transaction for each incoming request
+			web.ZeroLogger(logger),
 			edatpgx.WebSessionMiddleware(poolConn, zerologto.Logger(logger)),
 		))
 
@@ -77,30 +79,76 @@ func initWebServer(cfg webCfg, poolConn *pgxpool.Pool, logger zerolog.Logger) we
 
 func initRpcServer(cfg rpc.ServerCfg, poolConn *pgxpool.Pool, logger zerolog.Logger) rpc.Server {
 	return rpc.NewServer(cfg,
-		rpc.WithServerUnaryInterceptors(
-			// 4. Outbox: Use a RPC request middleware to start a new transaction for each incoming request
+		rpc.WithUnaryServerInterceptors(
+			rpc.RequestContextUnaryServerInterceptor,
+			rpc.WithUnaryServerLogging(logger),
 			edatpgx.RpcSessionUnaryInterceptor(poolConn, zerologto.Logger(logger)),
 		),
 		rpc.WithServerUnaryEnsureStatus(),
 	)
 }
 
-func initRpcClients(cfg rpc.ClientCfg) (map[string]*grpc.ClientConn, error) {
+func initRpcClients(cfg rpcCfg, logger zerolog.Logger) (map[string]*grpc.ClientConn, error) {
 	var err error
 
 	clients := map[string]*grpc.ClientConn{}
 
-	clients[OrderService], err = rpc.NewClientConn(cfg, "orderservice:8000", rpc.WithClientUnaryConvertStatus())
+	if cfg.Server.Network == "unix" {
+		conn, err := grpc.Dial(cfg.Server.Address, grpc.WithContextDialer(func(ctx context.Context, s string) (net.Conn, error) {
+			addr, err := net.ResolveUnixAddr(cfg.Server.Network, cfg.Server.Address)
+			if err != nil {
+				return nil, err
+			}
+			return net.DialUnix(cfg.Server.Network, nil, addr)
+		}), grpc.WithInsecure(),
+			grpc.WithChainUnaryInterceptor(
+				rpc.RequestContextUnaryClientInterceptor,
+				rpc.WithUnaryClientLogging(logger),
+				func(ctx context.Context, method string, req, reply interface{}, cc *grpc.ClientConn, invoker grpc.UnaryInvoker, opts ...grpc.CallOption) error {
+					return errors.ReceiveGRPCError(invoker(ctx, method, req, reply, cc, opts...))
+				},
+			),
+		)
+		if err != nil {
+			return nil, err
+		}
+
+		clients[OrderService] = conn
+		clients[ConsumerService] = conn
+		clients[OrderHistoryService] = conn
+
+		return clients, nil
+	}
+
+	clients[OrderService], err = rpc.NewClientConn(cfg.Client, "orderservice:8000",
+		rpc.WithUnaryClientInterceptors(
+			rpc.RequestContextUnaryClientInterceptor,
+			rpc.WithUnaryClientLogging(logger),
+		),
+		rpc.WithClientUnaryConvertStatus(),
+	)
 	if err != nil {
 		return nil, err
 	}
 
-	clients[ConsumerService], err = rpc.NewClientConn(cfg, "consumerservice:8000", rpc.WithClientUnaryConvertStatus())
+	clients[ConsumerService], err = rpc.NewClientConn(cfg.Client, "consumerservice:8000",
+		rpc.WithUnaryClientInterceptors(
+			rpc.RequestContextUnaryClientInterceptor,
+			rpc.WithUnaryClientLogging(logger),
+		),
+		rpc.WithClientUnaryConvertStatus(),
+	)
 	if err != nil {
 		return nil, err
 	}
 
-	clients[OrderHistoryService], err = rpc.NewClientConn(cfg, "orderhistoryservice:8000", rpc.WithClientUnaryConvertStatus())
+	clients[OrderHistoryService], err = rpc.NewClientConn(cfg.Client, "orderhistoryservice:8000",
+		rpc.WithUnaryClientInterceptors(
+			rpc.RequestContextUnaryClientInterceptor,
+			rpc.WithUnaryClientLogging(logger),
+		),
+		rpc.WithClientUnaryConvertStatus(),
+	)
 	if err != nil {
 		return nil, err
 	}

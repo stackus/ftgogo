@@ -8,25 +8,23 @@ import (
 	"sync"
 	"time"
 
-	"github.com/go-chi/chi/v5"
 	"github.com/jackc/pgx/v4/pgxpool"
 	"github.com/joho/godotenv"
 	"github.com/kelseyhightower/envconfig"
 	"github.com/nats-io/stan.go"
-	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/rs/zerolog"
 	"github.com/spf13/cobra"
 	"github.com/stackus/edat-kafka-go"
 	_ "github.com/stackus/edat-msgpack"
 	"github.com/stackus/edat-pgx"
 	"github.com/stackus/edat-stan"
+	"golang.org/x/sync/errgroup"
+
 	"github.com/stackus/edat/es"
-	http2 "github.com/stackus/edat/http"
 	"github.com/stackus/edat/inmem"
 	"github.com/stackus/edat/log"
 	"github.com/stackus/edat/msg"
 	"github.com/stackus/edat/saga"
-	"golang.org/x/sync/errgroup"
 
 	"shared-go/egress"
 	"shared-go/instrumentation"
@@ -179,30 +177,32 @@ func (s *Service) run(*cobra.Command, []string) error {
 		edatpgx.ReceiverSessionMiddleware(pgConn, zerologto.Logger(s.Logger)),
 	)
 
-	s.RpcServer = rpc.NewServer(s.Cfg.Rpc,
-		rpc.WithServerUnaryInterceptors(
-			// 4. Outbox: Use a RPC request middleware to start a new transaction for each incoming request
-			edatpgx.RpcSessionUnaryInterceptor(pgConn, zerologto.Logger(s.Logger)),
-		),
-		rpc.WithServerUnaryEnsureStatus(),
-	)
+	s.RpcServer = initRpcServer(s.Cfg.Rpc, pgConn, s.Logger)
+	// s.RpcServer = rpc.NewServer(s.Cfg.Rpc,
+	// 	rpc.WithUnaryServerInterceptors(
+	// 		// 4. Outbox: Use a RPC request middleware to start a new transaction for each incoming request
+	// 		edatpgx.RpcSessionUnaryInterceptor(pgConn, zerologto.Logger(s.Logger)),
+	// 	),
+	// 	rpc.WithServerUnaryEnsureStatus(),
+	// )
 
-	s.WebServer = web.NewServer(s.Cfg.Web.Http, web.WithHealthCheck(s.Cfg.Web.PingPath))
-
-	s.WebServer.Options(s.Cfg.Web.ApiPath,
-		web.WithSecure(),
-		web.WithCors(s.Cfg.Web.Cors),
-		web.WithMiddleware(
-			instrumentation.WebInstrumentation(),
-			web.ZeroLogger(s.Logger),
-			http2.RequestContext,
-			// 4. Outbox: Use a WEB request middleware to start a new transaction for each incoming request
-			edatpgx.WebSessionMiddleware(pgConn, zerologto.Logger(s.Logger)),
-		))
-
-	s.WebServer.Mount(s.Cfg.Web.MetricsPath, func(r chi.Router) http.Handler {
-		return promhttp.Handler()
-	})
+	s.WebServer = initWebServer(s.Cfg.Web, pgConn, s.Logger)
+	// s.WebServer = web.NewServer(s.Cfg.Web.Http, web.WithHealthCheck(s.Cfg.Web.PingPath))
+	//
+	// s.WebServer.Options(s.Cfg.Web.ApiPath,
+	// 	web.WithSecure(),
+	// 	web.WithCors(s.Cfg.Web.Cors),
+	// 	web.WithMiddleware(
+	// 		instrumentation.WebInstrumentation(),
+	// 		web.ZeroLogger(s.Logger),
+	// 		http2.RequestContext,
+	// 		// 4. Outbox: Use a WEB request middleware to start a new transaction for each incoming request
+	// 		edatpgx.WebSessionMiddleware(pgConn, zerologto.Logger(s.Logger)),
+	// 	))
+	//
+	// s.WebServer.Mount(s.Cfg.Web.MetricsPath, func(r chi.Router) http.Handler {
+	// 	return promhttp.Handler()
+	// })
 
 	err = s.appFn(s)
 	if err != nil {

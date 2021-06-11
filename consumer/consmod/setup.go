@@ -2,6 +2,7 @@ package consmod
 
 import (
 	edatpgx "github.com/stackus/edat-pgx"
+	"github.com/stackus/edat/msg"
 	"github.com/stackus/edat/outbox"
 
 	"github.com/stackus/ftgogo/consumer/internal/adapters"
@@ -24,12 +25,15 @@ func Setup(svc *applications.Monolith) error {
 		svc.PgConn,
 		edatpgx.WithEventStoreTableName("consumer.events"),
 	))
-	messageStore := edatpgx.NewMessageStore(svc.PgConn, edatpgx.WithMessageStoreTableName("consumer.messages"))
+	messageStore := edatpgx.NewMessageStore(svc.CDCPgConn, edatpgx.WithMessageStoreTableName("consumer.messages"))
+	publisher := msg.NewPublisher(messageStore)
+	svc.Publishers = append(svc.Publishers, publisher)
+	svc.Processors = append(svc.Processors, outbox.NewPollingProcessor(messageStore, svc.CDCPublisher))
 
 	// Driven
 	consumerRepo := adapters.NewConsumerRepositoryPublisherMiddleware(
 		adapters.NewConsumerAggregateRootRepository(aggregateStore),
-		adapters.NewConsumerEntityEventPublisher(svc.Publisher),
+		adapters.NewConsumerEntityEventPublisher(publisher),
 	)
 
 	app := application.Service{
@@ -48,9 +52,8 @@ func Setup(svc *applications.Monolith) error {
 	}
 
 	// Drivers
-	handlers.NewCommandHandlers(app).Mount(svc.Subscriber, svc.Publisher)
+	handlers.NewCommandHandlers(app).Mount(svc.Subscriber, publisher)
 	handlers.NewRpcHandlers(app).Mount(svc.RpcServer)
-	svc.Processors = append(svc.Processors, outbox.NewPollingProcessor(messageStore, svc.CDCPublisher))
 
 	return nil
 }

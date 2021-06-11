@@ -22,6 +22,8 @@ replace github.com/stackus/ftgogo/serviceapis => ./../serviceapis
 
 replace shared-go => ../shared-go
 
+//replace github.com/stackus/edat => ../edat
+
 require (
 	github.com/stackus/ftgogo/accounting v0.0.0-20210116185538-3dd9fbb69179
 	github.com/stackus/ftgogo/consumer v0.0.0-20210116185538-3dd9fbb69179

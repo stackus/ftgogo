@@ -24,7 +24,6 @@ import (
 	"shared-go/instrumentation"
 	"shared-go/logging"
 	"shared-go/logging/zerologto"
-	"shared-go/rpc"
 	"shared-go/web"
 )
 
@@ -34,7 +33,7 @@ type gatewayConfig struct {
 	LogLevel        logging.Level `envconfig:"LOG_LEVEL" default:"WARN" desc:"options: [TRACE,DEBUG,INFO,WARN,ERROR,PANIC]"`
 	ShutdownTimeout time.Duration `envconfig:"SHUTDOWN_TIMEOUT" default:"30s" desc:"time to allow services to gracefully stop"`
 	Web             webCfg        `envconfig:"WEB"` // Web Config
-	Rpc             rpc.ClientCfg `envconfig:"RPC"` // RPC Config
+	Rpc             rpcCfg        `envconfig:"RPC"` // RPC Config
 }
 
 type Gateway struct {
@@ -111,7 +110,7 @@ func (g *Gateway) run(*cobra.Command, []string) error {
 
 	log.DefaultLogger = zerologto.Logger(g.Logger)
 
-	g.Clients, err = initRpcClients(g.Cfg.Rpc)
+	g.Clients, err = initRpcClients(g.Cfg.Rpc, g.Logger)
 	if err != nil {
 		return err
 	}

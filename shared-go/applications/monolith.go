@@ -17,12 +17,13 @@ import (
 	edatkafkago "github.com/stackus/edat-kafka-go"
 	edatpgx "github.com/stackus/edat-pgx"
 	edatstan "github.com/stackus/edat-stan"
+	"golang.org/x/sync/errgroup"
+	"google.golang.org/grpc"
+
 	"github.com/stackus/edat/inmem"
 	"github.com/stackus/edat/log"
 	"github.com/stackus/edat/msg"
 	"github.com/stackus/edat/outbox"
-	"golang.org/x/sync/errgroup"
-	"google.golang.org/grpc"
 
 	"shared-go/egress"
 	"shared-go/instrumentation"
@@ -51,7 +52,8 @@ type Monolith struct {
 	Cfg          *monoConfig
 	Logger       zerolog.Logger
 	PgConn       edatpgx.Client
-	Publisher    *msg.Publisher
+	CDCPgConn    edatpgx.Client
+	Publishers   []*msg.Publisher
 	CDCPublisher *msg.Publisher
 	Subscriber   *msg.Subscriber
 	WebServer    web.Server
@@ -131,7 +133,7 @@ func (m *Monolith) run(*cobra.Command, []string) error {
 		panic(err)
 	}
 
-	// 1. Outbox: Use session client which will fetch a transaction from the context
+	m.CDCPgConn = poolConn
 	m.PgConn = edatpgx.NewSessionClient()
 
 	defer func() {
@@ -139,9 +141,6 @@ func (m *Monolith) run(*cobra.Command, []string) error {
 			poolConn.Close()
 		}
 	}()
-
-	// m.AggregateStore = edatpgx.NewSnapshotStore(m.PgConn)(edatpgx.NewEventStore(m.PgConn))
-	// m.SagaInstanceStore = edatpgx.NewSagaInstanceStore(m.PgConn)
 
 	var msgConsumer msg.Consumer
 	var msgProducer msg.Producer
@@ -165,53 +164,22 @@ func (m *Monolith) run(*cobra.Command, []string) error {
 		msgProducer = inmem.NewProducer()
 	}
 
-	// CDC processors publish events from the database into streams
 	m.CDCPublisher = msg.NewPublisher(msgProducer)
-
-	// 2. Outbox: Producer publishes into the db
-	msgProducer = edatpgx.NewMessageStore(m.PgConn)
-	m.Publisher = msg.NewPublisher(msgProducer)
 
 	m.Subscriber = msg.NewSubscriber(msgConsumer)
 	m.Subscriber.Use(
 		instrumentation.MessageInstrumentation(),
-		// 3. Outbox: Use a message receiver middleware to start a new transaction for each incoming message
 		edatpgx.ReceiverSessionMiddleware(poolConn, zerologto.Logger(m.Logger)),
 	)
 
-	m.Clients, err = initRpcClients(m.Cfg.Rpc.Client)
+	m.Clients, err = initRpcClients(m.Cfg.Rpc, m.Logger)
 	if err != nil {
 		return err
 	}
 
 	m.RpcServer = initRpcServer(m.Cfg.Rpc.Server, poolConn, m.Logger)
 
-	// m.RpcServer = rpc.NewServer(m.Cfg.Rpc,
-	// 	rpc.WithServerUnaryInterceptors(
-	// 		// 4. Outbox: Use a RPC request middleware to start a new transaction for each incoming request
-	// 		edatpgx.RpcSessionUnaryInterceptor(poolConn, zerologto.Logger(m.Logger)),
-	// 	),
-	// 	rpc.WithServerUnaryEnsureStatus(),
-	// )
-
 	m.WebServer = initWebServer(m.Cfg.Web, poolConn, m.Logger)
-
-	// m.WebServer = web.NewServer(m.Cfg.Web.Http, web.WithHealthCheck(m.Cfg.Web.PingPath))
-	//
-	// m.WebServer.Options(m.Cfg.Web.ApiPath,
-	// 	web.WithSecure(),
-	// 	web.WithCors(m.Cfg.Web.Cors),
-	// 	web.WithMiddleware(
-	// 		instrumentation.WebInstrumentation(),
-	// 		web.ZeroLogger(m.Logger),
-	// 		http2.RequestContext,
-	// 		// 4. Outbox: Use a WEB request middleware to start a new transaction for each incoming request
-	// 		edatpgx.WebSessionMiddleware(poolConn, zerologto.Logger(m.Logger)),
-	// 	))
-	//
-	// m.WebServer.Mount(m.Cfg.Web.MetricsPath, func(r chi.Router) http.Handler {
-	// 	return promhttp.Handler()
-	// })
 
 	err = m.appFn(m)
 	if err != nil {
@@ -247,15 +215,19 @@ func (m Monolith) waitForMessaging(ctx context.Context) error {
 		defer cancel()
 
 		wg := sync.WaitGroup{}
-		wg.Add(2)
-		go func() {
-			defer wg.Done()
-			if m.Publisher != nil {
-				if err := m.Publisher.Stop(sCtx); err != nil {
-					m.Logger.Error().Err(err).Msg("error while shutting down publisher")
+		for _, p := range m.Publishers {
+			publisher := p
+			wg.Add(1)
+			go func() {
+				defer wg.Done()
+				if publisher != nil {
+					if err := publisher.Stop(sCtx); err != nil {
+						m.Logger.Error().Err(err).Msg("error while shutting down publisher")
+					}
 				}
-			}
-		}()
+			}()
+		}
+		wg.Add(1)
 		go func() {
 			defer wg.Done()
 			if m.Subscriber != nil {
@@ -346,7 +318,11 @@ func (m Monolith) waitForProcessors(ctx context.Context) (err error) {
 	for _, processor := range m.Processors {
 		startFn := func(p outbox.MessageProcessor) func() error {
 			return func() error {
-				return p.Start(ctx)
+				err := p.Start(ctx)
+				if err != nil {
+					m.Logger.Err(err).Msg("processor exited with an error")
+				}
+				return err
 			}
 		}(processor)
 

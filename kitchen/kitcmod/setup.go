@@ -2,6 +2,7 @@ package kitcmod
 
 import (
 	edatpgx "github.com/stackus/edat-pgx"
+	"github.com/stackus/edat/msg"
 	"github.com/stackus/edat/outbox"
 
 	"github.com/stackus/ftgogo/kitchen/internal/adapters"
@@ -24,12 +25,15 @@ func Setup(svc *applications.Monolith) error {
 		svc.PgConn,
 		edatpgx.WithEventStoreTableName("kitchen.events"),
 	))
-	messageStore := edatpgx.NewMessageStore(svc.PgConn, edatpgx.WithMessageStoreTableName("kitchen.messages"))
+	messageStore := edatpgx.NewMessageStore(svc.CDCPgConn, edatpgx.WithMessageStoreTableName("kitchen.messages"))
+	publisher := msg.NewPublisher(messageStore)
+	svc.Publishers = append(svc.Publishers, publisher)
+	svc.Processors = append(svc.Processors, outbox.NewPollingProcessor(messageStore, svc.CDCPublisher))
 
 	// Driven
 	ticketRepo := adapters.NewTicketRepositoryPublisherMiddleware(
 		adapters.NewTicketAggregateRootRepository(aggregateStore),
-		adapters.NewTicketEntityEventPublisher(svc.Publisher),
+		adapters.NewTicketEntityEventPublisher(publisher),
 	)
 	adapters.RestaurantsTableName = "kitchen.restaurants"
 	restaurantRepo := adapters.NewRestaurantPostgresRepository(svc.PgConn)
@@ -55,10 +59,9 @@ func Setup(svc *applications.Monolith) error {
 	}
 
 	// Drivers
-	handlers.NewCommandHandlers(app).Mount(svc.Subscriber, svc.Publisher)
+	handlers.NewCommandHandlers(app).Mount(svc.Subscriber, publisher)
 	handlers.NewRestaurantEventHandlers(app).Mount(svc.Subscriber)
 	handlers.NewRpcHandlers(app).Mount(svc.RpcServer)
-	svc.Processors = append(svc.Processors, outbox.NewPollingProcessor(messageStore, svc.CDCPublisher))
 
 	return nil
 }

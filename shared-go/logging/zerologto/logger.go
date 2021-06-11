@@ -67,7 +67,7 @@ func (l *zerologLogger) fields(ctx zerolog.Context, fields []log.Field) zerolog.
 		case log.IntType:
 			ctx = ctx.Int(field.Key, field.Int)
 		case log.DurationType:
-			ctx = ctx.Dur(field.Key, field.Duration)
+			ctx = ctx.Str(field.Key, field.Duration.String())
 		case log.ErrorType:
 			ctx = ctx.Stack().Err(field.Error)
 		}

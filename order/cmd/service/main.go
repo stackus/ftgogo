@@ -38,6 +38,7 @@ func initService(svc *applications.Service) error {
 	reviseOrderSaga := adapters.NewReviseOrderOrchestrationSaga(svc.SagaInstanceStore, svc.Publisher)
 	svc.Subscriber.Subscribe(reviseOrderSaga.ReplyChannel(), reviseOrderSaga)
 
+	// Counters
 	ordersPlacedCounter := adapters.NewOrdersPlacedCounter()
 	ordersApprovedCounter := adapters.NewOrdersApprovedCounter()
 	ordersRejectedCounter := adapters.NewOrdersRejectedCounter()

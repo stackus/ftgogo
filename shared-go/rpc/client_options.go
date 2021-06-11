@@ -43,3 +43,9 @@ func WithClientUnaryConvertStatus() ClientOption {
 		})
 	}
 }
+
+func WithUnaryClientInterceptors(interceptors ...grpc.UnaryClientInterceptor) ClientOption {
+	return func(config *clientConfig) {
+		config.AddUnaryInterceptor(interceptors...)
+	}
+}

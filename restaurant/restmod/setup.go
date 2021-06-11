@@ -2,6 +2,7 @@ package restmod
 
 import (
 	edatpgx "github.com/stackus/edat-pgx"
+	"github.com/stackus/edat/msg"
 	"github.com/stackus/edat/outbox"
 
 	"github.com/stackus/ftgogo/restaurant/internal/adapters"
@@ -16,13 +17,18 @@ import (
 func Setup(svc *applications.Monolith) error {
 	serviceapis.RegisterTypes()
 
+	// Infrastructure
+	messageStore := edatpgx.NewMessageStore(svc.CDCPgConn, edatpgx.WithMessageStoreTableName("restaurant.messages"))
+	publisher := msg.NewPublisher(messageStore)
+	svc.Publishers = append(svc.Publishers, publisher)
+	svc.Processors = append(svc.Processors, outbox.NewPollingProcessor(messageStore, svc.CDCPublisher))
+
 	// Driven
 	adapters.RestaurantsTableName = "restaurant.restaurants"
 	restaurantRepo := adapters.NewRestaurantPostgresPublisherMiddleware(
 		adapters.NewRestaurantPostgresRepository(svc.PgConn),
-		adapters.NewRestaurantEntityEventPublisher(svc.Publisher),
+		adapters.NewRestaurantEntityEventPublisher(publisher),
 	)
-	messageStore := edatpgx.NewMessageStore(svc.PgConn, edatpgx.WithMessageStoreTableName("restaurant.messages"))
 
 	app := application.Application{
 		Commands: application.Commands{
@@ -35,7 +41,6 @@ func Setup(svc *applications.Monolith) error {
 
 	// Drivers
 	handlers.NewRpcHandlers(app).Mount(svc.RpcServer)
-	svc.Processors = append(svc.Processors, outbox.NewPollingProcessor(messageStore, svc.CDCPublisher))
 
 	return nil
 }

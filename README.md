@@ -17,6 +17,7 @@ This repository started as a Golang clone of the FTGO demonstration application 
 demonstrate additional microservice patterns and techniques.
 
 ![FTGOGO ARchitecture](docs/architecture.png)
+
 ## Prerequisites
 
 [Docker](https://www.docker.com/) - Everything is built and run from a docker compose environment.
@@ -122,15 +123,15 @@ example.
 The same three sagas found in [FTGO](https://github.com/microservices-patterns/ftgo-application) have been implemented
 here in the [order-service](https://github.com/stackus/ftgogo/blob/master/order/cmd/service).
 
-- [CreateOrderSaga](https://github.com/stackus/ftgogo/blob/master/order/internal/adapters/create_order_orchestration_saga.go) - saga
-  responsible for the creation of a new order  
-  ![Steps](docs/createOrderSaga.png)
-- [CancelOrderSaga](https://github.com/stackus/ftgogo/blob/master/order/internal/adapters/cancel_order_orchestration_saga.go) - saga
-  responsible for the cancelling and releasing of order resources like tickets and accounting reserves  
-  ![Steps](docs/cancelOrderSaga.png)
-- [ReviseOrderSaga](https://github.com/stackus/ftgogo/blob/master/order/internal/adapters/revise_order_orchestration_saga.go) - saga
-  responsible for the processing the changes made to an open order  
-  ![Steps](docs/reviseOrderSaga.png)
+- [CreateOrderSaga](https://github.com/stackus/ftgogo/blob/master/order/internal/adapters/create_order_orchestration_saga.go)
+  - saga responsible for the creation of a new order  
+    ![Steps](docs/createOrderSaga.png)
+- [CancelOrderSaga](https://github.com/stackus/ftgogo/blob/master/order/internal/adapters/cancel_order_orchestration_saga.go)
+  - saga responsible for the cancelling and releasing of order resources like tickets and accounting reserves  
+    ![Steps](docs/cancelOrderSaga.png)
+- [ReviseOrderSaga](https://github.com/stackus/ftgogo/blob/master/order/internal/adapters/revise_order_orchestration_saga.go)
+  - saga responsible for the processing the changes made to an open order  
+    ![Steps](docs/reviseOrderSaga.png)
 
 ### Event-driven architecture
 
@@ -162,12 +163,14 @@ the switch to GRPC.
 
 ### Other
 
+#### Tracing
+TODO document Request, correlation, and causation
+
 #### Metrics/Instrumentation
 
 Prometheus metrics for each service are available at `http://localhost:[port]/metrics`. The order-service has a few
 additional counters. See the
-order-service [application](https://github.com/stackus/ftgogo/blob/master/order/cmd/service/application.go) for more
-information.
+order-service [code](https://github.com/stackus/ftgogo/blob/master/order/cmd/service/main.go) for more information.
 
 #### Mono-repository
 
@@ -178,11 +181,13 @@ as possible, so you'll find there is also quite a bit of shared code in packages
 
 #### Always start with a Monolith
 
-Before developing an application using microservices the strongly suggested advice is to start with a monolith. Whether
-you have a legacy monolith application or are starting a new application the last step before microservices is to
-refactor or design the monolith to be loosely-coupled.
+Industry exports suggest applications start with a monolith, single deployable application, before developing an
+application using microservices. Whether you have a legacy monolith application or are starting a new application the
+last step before microservices is to refactor or design the monolith to be loosely-coupled.
 
-The service capabilities can all be run together in a loosely-coupled monolith to demonstrate what that might look like.
+The service capabilities can all be run together in a monolith to demonstrate what that might look like. It'll at beat
+represent the final form of a monolith that has been broken up by feature. This kind of monolith has several names.
+The "Majestic Monolith", the "Loosely-Coupled Monolith", or the "Modular Monolith".
 
 #### Type Registration
 

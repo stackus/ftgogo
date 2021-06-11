@@ -1,15 +1,11 @@
 package cwebmod
 
 import (
-	"context"
 	"fmt"
-	"net"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/render"
-	"github.com/stackus/errors"
-	"google.golang.org/grpc"
 
 	"github.com/stackus/ftgogo/customer-web/internal/adapters"
 	"github.com/stackus/ftgogo/customer-web/internal/application"
@@ -23,25 +19,11 @@ import (
 )
 
 func Setup(svc *applications.Monolith) error {
-	// Infrastructure
-	conn, err := grpc.Dial(svc.Cfg.Rpc.Address, grpc.WithContextDialer(func(ctx context.Context, s string) (net.Conn, error) {
-		addr, err := net.ResolveUnixAddr(svc.Cfg.Rpc.Network, svc.Cfg.Rpc.Address)
-		if err != nil {
-			return nil, err
-		}
-		return net.DialUnix(svc.Cfg.Rpc.Network, nil, addr)
-	}), grpc.WithChainUnaryInterceptor(func(ctx context.Context, method string, req, reply interface{}, cc *grpc.ClientConn, invoker grpc.UnaryInvoker, opts ...grpc.CallOption) error {
-		return errors.ReceiveGRPCError(invoker(ctx, method, req, reply, cc, opts...))
-	}))
-	if err != nil {
-		return err
-	}
-
 	// Driven
 	// Create a unix socket connection to the GRPC server
-	orderClient := adapters.NewOrderGrpcClient(orderpb.NewOrderServiceClient(conn))
-	consumerClient := adapters.NewConsumerGrpcClient(consumerpb.NewConsumerServiceClient(conn))
-	orderHistoryClient := adapters.NewOrderHistoryGrpcClient(orderhistorypb.NewOrderHistoryServiceClient(conn))
+	orderClient := adapters.NewOrderGrpcClient(orderpb.NewOrderServiceClient(svc.Clients[applications.OrderService]))
+	consumerClient := adapters.NewConsumerGrpcClient(consumerpb.NewConsumerServiceClient(svc.Clients[applications.ConsumerService]))
+	orderHistoryClient := adapters.NewOrderHistoryGrpcClient(orderhistorypb.NewOrderHistoryServiceClient(svc.Clients[applications.OrderHistoryService]))
 
 	app := application.Service{
 		Commands: application.Commands{
@@ -76,10 +58,6 @@ func Setup(svc *applications.Monolith) error {
 		})
 		return router
 	})
-
-	svc.Cleanup = func(ctx context.Context) error {
-		return conn.Close()
-	}
 
 	return nil
 }

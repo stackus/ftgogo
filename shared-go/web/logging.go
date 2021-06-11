@@ -8,6 +8,7 @@ import (
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/pkg/errors"
 	"github.com/rs/zerolog"
+	"github.com/stackus/edat/core"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 )
@@ -72,6 +73,10 @@ func ZeroLogger(logger zerolog.Logger) func(next http.Handler) http.Handler {
 
 			start := time.Now()
 
+			requestID := core.GetRequestID(request.Context())
+			correlationID := core.GetCorrelationID(request.Context())
+			causationID := core.GetCausationID(request.Context())
+
 			defer func() {
 				var err error
 				var logFn func() *zerolog.Event
@@ -97,10 +102,17 @@ func ZeroLogger(logger zerolog.Logger) func(next http.Handler) http.Handler {
 				if err != nil {
 					log = log.Err(err)
 				}
-				log.Str("RemoteAddr", request.RemoteAddr).
+				log = log.Str("RemoteAddr", request.RemoteAddr).
 					Int("ContextLength", ww.BytesWritten()).
-					Dur("ResponseTime", time.Since(start)).
-					Msgf("[%d] %s %s", ww.Status(), request.Method, request.RequestURI)
+					Dur("ResponseTime", time.Since(start))
+
+				if requestID != "" {
+					log = log.Str("RequestID", requestID).
+						Str("CorrelationID", correlationID).
+						Str("CausationID", causationID)
+				}
+
+				log.Msgf("[%d] %s %s", ww.Status(), request.Method, request.RequestURI)
 			}()
 
 			next.ServeHTTP(ww, request)
