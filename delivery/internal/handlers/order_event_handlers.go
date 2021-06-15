@@ -7,7 +7,7 @@ import (
 
 	"github.com/stackus/ftgogo/delivery/internal/application"
 	"github.com/stackus/ftgogo/delivery/internal/application/commands"
-	"github.com/stackus/ftgogo/serviceapis/deliveryapi"
+	"github.com/stackus/ftgogo/serviceapis/commonapi"
 	"github.com/stackus/ftgogo/serviceapis/orderapi"
 )
 
@@ -28,7 +28,7 @@ func (h OrderEventHandlers) OrderCreated(ctx context.Context, evtMsg msg.EntityE
 	return h.app.Commands.CreateDelivery.Handle(ctx, commands.CreateDelivery{
 		OrderID:      evtMsg.EntityID(),
 		RestaurantID: evt.RestaurantID,
-		DeliveryAddress: deliveryapi.Address{
+		DeliveryAddress: &commonapi.Address{
 			Street1: evt.DeliverTo.Street1,
 			Street2: evt.DeliverTo.Street2,
 			City:    evt.DeliverTo.City,

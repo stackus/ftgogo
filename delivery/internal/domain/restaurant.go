@@ -3,7 +3,7 @@ package domain
 import (
 	"github.com/stackus/errors"
 
-	"github.com/stackus/ftgogo/serviceapis/deliveryapi"
+	"github.com/stackus/ftgogo/serviceapis/commonapi"
 )
 
 // Restaurant errors
@@ -14,6 +14,6 @@ var (
 type Restaurant struct {
 	RestaurantID string
 	Name         string
-	Address      deliveryapi.Address
+	Address      *commonapi.Address
 	// note: no menu items
 }

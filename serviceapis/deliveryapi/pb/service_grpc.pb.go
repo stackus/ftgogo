@@ -18,8 +18,9 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type DeliveryServiceClient interface {
+	GetCourier(ctx context.Context, in *GetCourierRequest, opts ...grpc.CallOption) (*GetCourierResponse, error)
 	SetCourierAvailability(ctx context.Context, in *SetCourierAvailabilityRequest, opts ...grpc.CallOption) (*SetCourierAvailabilityResponse, error)
-	GetDeliveryStatus(ctx context.Context, in *GetDeliveryStatusRequest, opts ...grpc.CallOption) (*GetDeliveryStatusResponse, error)
+	GetDelivery(ctx context.Context, in *GetDeliveryRequest, opts ...grpc.CallOption) (*GetDeliveryResponse, error)
 }
 
 type deliveryServiceClient struct {
@@ -28,6 +29,15 @@ type deliveryServiceClient struct {
 
 func NewDeliveryServiceClient(cc grpc.ClientConnInterface) DeliveryServiceClient {
 	return &deliveryServiceClient{cc}
+}
+
+func (c *deliveryServiceClient) GetCourier(ctx context.Context, in *GetCourierRequest, opts ...grpc.CallOption) (*GetCourierResponse, error) {
+	out := new(GetCourierResponse)
+	err := c.cc.Invoke(ctx, "/deliverypb.DeliveryService/GetCourier", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
 }
 
 func (c *deliveryServiceClient) SetCourierAvailability(ctx context.Context, in *SetCourierAvailabilityRequest, opts ...grpc.CallOption) (*SetCourierAvailabilityResponse, error) {
@@ -39,9 +49,9 @@ func (c *deliveryServiceClient) SetCourierAvailability(ctx context.Context, in *
 	return out, nil
 }
 
-func (c *deliveryServiceClient) GetDeliveryStatus(ctx context.Context, in *GetDeliveryStatusRequest, opts ...grpc.CallOption) (*GetDeliveryStatusResponse, error) {
-	out := new(GetDeliveryStatusResponse)
-	err := c.cc.Invoke(ctx, "/deliverypb.DeliveryService/GetDeliveryStatus", in, out, opts...)
+func (c *deliveryServiceClient) GetDelivery(ctx context.Context, in *GetDeliveryRequest, opts ...grpc.CallOption) (*GetDeliveryResponse, error) {
+	out := new(GetDeliveryResponse)
+	err := c.cc.Invoke(ctx, "/deliverypb.DeliveryService/GetDelivery", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -52,8 +62,9 @@ func (c *deliveryServiceClient) GetDeliveryStatus(ctx context.Context, in *GetDe
 // All implementations must embed UnimplementedDeliveryServiceServer
 // for forward compatibility
 type DeliveryServiceServer interface {
+	GetCourier(context.Context, *GetCourierRequest) (*GetCourierResponse, error)
 	SetCourierAvailability(context.Context, *SetCourierAvailabilityRequest) (*SetCourierAvailabilityResponse, error)
-	GetDeliveryStatus(context.Context, *GetDeliveryStatusRequest) (*GetDeliveryStatusResponse, error)
+	GetDelivery(context.Context, *GetDeliveryRequest) (*GetDeliveryResponse, error)
 	mustEmbedUnimplementedDeliveryServiceServer()
 }
 
@@ -61,11 +72,14 @@ type DeliveryServiceServer interface {
 type UnimplementedDeliveryServiceServer struct {
 }
 
+func (UnimplementedDeliveryServiceServer) GetCourier(context.Context, *GetCourierRequest) (*GetCourierResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetCourier not implemented")
+}
 func (UnimplementedDeliveryServiceServer) SetCourierAvailability(context.Context, *SetCourierAvailabilityRequest) (*SetCourierAvailabilityResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SetCourierAvailability not implemented")
 }
-func (UnimplementedDeliveryServiceServer) GetDeliveryStatus(context.Context, *GetDeliveryStatusRequest) (*GetDeliveryStatusResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetDeliveryStatus not implemented")
+func (UnimplementedDeliveryServiceServer) GetDelivery(context.Context, *GetDeliveryRequest) (*GetDeliveryResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetDelivery not implemented")
 }
 func (UnimplementedDeliveryServiceServer) mustEmbedUnimplementedDeliveryServiceServer() {}
 
@@ -78,6 +92,24 @@ type UnsafeDeliveryServiceServer interface {
 
 func RegisterDeliveryServiceServer(s grpc.ServiceRegistrar, srv DeliveryServiceServer) {
 	s.RegisterService(&DeliveryService_ServiceDesc, srv)
+}
+
+func _DeliveryService_GetCourier_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetCourierRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(DeliveryServiceServer).GetCourier(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/deliverypb.DeliveryService/GetCourier",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(DeliveryServiceServer).GetCourier(ctx, req.(*GetCourierRequest))
+	}
+	return interceptor(ctx, in, info, handler)
 }
 
 func _DeliveryService_SetCourierAvailability_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
@@ -98,20 +130,20 @@ func _DeliveryService_SetCourierAvailability_Handler(srv interface{}, ctx contex
 	return interceptor(ctx, in, info, handler)
 }
 
-func _DeliveryService_GetDeliveryStatus_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetDeliveryStatusRequest)
+func _DeliveryService_GetDelivery_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetDeliveryRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(DeliveryServiceServer).GetDeliveryStatus(ctx, in)
+		return srv.(DeliveryServiceServer).GetDelivery(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/deliverypb.DeliveryService/GetDeliveryStatus",
+		FullMethod: "/deliverypb.DeliveryService/GetDelivery",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(DeliveryServiceServer).GetDeliveryStatus(ctx, req.(*GetDeliveryStatusRequest))
+		return srv.(DeliveryServiceServer).GetDelivery(ctx, req.(*GetDeliveryRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -124,12 +156,16 @@ var DeliveryService_ServiceDesc = grpc.ServiceDesc{
 	HandlerType: (*DeliveryServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
+			MethodName: "GetCourier",
+			Handler:    _DeliveryService_GetCourier_Handler,
+		},
+		{
 			MethodName: "SetCourierAvailability",
 			Handler:    _DeliveryService_SetCourierAvailability_Handler,
 		},
 		{
-			MethodName: "GetDeliveryStatus",
-			Handler:    _DeliveryService_GetDeliveryStatus_Handler,
+			MethodName: "GetDelivery",
+			Handler:    _DeliveryService_GetDelivery_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

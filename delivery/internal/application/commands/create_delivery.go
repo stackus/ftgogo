@@ -6,13 +6,13 @@ import (
 
 	"github.com/stackus/ftgogo/delivery/internal/adapters"
 	"github.com/stackus/ftgogo/delivery/internal/domain"
-	"github.com/stackus/ftgogo/serviceapis/deliveryapi"
+	"github.com/stackus/ftgogo/serviceapis/commonapi"
 )
 
 type CreateDelivery struct {
 	OrderID         string
 	RestaurantID    string
-	DeliveryAddress deliveryapi.Address
+	DeliveryAddress *commonapi.Address
 }
 
 type CreateDeliveryHandler struct {

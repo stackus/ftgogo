@@ -19,5 +19,6 @@ type Commands struct {
 }
 
 type Queries struct {
-	GetDeliveryStatus queries.GetDeliveryStatusHandler
+	GetCourier  queries.GetCourierHandler
+	GetDelivery queries.GetDeliveryHandler
 }

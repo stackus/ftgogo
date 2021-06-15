@@ -1,0 +1,477 @@
+openapi: "3.0.0"
+info:
+  version: "1.0.0"
+  title: Store Web API
+  description: The Store Web API is part of the FTGOGO demonstration application
+  contact:
+    name: FTGOGO Issues
+    url: https://github.com/stackus/ftgogo/issues
+servers:
+  - url: http://{host}:{port}/api
+    variables:
+      host:
+        default: localhost
+      port:
+        default: "8001"
+paths:
+  /accounts/{accountID}:
+    get:
+      operationId: getAccount
+      parameters:
+        - $ref: '#/components/parameters/AccountID'
+      responses:
+        '200':
+          $ref: '#/components/responses/AccountResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+  /accounts/{accountID}/disable:
+    put:
+      operationId: disableAccount
+      parameters:
+        - $ref: '#/components/parameters/AccountID'
+      responses:
+        '200':
+          $ref: '#/components/responses/AccountIDResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+  /accounts/{accountID}/enable:
+    put:
+      operationId: enableAccount
+      parameters:
+        - $ref: '#/components/parameters/AccountID'
+      responses:
+        '200':
+          $ref: '#/components/responses/AccountIDResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+  /consumers/{consumerID}:
+    get:
+      operationId: getConsumer
+      parameters:
+        - $ref: '#/components/parameters/ConsumerID'
+      responses:
+        '200':
+          $ref: '#/components/responses/ConsumerResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+  /couriers/{courierID}/availability:
+    post:
+      operationId: setCourierAvailability
+      parameters:
+        - $ref: '#/components/parameters/CourierID'
+      requestBody:
+        description: courier availability request
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [ available ]
+              properties:
+                available:
+                  type: boolean
+      responses:
+        '200':
+          $ref: '#/components/responses/CourierAvailableResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+  /deliveries/{deliveryID}:
+    get:
+      operationId: getDeliveryHistory
+      parameters:
+        - $ref: '#/components/parameters/DeliveryID'
+      responses:
+        '200':
+          $ref: '#/components/responses/DeliveryHistoryResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+  /orders/{orderID}:
+    get:
+      operationId: getOrder
+      security:
+        - bearerAuth: [ ]
+      parameters:
+        - $ref: '#/components/parameters/OrderID'
+      responses:
+        '200':
+          $ref: '#/components/responses/OrderResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+  /orders/{orderID}/cancel:
+    put:
+      operationId: cancelOrder
+      security:
+        - bearerAuth: [ ]
+      parameters:
+        - $ref: '#/components/parameters/OrderID'
+      responses:
+        '202':
+          $ref: '#/components/responses/OrderStatusResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+  /restaurants:
+    post:
+      operationId: createRestaurant
+      requestBody:
+        description: create restaurant request
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [ name, address, menu ]
+              properties:
+                name:
+                  type: string
+                address:
+                  $ref: '../../../serviceapis/commonapi/spec.yaml#/components/schemas/Address'
+                menu:
+                  type: object
+                  required: [ menu_items ]
+                  properties:
+                    menu_items:
+                      type: array
+                      items:
+                        $ref: '#/components/schemas/MenuItem'
+      responses:
+        '201':
+          $ref: '#/components/responses/RestaurantIDResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+  /restaurants/{restaurantID}:
+    get:
+      operationId: getRestaurant
+      parameters:
+        - $ref: '#/components/parameters/RestaurantID'
+      responses:
+        '200':
+          $ref: '#/components/responses/RestaurantResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+security:
+  - { }
+  - bearerAuth: [ ]
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    Account:
+      type: object
+      required: [ account_id, enabled ]
+      properties:
+        account_id:
+          type: string
+        enabled:
+          type: boolean
+    DeliveryHistory:
+      type: object
+      required: [ id, status, assigned_courier, courier_actions ]
+      properties:
+        id:
+          type: string
+          format: uuid
+        status:
+          type: string
+        assigned_courier:
+          type: string
+        courier_actions:
+          type: array
+          items:
+            type: string
+    OrderState:
+      type: string
+      enum: [ Unknown, ApprovalPending, Approved, Rejected, CancelPending, Cancelled, RevisionPending ]
+    Order:
+      type: object
+      required: [ order_id, status, order_total ]
+      properties:
+        order_id:
+          type: string
+        status:
+          $ref: '#/components/schemas/OrderState'
+        order_total:
+          type: integer
+    OrderDetail:
+      type: object
+      required: [ order_id, status, restaurant_id, restaurant_name, created_at ]
+      properties:
+        order_id:
+          type: string
+          format: uuid
+        status:
+          $ref: '#/components/schemas/OrderState'
+        restaurant_id:
+          type: string
+          format: uuid
+        restaurant_name:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+    OrderDetailFilters:
+      type: object
+      properties:
+        since:
+          type: string
+          format: date-time
+        keywords:
+          type: array
+          items:
+            type: string
+        status:
+          $ref: '#/components/schemas/OrderState'
+    Restaurant:
+      type: object
+      required: [ id, name, address, menu ]
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        address:
+          $ref: '../../../serviceapis/commonapi/spec.yaml#/components/schemas/Address'
+        menu:
+          type: object
+          required: [ menu_items ]
+          properties:
+            menu_items:
+              type: array
+              items:
+                $ref: '#/components/schemas/MenuItem'
+    MenuItem:
+      type: object
+      required: [ id, name, price ]
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        price:
+          type: integer
+  parameters:
+    NextQuery:
+      in: query
+      name: next
+      description: provide to read the next page of results
+      required: false
+      schema:
+        type: string
+    LimitQuery:
+      in: query
+      name: limit
+      description: provide to set the results page size
+      required: false
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 50
+        default: 20
+    AccountID:
+      in: path
+      name: accountID
+      description: account id (uuid)
+      required: true
+      schema:
+        type: string
+        format: uuid
+    ConsumerID:
+      in: path
+      name: consumerID
+      description: consumer id (uuid)
+      required: true
+      schema:
+        type: string
+        format: uuid
+    CourierID:
+      in: path
+      name: courierID
+      description: courier id (uuid)
+      required: true
+      schema:
+        type: string
+        format: uuid
+    DeliveryID:
+      in: path
+      name: deliveryID
+      description: delivery id (uuid)
+      required: true
+      schema:
+        type: string
+        format: uuid
+    OrderID:
+      in: path
+      name: orderID
+      description: order id (uuid)
+      required: true
+      schema:
+        type: string
+        format: uuid
+    RestaurantID:
+      in: path
+      name: restaurantID
+      description: restaurant id (uuid)
+      required: true
+      schema:
+        type: string
+        format: uuid
+  responses:
+    EmptyResponse:
+      description: No Content
+    ErrorResponse:
+      description: Unexpected Error
+      content:
+        application/json:
+          schema:
+            type: object
+            required: [ message ]
+            properties:
+              message:
+                type: string
+    AccountIDResponse:
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            required: [ id ]
+            properties:
+              id:
+                type: string
+    AccountResponse:
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            required: [ account ]
+            properties:
+              account:
+                $ref: '#/components/schemas/Account'
+    ConsumerIDResponse:
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            required: [ id ]
+            properties:
+              id:
+                type: string
+    ConsumerResponse:
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            required: [ consumer_id, name ]
+            properties:
+              consumer_id:
+                type: string
+              name:
+                type: string
+    ConsumerAddressIDResponse:
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            required: [ consumer_id, address_id ]
+            properties:
+              consumer_id:
+                type: string
+              address_id:
+                type: string
+    ConsumerAddressResponse:
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            required: [ address ]
+            properties:
+              address:
+                $ref: '../../../serviceapis/commonapi/spec.yaml#/components/schemas/Address'
+    CourierAvailableResponse:
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            required: [ available ]
+            properties:
+              available:
+                type: boolean
+    DeliveryHistoryResponse:
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            required: [ delivery_history ]
+            properties:
+              delivery_history:
+                $ref: '#/components/schemas/DeliveryHistory'
+    OrderIDResponse:
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            required: [ id ]
+            properties:
+              id:
+                type: string
+    OrderStatusResponse:
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            required: [ status ]
+            properties:
+              status:
+                $ref: '#/components/schemas/OrderState'
+    OrderResponse:
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            required: [ order ]
+            properties:
+              order:
+                $ref: '#/components/schemas/Order'
+    SearchOrdersResponse:
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            required: [ orders, next ]
+            properties:
+              orders:
+                type: array
+                items:
+                  $ref: '#/components/schemas/OrderDetail'
+              next:
+                type: string
+    RestaurantIDResponse:
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            required: [ id ]
+            properties:
+              id:
+                type: string
+    RestaurantResponse:
+      description: OK
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Restaurant'

@@ -4,10 +4,12 @@ option go_package = "github.com/stackus/ftgogo/serviceapis/accountingapi/pb;acco
 
 package accountingpb;
 
+import 'google/protobuf/empty.proto';
+
 service AccountingService {
   rpc GetAccount(GetAccountRequest) returns (GetAccountResponse);
-  rpc DisableAccount(DisableAccountRequest) returns (DisableAccountResponse);
-  rpc EnableAccount(EnableAccountRequest) returns (EnableAccountResponse);
+  rpc DisableAccount(DisableAccountRequest) returns (google.protobuf.Empty);
+  rpc EnableAccount(EnableAccountRequest) returns (google.protobuf.Empty);
 }
 
 message GetAccountRequest {
@@ -16,20 +18,13 @@ message GetAccountRequest {
 
 message GetAccountResponse {
   string AccountID = 1;
+  bool Enabled = 2;
 }
 
 message DisableAccountRequest {
   string AccountID = 1;
 }
 
-message DisableAccountResponse {
-  string AccountID = 1;
-}
-
 message EnableAccountRequest {
-  string AccountID = 1;
-}
-
-message EnableAccountResponse {
   string AccountID = 1;
 }

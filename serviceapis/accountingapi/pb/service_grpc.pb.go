@@ -7,6 +7,7 @@ import (
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
+	emptypb "google.golang.org/protobuf/types/known/emptypb"
 )
 
 // This is a compile-time assertion to ensure that this generated file
@@ -19,8 +20,8 @@ const _ = grpc.SupportPackageIsVersion7
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type AccountingServiceClient interface {
 	GetAccount(ctx context.Context, in *GetAccountRequest, opts ...grpc.CallOption) (*GetAccountResponse, error)
-	DisableAccount(ctx context.Context, in *DisableAccountRequest, opts ...grpc.CallOption) (*DisableAccountResponse, error)
-	EnableAccount(ctx context.Context, in *EnableAccountRequest, opts ...grpc.CallOption) (*EnableAccountResponse, error)
+	DisableAccount(ctx context.Context, in *DisableAccountRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	EnableAccount(ctx context.Context, in *EnableAccountRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 }
 
 type accountingServiceClient struct {
@@ -40,8 +41,8 @@ func (c *accountingServiceClient) GetAccount(ctx context.Context, in *GetAccount
 	return out, nil
 }
 
-func (c *accountingServiceClient) DisableAccount(ctx context.Context, in *DisableAccountRequest, opts ...grpc.CallOption) (*DisableAccountResponse, error) {
-	out := new(DisableAccountResponse)
+func (c *accountingServiceClient) DisableAccount(ctx context.Context, in *DisableAccountRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+	out := new(emptypb.Empty)
 	err := c.cc.Invoke(ctx, "/accountingpb.AccountingService/DisableAccount", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -49,8 +50,8 @@ func (c *accountingServiceClient) DisableAccount(ctx context.Context, in *Disabl
 	return out, nil
 }
 
-func (c *accountingServiceClient) EnableAccount(ctx context.Context, in *EnableAccountRequest, opts ...grpc.CallOption) (*EnableAccountResponse, error) {
-	out := new(EnableAccountResponse)
+func (c *accountingServiceClient) EnableAccount(ctx context.Context, in *EnableAccountRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+	out := new(emptypb.Empty)
 	err := c.cc.Invoke(ctx, "/accountingpb.AccountingService/EnableAccount", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -63,8 +64,8 @@ func (c *accountingServiceClient) EnableAccount(ctx context.Context, in *EnableA
 // for forward compatibility
 type AccountingServiceServer interface {
 	GetAccount(context.Context, *GetAccountRequest) (*GetAccountResponse, error)
-	DisableAccount(context.Context, *DisableAccountRequest) (*DisableAccountResponse, error)
-	EnableAccount(context.Context, *EnableAccountRequest) (*EnableAccountResponse, error)
+	DisableAccount(context.Context, *DisableAccountRequest) (*emptypb.Empty, error)
+	EnableAccount(context.Context, *EnableAccountRequest) (*emptypb.Empty, error)
 	mustEmbedUnimplementedAccountingServiceServer()
 }
 
@@ -75,10 +76,10 @@ type UnimplementedAccountingServiceServer struct {
 func (UnimplementedAccountingServiceServer) GetAccount(context.Context, *GetAccountRequest) (*GetAccountResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetAccount not implemented")
 }
-func (UnimplementedAccountingServiceServer) DisableAccount(context.Context, *DisableAccountRequest) (*DisableAccountResponse, error) {
+func (UnimplementedAccountingServiceServer) DisableAccount(context.Context, *DisableAccountRequest) (*emptypb.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DisableAccount not implemented")
 }
-func (UnimplementedAccountingServiceServer) EnableAccount(context.Context, *EnableAccountRequest) (*EnableAccountResponse, error) {
+func (UnimplementedAccountingServiceServer) EnableAccount(context.Context, *EnableAccountRequest) (*emptypb.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method EnableAccount not implemented")
 }
 func (UnimplementedAccountingServiceServer) mustEmbedUnimplementedAccountingServiceServer() {}

@@ -1,0 +1,115 @@
+openapi: "3.0.0"
+info:
+  version: "1.0.0"
+  title: Restaurant Service API
+  description: The restaurant-service API is part of the FTGOGO demonstration application
+  contact:
+    name: FTGOGO Issues
+    url: https://github.com/stackus/ftgogo/issues
+servers:
+  - url: https://{host}:{port}/api
+    variables:
+      host:
+        default: localhost
+      port:
+        default: "8006"
+paths:
+  /restaurants:
+    post:
+      summary: Create a new restaurant for delivery
+      operationId: createRestaurant
+      requestBody:
+        description: create restaurant request
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [ name, address, menu ]
+              properties:
+                name:
+                  type: string
+                address:
+                  $ref: '../../../serviceapis/commonapi/spec.yaml#/components/schemas/Address'
+                menu:
+                  type: object
+                  required: [ menu_items ]
+                  properties:
+                    menu_items:
+                      type: array
+                      items:
+                        $ref: '#/components/schemas/MenuItem'
+      responses:
+        '201':
+          $ref: '#/components/responses/RestaurantIDResponse'
+        default:
+          $ref: '../../../shared-go/web/spec.yaml#/components/responses/ErrorResponse'
+  /restaurants/{restaurantID}:
+    get:
+      summary: Get information for an restaurant by ID
+      operationId: getRestaurant
+      parameters:
+        - $ref: '#/components/parameters/RestaurantID'
+      responses:
+        '200':
+          $ref: '#/components/responses/RestaurantResponse'
+        default:
+          $ref: '../../../shared-go/web/spec.yaml#/components/responses/ErrorResponse'
+
+components:
+  schemas:
+    Restaurant:
+      type: object
+      required: [ id, name, address, menu ]
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        address:
+          $ref: '../../../serviceapis/commonapi/spec.yaml#/components/schemas/Address'
+        menu:
+          type: object
+          required: [ menu_items ]
+          properties:
+            menu_items:
+              type: array
+              items:
+                $ref: '#/components/schemas/MenuItem'
+    MenuItem:
+      type: object
+      required: [ id, name, price ]
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        price:
+          type: integer
+  parameters:
+    RestaurantID:
+      in: path
+      name: restaurantID
+      description: restaurant id (uuid)
+      required: true
+      schema:
+        type: string
+        format: uuid
+  responses:
+    RestaurantIDResponse:
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            required: [ id ]
+            properties:
+              id:
+                type: string
+    RestaurantResponse:
+      description: OK
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Restaurant'

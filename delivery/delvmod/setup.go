@@ -27,7 +27,8 @@ func Setup(svc *applications.Monolith) error {
 			CancelDelivery:         commands.NewCancelDeliveryHandler(deliveryRepo, courierRepo),
 		},
 		Queries: application.Queries{
-			GetDeliveryStatus: queries.NewGetDeliveryStatusHandler(deliveryRepo, courierRepo),
+			GetCourier:  queries.NewGetCourierHandler(courierRepo),
+			GetDelivery: queries.NewGetDeliveryHandler(deliveryRepo),
 		},
 	}
 

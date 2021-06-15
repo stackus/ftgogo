@@ -11,6 +11,7 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/rs/zerolog"
 	edatpgx "github.com/stackus/edat-pgx"
+	grpc2 "github.com/stackus/edat/grpc"
 	"github.com/stackus/errors"
 	"google.golang.org/grpc"
 
@@ -22,9 +23,13 @@ import (
 	"shared-go/web"
 )
 
-const OrderService = "orderservice"
-const ConsumerService = "consumerservice"
-const OrderHistoryService = "orderhistoryserver"
+const (
+	AccountingService   = "accountingservice"
+	ConsumerService     = "consumerservice"
+	DeliveryService     = "deliveryservice"
+	OrderService        = "orderservice"
+	OrderHistoryService = "orderhistoryserver"
+)
 
 type CleanupFunc func(ctx context.Context) error
 
@@ -80,7 +85,7 @@ func initWebServer(cfg webCfg, poolConn *pgxpool.Pool, logger zerolog.Logger) we
 func initRpcServer(cfg rpc.ServerCfg, poolConn *pgxpool.Pool, logger zerolog.Logger) rpc.Server {
 	return rpc.NewServer(cfg,
 		rpc.WithUnaryServerInterceptors(
-			rpc.RequestContextUnaryServerInterceptor,
+			grpc2.RequestContextUnaryServerInterceptor,
 			rpc.WithUnaryServerLogging(logger),
 			edatpgx.RpcSessionUnaryInterceptor(poolConn, zerologto.Logger(logger)),
 		),
@@ -102,7 +107,7 @@ func initRpcClients(cfg rpcCfg, logger zerolog.Logger) (map[string]*grpc.ClientC
 			return net.DialUnix(cfg.Server.Network, nil, addr)
 		}), grpc.WithInsecure(),
 			grpc.WithChainUnaryInterceptor(
-				rpc.RequestContextUnaryClientInterceptor,
+				grpc2.RequestContextUnaryClientInterceptor,
 				rpc.WithUnaryClientLogging(logger),
 				func(ctx context.Context, method string, req, reply interface{}, cc *grpc.ClientConn, invoker grpc.UnaryInvoker, opts ...grpc.CallOption) error {
 					return errors.ReceiveGRPCError(invoker(ctx, method, req, reply, cc, opts...))
@@ -113,42 +118,44 @@ func initRpcClients(cfg rpcCfg, logger zerolog.Logger) (map[string]*grpc.ClientC
 			return nil, err
 		}
 
-		clients[OrderService] = conn
+		clients[AccountingService] = conn
 		clients[ConsumerService] = conn
+		clients[DeliveryService] = conn
+		clients[OrderService] = conn
 		clients[OrderHistoryService] = conn
 
 		return clients, nil
 	}
 
-	clients[OrderService], err = rpc.NewClientConn(cfg.Client, "orderservice:8000",
+	clientOptions := []rpc.ClientOption{
 		rpc.WithUnaryClientInterceptors(
-			rpc.RequestContextUnaryClientInterceptor,
+			grpc2.RequestContextUnaryClientInterceptor,
 			rpc.WithUnaryClientLogging(logger),
 		),
 		rpc.WithClientUnaryConvertStatus(),
-	)
+	}
+
+	clients[AccountingService], err = rpc.NewClientConn(cfg.Client, "accountingservice:8000", clientOptions...)
 	if err != nil {
 		return nil, err
 	}
 
-	clients[ConsumerService], err = rpc.NewClientConn(cfg.Client, "consumerservice:8000",
-		rpc.WithUnaryClientInterceptors(
-			rpc.RequestContextUnaryClientInterceptor,
-			rpc.WithUnaryClientLogging(logger),
-		),
-		rpc.WithClientUnaryConvertStatus(),
-	)
+	clients[ConsumerService], err = rpc.NewClientConn(cfg.Client, "consumerservice:8000", clientOptions...)
 	if err != nil {
 		return nil, err
 	}
 
-	clients[OrderHistoryService], err = rpc.NewClientConn(cfg.Client, "orderhistoryservice:8000",
-		rpc.WithUnaryClientInterceptors(
-			rpc.RequestContextUnaryClientInterceptor,
-			rpc.WithUnaryClientLogging(logger),
-		),
-		rpc.WithClientUnaryConvertStatus(),
-	)
+	clients[DeliveryService], err = rpc.NewClientConn(cfg.Client, "deliveryservice:8000", clientOptions...)
+	if err != nil {
+		return nil, err
+	}
+
+	clients[OrderService], err = rpc.NewClientConn(cfg.Client, "orderservice:8000", clientOptions...)
+	if err != nil {
+		return nil, err
+	}
+
+	clients[OrderHistoryService], err = rpc.NewClientConn(cfg.Client, "orderhistoryservice:8000", clientOptions...)
 	if err != nil {
 		return nil, err
 	}

@@ -5,7 +5,7 @@ import (
 
 	"github.com/stackus/errors"
 
-	"github.com/stackus/ftgogo/serviceapis/deliveryapi"
+	"github.com/stackus/ftgogo/serviceapis/commonapi"
 )
 
 type DeliveryStatus int
@@ -20,8 +20,8 @@ type Delivery struct {
 	DeliveryID        string
 	RestaurantID      string
 	AssignedCourierID string
-	PickUpAddress     deliveryapi.Address
-	DeliveryAddress   deliveryapi.Address
+	PickUpAddress     *commonapi.Address
+	DeliveryAddress   *commonapi.Address
 	Status            DeliveryStatus
 	PickUpTime        time.Time
 	ReadyBy           time.Time

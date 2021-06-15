@@ -164,7 +164,18 @@ the switch to GRPC.
 ### Other
 
 #### Tracing
-TODO document Request, correlation, and causation
+
+New requests into the system will be given value that is put into three containers `RequestID`, a `CorrelationID`, and
+a `CausationID`.
+
+At each event boundary, -> HTTP, -> Message, -> GRPC a new `RequestID` is generated, if a previous `RequestID` exists it
+is moved into the `CausationID`.
+
+- At each boundary a new `RequestID` is generated
+- The `CausationID` is set to the previous `RequestID`
+- The `CorrelationID` value remains the same into every event that results from the original request.
+
+These three values can be used to build a map of a request through the system.
 
 #### Metrics/Instrumentation
 
@@ -181,6 +192,8 @@ as possible, so you'll find there is also quite a bit of shared code in packages
 
 #### Always start with a Monolith
 
+> Still a work-in-progress.
+
 Industry exports suggest applications start with a monolith, single deployable application, before developing an
 application using microservices. Whether you have a legacy monolith application or are starting a new application the
 last step before microservices is to refactor or design the monolith to be loosely-coupled.
@@ -188,6 +201,8 @@ last step before microservices is to refactor or design the monolith to be loose
 The service capabilities can all be run together in a monolith to demonstrate what that might look like. It'll at beat
 represent the final form of a monolith that has been broken up by feature. This kind of monolith has several names.
 The "Majestic Monolith", the "Loosely-Coupled Monolith", or the "Modular Monolith".
+
+> Note: The monolith was created in reverse. It may not give the best example of what a monolith might look like just before switching to microservices.
 
 #### Type Registration
 
@@ -216,18 +231,20 @@ because of opinion or is necessary due of the particulars of Go, I will try my b
   The [command](https://github.com/stackus/ftgogo/blob/master/order/internal/application/commands/create_order.go)
   implementation creates the order like before, but the published entity event that results from that command is now the
   catalyst for starting the CreateOrderSaga.
+- To better demonstrate a "Backend-For-Frontend", orders take a consumers `addressId`. Consumers will register one or
+  more addresses now.
 
 ### Missing
 
 - Tests. Examples of testing these services. Both Unit and Integration
-- ~~Api-Gateway. I haven't gotten around to creating the gateway.~~ Backend-for-Frontends have been added.
+- ~~Api-Gateway. I haven't gotten around to creating the gateway.~~ "Backend-for-Frontend"s have been added.
 
 ## Out Of Scope
 
 Just like the original the following are outside the scope of the demonstration.
 
-- ~~Logins & Authentication~~ The Backend-for-Frontend has implemented this.
-- ~~Accounts & Authorization~~ The Backend-for-Frontend has implemented this.
+- ~~Logins & Authentication~~ The "Backend-for-Frontend"s have implemented this.
+- ~~Accounts & Authorization~~ The "Backend-for-Frontend"s have implemented this.
 - AWS/Azure/GCP or any other cloud deployment instructions or scripts
 - Tuning guidance
 - CI/CD guidance
@@ -240,7 +257,14 @@ Just like the original the following are outside the scope of the demonstration.
 With the application running using one of the commands above you can make the following calls to see the processes,
 events, and entities involved.
 
+- Register Consumer
+- Sign In Consumer
+- Add Consumer Address
+- Create Order
+
+
 - Consumer Service: Register Consumer
+-
 - Restaurant Service: Create Restaurant
 - Order: Create Order
 

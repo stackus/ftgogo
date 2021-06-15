@@ -27,8 +27,8 @@ func main() {
 
 func initGateway(gateway *applications.Gateway) error {
 	// Driven
-	orderClient := adapters.NewOrderGrpcClient(orderpb.NewOrderServiceClient(gateway.Clients[applications.OrderService]))
 	consumerClient := adapters.NewConsumerGrpcClient(consumerpb.NewConsumerServiceClient(gateway.Clients[applications.ConsumerService]))
+	orderClient := adapters.NewOrderGrpcClient(orderpb.NewOrderServiceClient(gateway.Clients[applications.OrderService]))
 	orderHistoryClient := adapters.NewOrderHistoryGrpcClient(orderhistorypb.NewOrderHistoryServiceClient(gateway.Clients[applications.OrderHistoryService]))
 
 	app := application.Service{

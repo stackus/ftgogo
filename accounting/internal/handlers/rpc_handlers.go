@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"google.golang.org/grpc"
+	"google.golang.org/protobuf/types/known/emptypb"
 
 	"github.com/stackus/ftgogo/accounting/internal/application"
 	"github.com/stackus/ftgogo/accounting/internal/application/commands"
@@ -27,28 +28,31 @@ func (h RpcHandlers) Mount(registrar grpc.ServiceRegistrar) {
 }
 
 func (h RpcHandlers) GetAccount(ctx context.Context, request *accountingpb.GetAccountRequest) (*accountingpb.GetAccountResponse, error) {
-	_, err := h.app.Queries.GetAccount.Handle(ctx, queries.GetAccount{AccountID: request.AccountID})
+	account, err := h.app.Queries.GetAccount.Handle(ctx, queries.GetAccount{AccountID: request.AccountID})
 	if err != nil {
 		return nil, err
 	}
 
-	return &accountingpb.GetAccountResponse{AccountID: request.AccountID}, nil
+	return &accountingpb.GetAccountResponse{
+		AccountID: request.AccountID,
+		Enabled:   account.Enabled,
+	}, nil
 }
 
-func (h RpcHandlers) DisableAccount(ctx context.Context, request *accountingpb.DisableAccountRequest) (*accountingpb.DisableAccountResponse, error) {
+func (h RpcHandlers) DisableAccount(ctx context.Context, request *accountingpb.DisableAccountRequest) (*emptypb.Empty, error) {
 	err := h.app.Commands.DisableAccount.Handle(ctx, commands.DisableAccount{AccountID: request.AccountID})
 	if err != nil {
 		return nil, err
 	}
 
-	return &accountingpb.DisableAccountResponse{AccountID: request.AccountID}, nil
+	return &emptypb.Empty{}, nil
 }
 
-func (h RpcHandlers) EnableAccount(ctx context.Context, request *accountingpb.EnableAccountRequest) (*accountingpb.EnableAccountResponse, error) {
+func (h RpcHandlers) EnableAccount(ctx context.Context, request *accountingpb.EnableAccountRequest) (*emptypb.Empty, error) {
 	err := h.app.Commands.EnableAccount.Handle(ctx, commands.EnableAccount{AccountID: request.AccountID})
 	if err != nil {
 		return nil, err
 	}
 
-	return &accountingpb.EnableAccountResponse{AccountID: request.AccountID}, nil
+	return &emptypb.Empty{}, nil
 }

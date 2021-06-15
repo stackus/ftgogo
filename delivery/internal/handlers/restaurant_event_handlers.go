@@ -7,7 +7,7 @@ import (
 
 	"github.com/stackus/ftgogo/delivery/internal/application"
 	"github.com/stackus/ftgogo/delivery/internal/application/commands"
-	"github.com/stackus/ftgogo/serviceapis/deliveryapi"
+	"github.com/stackus/ftgogo/serviceapis/commonapi"
 	"github.com/stackus/ftgogo/serviceapis/restaurantapi"
 )
 
@@ -28,7 +28,7 @@ func (h RestaurantEventHandlers) RestaurantCreated(ctx context.Context, evtMsg m
 	return h.app.Commands.CreateRestaurant.Handle(ctx, commands.CreateRestaurant{
 		RestaurantID: evtMsg.EntityID(),
 		Name:         evt.Name,
-		Address: deliveryapi.Address{
+		Address: &commonapi.Address{
 			Street1: evt.Address.Street1,
 			Street2: evt.Address.Street2,
 			City:    evt.Address.City,

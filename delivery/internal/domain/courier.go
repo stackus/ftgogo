@@ -5,14 +5,14 @@ import (
 
 	"github.com/stackus/errors"
 
-	"github.com/stackus/ftgogo/serviceapis/deliveryapi"
+	"github.com/stackus/ftgogo/serviceapis/commonapi"
 )
 
 type ActionType string
 
 const (
 	PickUp  ActionType = "PICKUP"
-	DropOff            = "DROPOFF"
+	DropOff ActionType = "DROPOFF"
 )
 
 type Courier struct {
@@ -26,7 +26,7 @@ type Plan []Action
 type Action struct {
 	DeliveryID string
 	ActionType ActionType
-	Address    deliveryapi.Address
+	Address    *commonapi.Address
 	When       time.Time
 }
 
