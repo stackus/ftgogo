@@ -2,6 +2,8 @@ package restaurantapi
 
 import (
 	"github.com/stackus/edat/core"
+
+	"github.com/stackus/ftgogo/serviceapis/commonapi"
 )
 
 func registerEvents() {
@@ -15,7 +17,7 @@ func (RestaurantEvent) DestinationChannel() string { return RestaurantAggregateC
 type RestaurantCreated struct {
 	RestaurantEvent
 	Name    string
-	Address Address
+	Address *commonapi.Address
 	Menu    []MenuItem
 }
 

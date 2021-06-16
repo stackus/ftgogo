@@ -8,7 +8,7 @@ import (
 	"github.com/stackus/ftgogo/restaurant/internal/application"
 	"github.com/stackus/ftgogo/restaurant/internal/application/commands"
 	"github.com/stackus/ftgogo/restaurant/internal/application/queries"
-	"github.com/stackus/ftgogo/serviceapis/commonapi/pb"
+	"github.com/stackus/ftgogo/serviceapis/commonapi"
 	"github.com/stackus/ftgogo/serviceapis/restaurantapi"
 	"github.com/stackus/ftgogo/serviceapis/restaurantapi/pb"
 )
@@ -31,22 +31,12 @@ func (h RpcHandlers) Mount(registrar grpc.ServiceRegistrar) {
 func (h RpcHandlers) CreateRestaurant(ctx context.Context, request *restaurantpb.CreateRestaurantRequest) (*restaurantpb.CreateRestaurantResponse, error) {
 	menuItems := make([]restaurantapi.MenuItem, 0)
 	for _, item := range request.Menu.MenuItems {
-		menuItems = append(menuItems, restaurantapi.MenuItem{
-			ID:    item.ID,
-			Name:  item.Name,
-			Price: int(item.Price),
-		})
+		menuItems = append(menuItems, restaurantapi.FromMenuItemProto(item))
 	}
 
 	restaurantID, err := h.app.Commands.CreateRestaurant.Handle(ctx, commands.CreateRestaurant{
-		Name: request.Name,
-		Address: restaurantapi.Address{
-			Street1: request.Address.Street1,
-			Street2: request.Address.Street2,
-			City:    request.Address.City,
-			State:   request.Address.State,
-			Zip:     request.Address.Zip,
-		},
+		Name:      request.Name,
+		Address:   commonapi.FromAddressProto(request.Address),
 		MenuItems: menuItems,
 	})
 	if err != nil {
@@ -62,25 +52,15 @@ func (h RpcHandlers) GetRestaurant(ctx context.Context, request *restaurantpb.Ge
 		return nil, err
 	}
 
-	menuItems := make([]*restaurantpb.GetRestaurantResponseMenuItem, 0, len(restaurant.MenuItems))
+	menuItems := make([]*restaurantpb.MenuItem, 0, len(restaurant.MenuItems))
 	for _, item := range restaurant.MenuItems {
-		menuItems = append(menuItems, &restaurantpb.GetRestaurantResponseMenuItem{
-			ID:    item.ID,
-			Name:  item.Name,
-			Price: int64(item.Price),
-		})
+		menuItems = append(menuItems, restaurantapi.ToMenuItemProto(item))
 	}
 
 	return &restaurantpb.GetRestaurantResponse{
 		RestaurantID: restaurant.ID(),
 		Name:         restaurant.Name,
-		Address: &commonpb.Address{
-			Street1: restaurant.Address.Street1,
-			Street2: restaurant.Address.Street2,
-			City:    restaurant.Address.City,
-			State:   restaurant.Address.State,
-			Zip:     restaurant.Address.Zip,
-		},
-		Menu: &restaurantpb.GetRestaurantResponseMenu{MenuItems: menuItems},
+		Address:      commonapi.ToAddressProto(restaurant.Address),
+		Menu:         &restaurantpb.Menu{MenuItems: menuItems},
 	}, nil
 }

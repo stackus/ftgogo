@@ -7,6 +7,7 @@ import (
 	"github.com/go-chi/render"
 
 	"github.com/stackus/ftgogo/serviceapis/orderapi"
+	"github.com/stackus/ftgogo/serviceapis/restaurantapi"
 	"github.com/stackus/ftgogo/store-web/internal/application"
 	"github.com/stackus/ftgogo/store-web/internal/application/commands"
 	"github.com/stackus/ftgogo/store-web/internal/application/queries"
@@ -223,7 +224,23 @@ func (h WebHandlers) CancelOrder(w http.ResponseWriter, r *http.Request, orderID
 }
 
 func (h WebHandlers) CreateRestaurant(w http.ResponseWriter, r *http.Request) {
-	panic("implement me")
+	request := CreateRestaurantJSONRequestBody{}
+	if err := render.Decode(r, &request); err != nil {
+		render.Render(w, r, web.NewErrorResponse(err))
+		return
+	}
+
+	restaurantID, err := h.app.Commands.CreateRestaurant.Handle(r.Context(), commands.CreateRestaurant{
+		Name:      request.Name,
+		Address:   &request.Address,
+		MenuItems: h.fromMenuItemJson(request.Menu.MenuItems),
+	})
+	if err != nil {
+		render.Render(w, r, web.NewErrorResponse(err))
+		return
+	}
+
+	render.Respond(w, r, RestaurantIDResponse{Id: restaurantID})
 }
 
 func (h WebHandlers) withRestaurantID(next func(http.ResponseWriter, *http.Request, RestaurantID)) http.HandlerFunc {
@@ -233,6 +250,25 @@ func (h WebHandlers) withRestaurantID(next func(http.ResponseWriter, *http.Reque
 }
 
 func (h WebHandlers) GetRestaurant(w http.ResponseWriter, r *http.Request, restaurantID RestaurantID) {
+	restaurant, err := h.app.Queries.GetRestaurant.Handle(r.Context(), queries.GetRestaurant{RestaurantID: string(restaurantID)})
+	if err != nil {
+		render.Render(w, r, web.NewErrorResponse(err))
+		return
+	}
+
+	render.Respond(w, r, RestaurantResponse{
+		Restaurant: Restaurant{
+			Address: *restaurant.Address,
+			Id:      restaurant.RestaurantID,
+			Menu: struct {
+				MenuItems []MenuItem `json:"menu_items"`
+			}{
+				MenuItems: h.toMenuItemJson(restaurant.MenuItems),
+			},
+			Name: restaurant.Name,
+		},
+	})
+
 	panic("implement me")
 }
 
@@ -277,4 +313,28 @@ func (h WebHandlers) toOrderStateJson(orderState orderapi.OrderState) OrderState
 	default:
 		return OrderStateUnknown
 	}
+}
+
+func (h WebHandlers) fromMenuItemJson(menuItems []MenuItem) []restaurantapi.MenuItem {
+	m := make([]restaurantapi.MenuItem, 0, len(menuItems))
+	for _, item := range menuItems {
+		m = append(m, restaurantapi.MenuItem{
+			ID:    item.Id,
+			Name:  item.Name,
+			Price: item.Price,
+		})
+	}
+	return m
+}
+
+func (h WebHandlers) toMenuItemJson(menuItems []restaurantapi.MenuItem) []MenuItem {
+	m := make([]MenuItem, 0, len(menuItems))
+	for _, item := range menuItems {
+		m = append(m, MenuItem{
+			Id:    item.ID,
+			Name:  item.Name,
+			Price: item.Price,
+		})
+	}
+	return m
 }

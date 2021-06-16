@@ -425,7 +425,6 @@ func (h WebHandlers) SearchOrders(w http.ResponseWriter, r *http.Request, params
 		Next:   results.Next,
 		Orders: nil,
 	})
-	panic("implement me")
 }
 
 func (h WebHandlers) withRestaurantID(next func(http.ResponseWriter, *http.Request, RestaurantID)) http.HandlerFunc {

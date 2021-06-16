@@ -11,20 +11,20 @@ service RestaurantService {
   rpc GetRestaurant(GetRestaurantRequest) returns (GetRestaurantResponse);
 }
 
+message MenuItem {
+  string ID = 1;
+  string Name = 2;
+  int64 Price = 3;
+}
+
+message Menu {
+  repeated MenuItem MenuItems = 1;
+}
+
 message CreateRestaurantRequest {
-  message menuItem {
-    string ID = 1;
-    string Name = 2;
-    int64 Price = 3;
-  }
-
-  message menu {
-    repeated menuItem MenuItems = 1;
-  }
-
   string Name = 1;
   commonpb.Address Address = 2;
-  menu Menu = 3;
+  Menu Menu = 3;
 }
 
 message CreateRestaurantResponse {
@@ -36,18 +36,8 @@ message GetRestaurantRequest {
 }
 
 message GetRestaurantResponse {
-  message menuItem {
-    string ID = 1;
-    string Name = 2;
-    int64 Price = 3;
-  }
-
-  message menu {
-    repeated menuItem MenuItems = 1;
-  }
-
   string RestaurantID = 1;
   string Name = 2;
   commonpb.Address Address = 3;
-  menu Menu = 4;
+  Menu Menu = 4;
 }

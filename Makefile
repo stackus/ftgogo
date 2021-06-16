@@ -1,28 +1,5 @@
-#build:
-#	@echo Building all containers
-#	@docker build --build-arg service=accounting -t accounting-service:latest .
-#	@docker build --build-arg service=accounting --build-arg cmd=cdc -t accounting-cdc:latest .
-#
-#	@docker build --build-arg service=consumer -t consumer-service:latest .
-#	@docker build --build-arg service=consumer --build-arg cmd=cdc -t consumer-cdc:latest .
-#
-#	@docker build --build-arg service=delivery -t delivery-service:latest .
-#
-#	@docker build --build-arg service=kitchen -t kitchen-service:latest .
-#	@docker build --build-arg service=kitchen --build-arg cmd=cdc -t kitchen-cdc:latest .
-#
-#	@docker build --build-arg service=order -t order-service:latest .
-#	@docker build --build-arg service=order --build-arg cmd=cdc -t order-cdc:latest .
-#
-#	@docker build --build-arg service=order-history -t order-history-service:latest .
-#
-#	@docker build --build-arg service=restaurant -t restaurant-service:latest .
-#	@docker build --build-arg service=restaurant --build-arg cmd=cdc -t restaurant-cdc:latest .
-#
-#	@docker build --build-arg service=customer-web -t customer-web-service:latest .
-#
-#	# Monolith
-#	@docker build --build-arg service=monolith -t monolith-service:latest .
+.DEFAULT_GOAL := run
+.PHONY: tidy shiny build run build-monolith run-monolith
 
 tidy:
 	@echo Tidying all mod files

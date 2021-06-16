@@ -5,6 +5,7 @@ import (
 	"github.com/stackus/edat/core"
 	"github.com/stackus/errors"
 
+	"github.com/stackus/ftgogo/serviceapis/commonapi"
 	"github.com/stackus/ftgogo/serviceapis/restaurantapi"
 )
 
@@ -18,7 +19,7 @@ type Restaurant struct {
 	core.EntityBase
 	RestaurantID string
 	Name         string
-	Address      restaurantapi.Address
+	Address      *commonapi.Address
 	MenuItems    []restaurantapi.MenuItem
 }
 
@@ -33,7 +34,7 @@ func (r Restaurant) ID() string {
 }
 
 // CreateRestaurant builds a new Restaurant instance
-func CreateRestaurant(name string, address restaurantapi.Address, menuItems []restaurantapi.MenuItem) *Restaurant {
+func CreateRestaurant(name string, address *commonapi.Address, menuItems []restaurantapi.MenuItem) *Restaurant {
 	r := &Restaurant{
 		RestaurantID: uuid.New().String(),
 		Name:         name,

@@ -13,7 +13,7 @@ type ConsumerGRPCRepository struct {
 
 var _ ConsumerRepository = (*ConsumerGRPCRepository)(nil)
 
-func NewConsumerGrpcClient(client consumerpb.ConsumerServiceClient) *ConsumerGRPCRepository {
+func NewConsumerGrpcRepository(client consumerpb.ConsumerServiceClient) *ConsumerGRPCRepository {
 	return &ConsumerGRPCRepository{client: client}
 }
 

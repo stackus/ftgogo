@@ -15,6 +15,7 @@ type Commands struct {
 	DisableAccount         commands.DisableAccountHandler
 	SetCourierAvailability commands.SetCourierAvailabilityHandler
 	CancelOrder            commands.CancelOrderHandler
+	CreateRestaurant       commands.CreateRestaurantHandler
 }
 
 type Queries struct {
@@ -22,4 +23,5 @@ type Queries struct {
 	GetConsumer        queries.GetConsumerHandler
 	GetDeliveryHistory queries.GetDeliveryHistoryHandler
 	GetOrder           queries.GetOrderHandler
+	GetRestaurant      queries.GetRestaurantHandler
 }

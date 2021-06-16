@@ -9,6 +9,7 @@ import (
 
 	accountingpb "github.com/stackus/ftgogo/serviceapis/accountingapi/pb"
 	deliverypb "github.com/stackus/ftgogo/serviceapis/deliveryapi/pb"
+	restaurantpb "github.com/stackus/ftgogo/serviceapis/restaurantapi/pb"
 	"github.com/stackus/ftgogo/store-web/internal/application/commands"
 	"github.com/stackus/ftgogo/store-web/internal/application/queries"
 	"shared-go/applications"
@@ -30,9 +31,10 @@ func main() {
 func initGateway(gateway *applications.Gateway) error {
 	// Driven
 	accountingClient := adapters.NewAccountingGrpcRepository(accountingpb.NewAccountingServiceClient(gateway.Clients[applications.AccountingService]))
-	consumerClient := adapters.NewConsumerGrpcClient(consumerpb.NewConsumerServiceClient(gateway.Clients[applications.ConsumerService]))
+	consumerClient := adapters.NewConsumerGrpcRepository(consumerpb.NewConsumerServiceClient(gateway.Clients[applications.ConsumerService]))
 	deliveryClient := adapters.NewDeliveryGrpcRepository(deliverypb.NewDeliveryServiceClient(gateway.Clients[applications.DeliveryService]))
-	orderClient := adapters.NewOrderGrpcClient(orderpb.NewOrderServiceClient(gateway.Clients[applications.OrderService]))
+	orderClient := adapters.NewOrderGrpcRepository(orderpb.NewOrderServiceClient(gateway.Clients[applications.OrderService]))
+	restaurantClient := adapters.NewRestaurantGrpcRepository(restaurantpb.NewRestaurantServiceClient(gateway.Clients[applications.RestaurantService]))
 
 	app := application.Service{
 		Commands: application.Commands{
@@ -40,12 +42,14 @@ func initGateway(gateway *applications.Gateway) error {
 			DisableAccount:         commands.NewDisableAccountHandler(accountingClient),
 			SetCourierAvailability: commands.NewSetCourierAvailabilityHandler(deliveryClient),
 			CancelOrder:            commands.NewCancelOrderHandler(orderClient),
+			CreateRestaurant:       commands.NewCreateRestaurantHandler(restaurantClient),
 		},
 		Queries: application.Queries{
 			GetAccount:         queries.NewGetAccountHandler(accountingClient),
 			GetConsumer:        queries.NewGetConsumerHandler(consumerClient),
 			GetDeliveryHistory: queries.NewGetDeliveryHistoryHandler(deliveryClient),
 			GetOrder:           queries.NewGetOrderHandler(orderClient),
+			GetRestaurant:      queries.NewGetRestaurantHandler(restaurantClient),
 		},
 	}
 

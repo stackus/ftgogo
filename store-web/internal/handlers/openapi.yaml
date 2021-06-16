@@ -474,4 +474,8 @@ components:
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/Restaurant'
+            type: object
+            required: [ restaurant ]
+            properties:
+              restaurant:
+                $ref: '#/components/schemas/Restaurant'

@@ -5,12 +5,13 @@ import (
 
 	"github.com/stackus/ftgogo/restaurant/internal/adapters"
 	"github.com/stackus/ftgogo/restaurant/internal/domain"
+	"github.com/stackus/ftgogo/serviceapis/commonapi"
 	"github.com/stackus/ftgogo/serviceapis/restaurantapi"
 )
 
 type CreateRestaurant struct {
 	Name      string
-	Address   restaurantapi.Address
+	Address   *commonapi.Address
 	MenuItems []restaurantapi.MenuItem
 }
 

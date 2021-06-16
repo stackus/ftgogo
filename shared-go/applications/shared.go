@@ -29,6 +29,7 @@ const (
 	DeliveryService     = "deliveryservice"
 	OrderService        = "orderservice"
 	OrderHistoryService = "orderhistoryserver"
+	RestaurantService   = "restaurantservice"
 )
 
 type CleanupFunc func(ctx context.Context) error
@@ -123,6 +124,7 @@ func initRpcClients(cfg rpcCfg, logger zerolog.Logger) (map[string]*grpc.ClientC
 		clients[DeliveryService] = conn
 		clients[OrderService] = conn
 		clients[OrderHistoryService] = conn
+		clients[RestaurantService] = conn
 
 		return clients, nil
 	}
@@ -156,6 +158,11 @@ func initRpcClients(cfg rpcCfg, logger zerolog.Logger) (map[string]*grpc.ClientC
 	}
 
 	clients[OrderHistoryService], err = rpc.NewClientConn(cfg.Client, "orderhistoryservice:8000", clientOptions...)
+	if err != nil {
+		return nil, err
+	}
+
+	clients[RestaurantService], err = rpc.NewClientConn(cfg.Client, "restaurantservice:8000", clientOptions...)
 	if err != nil {
 		return nil, err
 	}

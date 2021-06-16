@@ -14,7 +14,7 @@ type OrderGRPCRepository struct {
 
 var _ OrderRepository = (*OrderGRPCRepository)(nil)
 
-func NewOrderGrpcClient(client orderpb.OrderServiceClient) *OrderGRPCRepository {
+func NewOrderGrpcRepository(client orderpb.OrderServiceClient) *OrderGRPCRepository {
 	return &OrderGRPCRepository{client: client}
 }
 
