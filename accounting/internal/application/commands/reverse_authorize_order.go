@@ -3,7 +3,7 @@ package commands
 import (
 	"context"
 
-	"github.com/stackus/ftgogo/accounting/internal/adapters"
+	"github.com/stackus/ftgogo/accounting/internal/application/ports"
 	"github.com/stackus/ftgogo/accounting/internal/domain"
 )
 
@@ -14,10 +14,10 @@ type ReverseAuthorizeOrder struct {
 }
 
 type ReverseAuthorizeOrderHandler struct {
-	repo adapters.AccountRepository
+	repo ports.AccountRepository
 }
 
-func NewReverseAuthorizeOrderHandler(accountRepo adapters.AccountRepository) ReverseAuthorizeOrderHandler {
+func NewReverseAuthorizeOrderHandler(accountRepo ports.AccountRepository) ReverseAuthorizeOrderHandler {
 	return ReverseAuthorizeOrderHandler{repo: accountRepo}
 }
 

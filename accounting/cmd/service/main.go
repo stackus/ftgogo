@@ -3,8 +3,6 @@ package main
 import (
 	"github.com/stackus/ftgogo/accounting/internal/adapters"
 	"github.com/stackus/ftgogo/accounting/internal/application"
-	"github.com/stackus/ftgogo/accounting/internal/application/commands"
-	"github.com/stackus/ftgogo/accounting/internal/application/queries"
 	"github.com/stackus/ftgogo/accounting/internal/domain"
 	"github.com/stackus/ftgogo/accounting/internal/handlers"
 	"github.com/stackus/ftgogo/serviceapis"
@@ -23,21 +21,9 @@ func initService(svc *applications.Service) error {
 	domain.RegisterTypes()
 
 	// Driven
-	accountRepo := adapters.NewAccountAggregateRootRepository(svc.AggregateStore)
+	accountRepo := adapters.NewAccountAggregateRepository(svc.AggregateStore)
 
-	app := application.Service{
-		Commands: application.Commands{
-			AuthorizeOrder:        commands.NewAuthorizeOrderHandler(accountRepo),
-			ReverseAuthorizeOrder: commands.NewReverseAuthorizeOrderHandler(accountRepo),
-			ReviseAuthorizeOrder:  commands.NewReviseAuthorizeOrderHandler(accountRepo),
-			CreateAccount:         commands.NewCreateAccountHandler(accountRepo),
-			DisableAccount:        commands.NewDisableAccountHandler(accountRepo),
-			EnableAccount:         commands.NewEnableAccountHandler(accountRepo),
-		},
-		Queries: application.Queries{
-			GetAccount: queries.NewGetAccountHandler(accountRepo),
-		},
-	}
+	app := application.NewServiceApplication(accountRepo)
 
 	// Drivers
 	handlers.NewCommandHandlers(app).Mount(svc.Subscriber, svc.Publisher)

@@ -13,13 +13,13 @@ import (
 )
 
 type RpcHandlers struct {
-	app application.Service
+	app application.ServiceApplication
 	accountingpb.UnimplementedAccountingServiceServer
 }
 
 var _ accountingpb.AccountingServiceServer = (*RpcHandlers)(nil)
 
-func NewRpcHandlers(app application.Service) RpcHandlers {
+func NewRpcHandlers(app application.ServiceApplication) RpcHandlers {
 	return RpcHandlers{app: app}
 }
 
@@ -28,7 +28,7 @@ func (h RpcHandlers) Mount(registrar grpc.ServiceRegistrar) {
 }
 
 func (h RpcHandlers) GetAccount(ctx context.Context, request *accountingpb.GetAccountRequest) (*accountingpb.GetAccountResponse, error) {
-	account, err := h.app.Queries.GetAccount.Handle(ctx, queries.GetAccount{AccountID: request.AccountID})
+	account, err := h.app.GetAccount(ctx, queries.GetAccount{AccountID: request.AccountID})
 	if err != nil {
 		return nil, err
 	}
@@ -40,7 +40,7 @@ func (h RpcHandlers) GetAccount(ctx context.Context, request *accountingpb.GetAc
 }
 
 func (h RpcHandlers) DisableAccount(ctx context.Context, request *accountingpb.DisableAccountRequest) (*emptypb.Empty, error) {
-	err := h.app.Commands.DisableAccount.Handle(ctx, commands.DisableAccount{AccountID: request.AccountID})
+	err := h.app.DisableAccount(ctx, commands.DisableAccount{AccountID: request.AccountID})
 	if err != nil {
 		return nil, err
 	}
@@ -49,7 +49,7 @@ func (h RpcHandlers) DisableAccount(ctx context.Context, request *accountingpb.D
 }
 
 func (h RpcHandlers) EnableAccount(ctx context.Context, request *accountingpb.EnableAccountRequest) (*emptypb.Empty, error) {
-	err := h.app.Commands.EnableAccount.Handle(ctx, commands.EnableAccount{AccountID: request.AccountID})
+	err := h.app.EnableAccount(ctx, commands.EnableAccount{AccountID: request.AccountID})
 	if err != nil {
 		return nil, err
 	}

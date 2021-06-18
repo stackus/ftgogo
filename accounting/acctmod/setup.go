@@ -7,8 +7,6 @@ import (
 
 	"github.com/stackus/ftgogo/accounting/internal/adapters"
 	"github.com/stackus/ftgogo/accounting/internal/application"
-	"github.com/stackus/ftgogo/accounting/internal/application/commands"
-	"github.com/stackus/ftgogo/accounting/internal/application/queries"
 	"github.com/stackus/ftgogo/accounting/internal/domain"
 	"github.com/stackus/ftgogo/accounting/internal/handlers"
 	"shared-go/applications"
@@ -31,21 +29,9 @@ func Setup(svc *applications.Monolith) error {
 	svc.Processors = append(svc.Processors, outbox.NewPollingProcessor(messageStore, svc.CDCPublisher))
 
 	// Driven
-	accountRepo := adapters.NewAccountAggregateRootRepository(aggregateStore)
+	accountRepo := adapters.NewAccountAggregateRepository(aggregateStore)
 
-	app := application.Service{
-		Commands: application.Commands{
-			AuthorizeOrder:        commands.NewAuthorizeOrderHandler(accountRepo),
-			ReverseAuthorizeOrder: commands.NewReverseAuthorizeOrderHandler(accountRepo),
-			ReviseAuthorizeOrder:  commands.NewReviseAuthorizeOrderHandler(accountRepo),
-			CreateAccount:         commands.NewCreateAccountHandler(accountRepo),
-			DisableAccount:        commands.NewDisableAccountHandler(accountRepo),
-			EnableAccount:         commands.NewEnableAccountHandler(accountRepo),
-		},
-		Queries: application.Queries{
-			GetAccount: queries.NewGetAccountHandler(accountRepo),
-		},
-	}
+	app := application.NewServiceApplication(accountRepo)
 
 	// Drivers
 	handlers.NewCommandHandlers(app).Mount(svc.Subscriber, publisher)

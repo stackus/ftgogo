@@ -14,12 +14,13 @@ import (
 )
 
 type CommandHandlers struct {
-	app application.Service
+	app application.ServiceApplication
 }
 
-func NewCommandHandlers(app application.Service) CommandHandlers {
+func NewCommandHandlers(app application.ServiceApplication) CommandHandlers {
 	return CommandHandlers{app: app}
 }
+
 func (h CommandHandlers) Mount(subscriber *msg.Subscriber, publisher *msg.Publisher) {
 	subscriber.Subscribe(accountingapi.AccountingServiceCommandChannel, saga.NewCommandDispatcher(publisher).
 		Handle(accountingapi.AuthorizeOrder{}, h.AuthorizeOrder).
@@ -30,7 +31,7 @@ func (h CommandHandlers) Mount(subscriber *msg.Subscriber, publisher *msg.Publis
 func (h CommandHandlers) AuthorizeOrder(ctx context.Context, cmdMsg saga.Command) ([]msg.Reply, error) {
 	cmd := cmdMsg.Command().(*accountingapi.AuthorizeOrder)
 
-	err := h.app.Commands.AuthorizeOrder.Handle(ctx, commands.AuthorizeOrder{
+	err := h.app.AuthorizeOrder(ctx, commands.AuthorizeOrder{
 		ConsumerID: cmd.ConsumerID,
 		OrderID:    cmd.OrderID,
 		OrderTotal: cmd.OrderTotal,
@@ -48,7 +49,7 @@ func (h CommandHandlers) AuthorizeOrder(ctx context.Context, cmdMsg saga.Command
 func (h CommandHandlers) ReverseAuthorizeOrder(ctx context.Context, cmdMsg saga.Command) ([]msg.Reply, error) {
 	cmd := cmdMsg.Command().(*accountingapi.ReverseAuthorizeOrder)
 
-	err := h.app.Commands.ReverseAuthorizeOrder.Handle(ctx, commands.ReverseAuthorizeOrder{
+	err := h.app.ReverseAuthorizeOrder(ctx, commands.ReverseAuthorizeOrder{
 		ConsumerID: cmd.ConsumerID,
 		OrderID:    cmd.OrderID,
 		OrderTotal: cmd.OrderTotal,
@@ -66,7 +67,7 @@ func (h CommandHandlers) ReverseAuthorizeOrder(ctx context.Context, cmdMsg saga.
 func (h CommandHandlers) ReviseAuthorizeOrder(ctx context.Context, cmdMsg saga.Command) ([]msg.Reply, error) {
 	cmd := cmdMsg.Command().(*accountingapi.ReviseAuthorizeOrder)
 
-	err := h.app.Commands.ReviseAuthorizeOrder.Handle(ctx, commands.ReviseAuthorizeOrder{
+	err := h.app.ReviseAuthorizeOrder(ctx, commands.ReviseAuthorizeOrder{
 		ConsumerID: cmd.ConsumerID,
 		OrderID:    cmd.OrderID,
 		OrderTotal: cmd.OrderTotal,

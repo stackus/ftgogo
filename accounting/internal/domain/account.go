@@ -10,6 +10,7 @@ var (
 	ErrAccountUnhandledCommand  = errors.Wrap(errors.ErrInternal, "unhandled command in account aggregate")
 	ErrAccountUnhandledEvent    = errors.Wrap(errors.ErrInternal, "unhandled event in account aggregate")
 	ErrAccountUnhandledSnapshot = errors.Wrap(errors.ErrInternal, "unhandled snapshot in account aggregate")
+	ErrAccountNotFound          = errors.Wrap(errors.ErrNotFound, "account not found")
 	ErrAccountDisabled          = errors.Wrap(errors.ErrFailedPrecondition, "account is disabled")
 	ErrAccountEnabled           = errors.Wrap(errors.ErrFailedPrecondition, "account is enabled")
 )

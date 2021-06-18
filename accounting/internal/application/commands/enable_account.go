@@ -3,7 +3,7 @@ package commands
 import (
 	"context"
 
-	"github.com/stackus/ftgogo/accounting/internal/adapters"
+	"github.com/stackus/ftgogo/accounting/internal/application/ports"
 	"github.com/stackus/ftgogo/accounting/internal/domain"
 )
 
@@ -12,10 +12,10 @@ type EnableAccount struct {
 }
 
 type EnableAccountHandler struct {
-	repo adapters.AccountRepository
+	repo ports.AccountRepository
 }
 
-func NewEnableAccountHandler(accountRepo adapters.AccountRepository) EnableAccountHandler {
+func NewEnableAccountHandler(accountRepo ports.AccountRepository) EnableAccountHandler {
 	return EnableAccountHandler{repo: accountRepo}
 }
 

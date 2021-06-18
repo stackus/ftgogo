@@ -11,10 +11,10 @@ import (
 )
 
 type ConsumerEventHandlers struct {
-	app application.Service
+	app application.ServiceApplication
 }
 
-func NewConsumerEventHandlers(app application.Service) ConsumerEventHandlers {
+func NewConsumerEventHandlers(app application.ServiceApplication) ConsumerEventHandlers {
 	return ConsumerEventHandlers{app: app}
 }
 
@@ -26,7 +26,7 @@ func (h ConsumerEventHandlers) Mount(subscriber *msg.Subscriber) {
 func (h ConsumerEventHandlers) ConsumerRegistered(ctx context.Context, evtMsg msg.EntityEvent) error {
 	evt := evtMsg.Event().(*consumerapi.ConsumerRegistered)
 
-	return h.app.Commands.CreateAccount.Handle(ctx, commands.CreateAccount{
+	return h.app.CreateAccount(ctx, commands.CreateAccount{
 		ConsumerID: evtMsg.EntityID(),
 		Name:       evt.Name,
 	})
