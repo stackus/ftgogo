@@ -25,12 +25,10 @@ func NewStartCancelOrderSagaHandler(orderRepo adapters.OrderRepository, cancelOr
 }
 
 func (h StartCancelOrderSagaHandler) Handle(ctx context.Context, cmd StartCancelOrderSaga) (orderapi.OrderState, error) {
-	root, err := h.repo.Load(ctx, cmd.OrderID)
+	order, err := h.repo.Load(ctx, cmd.OrderID)
 	if err != nil {
 		return orderapi.UnknownOrderState, err
 	}
-
-	order := root.Aggregate().(*domain.Order)
 
 	_, err = h.saga.Start(ctx, &domain.CancelOrderSagaData{
 		OrderID:      cmd.OrderID,

@@ -20,10 +20,5 @@ func NewGetOrderHandler(orderRepo adapters.OrderRepository) GetOrderHandler {
 }
 
 func (h GetOrderHandler) Handle(ctx context.Context, query GetOrder) (*domain.Order, error) {
-	root, err := h.orderRepo.Load(ctx, query.OrderID)
-	if err != nil {
-		return nil, err
-	}
-
-	return root.Aggregate().(*domain.Order), nil
+	return h.orderRepo.Load(ctx, query.OrderID)
 }

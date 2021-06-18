@@ -5,6 +5,8 @@ import (
 
 	"github.com/stackus/edat/core"
 	"github.com/stackus/edat/es"
+
+	"github.com/stackus/ftgogo/order/internal/domain"
 )
 
 type orderRepositoryPublisherMiddleware struct {
@@ -21,20 +23,20 @@ func NewOrderRepositoryPublisherMiddleware(repository OrderRepository, publisher
 	}
 }
 
-func (r orderRepositoryPublisherMiddleware) Save(ctx context.Context, command core.Command, options ...es.AggregateRootOption) (*es.AggregateRoot, error) {
-	root, err := r.OrderRepository.Save(ctx, command, options...)
+func (r orderRepositoryPublisherMiddleware) Save(ctx context.Context, command core.Command, options ...es.AggregateRootOption) (*domain.Order, error) {
+	order, err := r.OrderRepository.Save(ctx, command, options...)
 	if err != nil {
-		return root, err
+		return order, err
 	}
 
-	return root, r.publisher.PublishEntityEvents(ctx, root)
+	return order, r.publisher.PublishEntityEvents(ctx, order)
 }
 
-func (r orderRepositoryPublisherMiddleware) Update(ctx context.Context, aggregateID string, command core.Command, options ...es.AggregateRootOption) (*es.AggregateRoot, error) {
-	root, err := r.OrderRepository.Update(ctx, aggregateID, command, options...)
+func (r orderRepositoryPublisherMiddleware) Update(ctx context.Context, aggregateID string, command core.Command, options ...es.AggregateRootOption) (*domain.Order, error) {
+	order, err := r.OrderRepository.Update(ctx, aggregateID, command, options...)
 	if err != nil {
-		return root, err
+		return order, err
 	}
 
-	return root, r.publisher.PublishEntityEvents(ctx, root)
+	return order, r.publisher.PublishEntityEvents(ctx, order)
 }

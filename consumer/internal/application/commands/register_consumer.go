@@ -22,12 +22,12 @@ func NewRegisterConsumerHandler(repo adapters.ConsumerRepository) RegisterConsum
 }
 
 func (h RegisterConsumerHandler) Handle(ctx context.Context, cmd RegisterConsumer) (string, error) {
-	root, err := h.repo.Save(ctx, &domain.RegisterConsumer{
+	consumer, err := h.repo.Save(ctx, &domain.RegisterConsumer{
 		Name: cmd.Name,
 	})
 	if err != nil {
 		return "", err
 	}
 
-	return root.AggregateID(), nil
+	return consumer.ID(), nil
 }

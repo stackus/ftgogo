@@ -33,7 +33,7 @@ func Setup(svc *applications.Monolith) error {
 
 	// Driven
 	orderRepo := adapters.NewOrderRepositoryPublisherMiddleware(
-		adapters.NewOrderAggregateRootRepository(aggregateStore),
+		adapters.NewOrderAggregateRepository(aggregateStore),
 		adapters.NewOrderEntityEventPublisher(publisher),
 	)
 	adapters.RestaurantsTableName = "orders.restaurants"

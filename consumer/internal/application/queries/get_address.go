@@ -6,7 +6,6 @@ import (
 	"github.com/stackus/errors"
 
 	"github.com/stackus/ftgogo/consumer/internal/adapters"
-	"github.com/stackus/ftgogo/consumer/internal/domain"
 	"github.com/stackus/ftgogo/serviceapis/commonapi"
 )
 
@@ -24,12 +23,12 @@ func NewGetAddressHandler(repo adapters.ConsumerRepository) GetAddressHandler {
 }
 
 func (h GetAddressHandler) Handle(ctx context.Context, query GetAddress) (*commonapi.Address, error) {
-	root, err := h.repo.Load(ctx, query.ConsumerID)
+	consumer, err := h.repo.Load(ctx, query.ConsumerID)
 	if err != nil {
 		return nil, err
 	}
 
-	address := root.Aggregate().(*domain.Consumer).Address(query.AddressID)
+	address := consumer.Address(query.AddressID)
 	if address == nil {
 		return nil, errors.Wrap(errors.ErrNotFound, "an address with that identifier does not exist")
 	}

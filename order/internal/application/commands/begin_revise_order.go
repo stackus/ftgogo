@@ -23,14 +23,12 @@ func NewBeginReviseOrderHandler(repo adapters.OrderRepository) BeginReviseOrderH
 }
 
 func (h BeginReviseOrderHandler) Handle(ctx context.Context, cmd BeginReviseOrder) (int, error) {
-	root, err := h.repo.Update(ctx, cmd.OrderID, &domain.BeginReviseOrder{
+	order, err := h.repo.Update(ctx, cmd.OrderID, &domain.BeginReviseOrder{
 		RevisedQuantities: cmd.RevisedQuantities,
 	})
 	if err != nil {
 		return 0, err
 	}
-
-	order := root.Aggregate().(*domain.Order)
 
 	return order.RevisedOrderTotal(order.OrderTotal(), cmd.RevisedQuantities), nil
 }

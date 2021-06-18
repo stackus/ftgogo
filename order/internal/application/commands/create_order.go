@@ -39,7 +39,7 @@ func (h CreateOrderHandler) Handle(ctx context.Context, cmd CreateOrder) (string
 		return "", err
 	}
 
-	root, err := h.orderRepo.Save(ctx, &domain.CreateOrder{
+	order, err := h.orderRepo.Save(ctx, &domain.CreateOrder{
 		ConsumerID: cmd.ConsumerID,
 		Restaurant: restaurant,
 		LineItems:  cmd.LineItems,
@@ -51,5 +51,5 @@ func (h CreateOrderHandler) Handle(ctx context.Context, cmd CreateOrder) (string
 		return "", err
 	}
 
-	return root.AggregateID(), nil
+	return order.ID(), nil
 }

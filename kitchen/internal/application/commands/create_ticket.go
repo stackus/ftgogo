@@ -23,7 +23,7 @@ func NewCreateTicketHandler(ticketRepo adapters.TicketRepository) CreateTicketHa
 }
 
 func (h CreateTicketHandler) Handle(ctx context.Context, cmd CreateTicket) (string, error) {
-	root, err := h.repo.Save(ctx, &domain.CreateTicket{
+	ticket, err := h.repo.Save(ctx, &domain.CreateTicket{
 		OrderID:      cmd.OrderID,
 		RestaurantID: cmd.RestaurantID,
 		LineItems:    cmd.LineItems,
@@ -32,5 +32,5 @@ func (h CreateTicketHandler) Handle(ctx context.Context, cmd CreateTicket) (stri
 		return "", err
 	}
 
-	return root.AggregateID(), nil
+	return ticket.ID(), nil
 }

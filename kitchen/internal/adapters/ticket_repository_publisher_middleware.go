@@ -5,6 +5,8 @@ import (
 
 	"github.com/stackus/edat/core"
 	"github.com/stackus/edat/es"
+
+	"github.com/stackus/ftgogo/kitchen/internal/domain"
 )
 
 type ticketRepositoryPublisherMiddleware struct {
@@ -21,20 +23,20 @@ func NewTicketRepositoryPublisherMiddleware(repository TicketRepository, publish
 	}
 }
 
-func (r ticketRepositoryPublisherMiddleware) Save(ctx context.Context, command core.Command, options ...es.AggregateRootOption) (*es.AggregateRoot, error) {
-	root, err := r.TicketRepository.Save(ctx, command, options...)
+func (r ticketRepositoryPublisherMiddleware) Save(ctx context.Context, command core.Command, options ...es.AggregateRootOption) (*domain.Ticket, error) {
+	ticket, err := r.TicketRepository.Save(ctx, command, options...)
 	if err != nil {
-		return root, err
+		return ticket, err
 	}
 
-	return root, r.publisher.PublishEntityEvents(ctx, root)
+	return ticket, r.publisher.PublishEntityEvents(ctx, ticket)
 }
 
-func (r ticketRepositoryPublisherMiddleware) Update(ctx context.Context, aggregateID string, command core.Command, options ...es.AggregateRootOption) (*es.AggregateRoot, error) {
-	root, err := r.TicketRepository.Update(ctx, aggregateID, command, options...)
+func (r ticketRepositoryPublisherMiddleware) Update(ctx context.Context, aggregateID string, command core.Command, options ...es.AggregateRootOption) (*domain.Ticket, error) {
+	ticket, err := r.TicketRepository.Update(ctx, aggregateID, command, options...)
 	if err != nil {
-		return root, err
+		return ticket, err
 	}
 
-	return root, r.publisher.PublishEntityEvents(ctx, root)
+	return ticket, r.publisher.PublishEntityEvents(ctx, ticket)
 }

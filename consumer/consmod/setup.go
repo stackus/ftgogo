@@ -32,7 +32,7 @@ func Setup(svc *applications.Monolith) error {
 
 	// Driven
 	consumerRepo := adapters.NewConsumerRepositoryPublisherMiddleware(
-		adapters.NewConsumerAggregateRootRepository(aggregateStore),
+		adapters.NewConsumerAggregateRepository(aggregateStore),
 		adapters.NewConsumerEntityEventPublisher(publisher),
 	)
 

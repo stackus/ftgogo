@@ -32,7 +32,7 @@ func Setup(svc *applications.Monolith) error {
 
 	// Driven
 	ticketRepo := adapters.NewTicketRepositoryPublisherMiddleware(
-		adapters.NewTicketAggregateRootRepository(aggregateStore),
+		adapters.NewTicketAggregateRepository(aggregateStore),
 		adapters.NewTicketEntityEventPublisher(publisher),
 	)
 	adapters.RestaurantsTableName = "kitchen.restaurants"

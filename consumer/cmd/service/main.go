@@ -24,7 +24,7 @@ func initService(svc *applications.Service) error {
 
 	// Driven
 	consumerRepo := adapters.NewConsumerRepositoryPublisherMiddleware(
-		adapters.NewConsumerAggregateRootRepository(svc.AggregateStore),
+		adapters.NewConsumerAggregateRepository(svc.AggregateStore),
 		adapters.NewConsumerEntityEventPublisher(svc.Publisher),
 	)
 

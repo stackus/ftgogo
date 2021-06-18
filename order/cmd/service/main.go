@@ -24,7 +24,7 @@ func initService(svc *applications.Service) error {
 
 	// Driven
 	orderRepo := adapters.NewOrderRepositoryPublisherMiddleware(
-		adapters.NewOrderAggregateRootRepository(svc.AggregateStore),
+		adapters.NewOrderAggregateRepository(svc.AggregateStore),
 		adapters.NewOrderEntityEventPublisher(svc.Publisher),
 	)
 	restaurantRepo := adapters.NewRestaurantPostgresRepository(svc.PgConn)
