@@ -178,31 +178,7 @@ func (s *Service) run(*cobra.Command, []string) error {
 	)
 
 	s.RpcServer = initRpcServer(s.Cfg.Rpc, pgConn, s.Logger)
-	// s.RpcServer = rpc.NewServer(s.Cfg.Rpc,
-	// 	rpc.WithUnaryServerInterceptors(
-	// 		// 4. Outbox: Use a RPC request middleware to start a new transaction for each incoming request
-	// 		edatpgx.RpcSessionUnaryInterceptor(pgConn, zerologto.Logger(s.Logger)),
-	// 	),
-	// 	rpc.WithServerUnaryEnsureStatus(),
-	// )
-
 	s.WebServer = initWebServer(s.Cfg.Web, pgConn, s.Logger)
-	// s.WebServer = web.NewServer(s.Cfg.Web.Http, web.WithHealthCheck(s.Cfg.Web.PingPath))
-	//
-	// s.WebServer.Options(s.Cfg.Web.ApiPath,
-	// 	web.WithSecure(),
-	// 	web.WithCors(s.Cfg.Web.Cors),
-	// 	web.WithMiddleware(
-	// 		instrumentation.WebInstrumentation(),
-	// 		web.ZeroLogger(s.Logger),
-	// 		http2.RequestContext,
-	// 		// 4. Outbox: Use a WEB request middleware to start a new transaction for each incoming request
-	// 		edatpgx.WebSessionMiddleware(pgConn, zerologto.Logger(s.Logger)),
-	// 	))
-	//
-	// s.WebServer.Mount(s.Cfg.Web.MetricsPath, func(r chi.Router) http.Handler {
-	// 	return promhttp.Handler()
-	// })
 
 	err = s.appFn(s)
 	if err != nil {
