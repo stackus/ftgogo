@@ -3,7 +3,7 @@ package commands
 import (
 	"context"
 
-	"github.com/stackus/ftgogo/delivery/internal/adapters"
+	"github.com/stackus/ftgogo/delivery/internal/application/ports"
 )
 
 type SetCourierAvailability struct {
@@ -12,10 +12,10 @@ type SetCourierAvailability struct {
 }
 
 type SetCourierAvailabilityHandler struct {
-	repo adapters.CourierRepository
+	repo ports.CourierRepository
 }
 
-func NewSetCourierAvailabilityHandler(courierRepo adapters.CourierRepository) SetCourierAvailabilityHandler {
+func NewSetCourierAvailabilityHandler(courierRepo ports.CourierRepository) SetCourierAvailabilityHandler {
 	return SetCourierAvailabilityHandler{repo: courierRepo}
 }
 

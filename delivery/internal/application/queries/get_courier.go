@@ -3,7 +3,7 @@ package queries
 import (
 	"context"
 
-	"github.com/stackus/ftgogo/delivery/internal/adapters"
+	"github.com/stackus/ftgogo/delivery/internal/application/ports"
 	"github.com/stackus/ftgogo/delivery/internal/domain"
 )
 
@@ -12,10 +12,10 @@ type GetCourier struct {
 }
 
 type GetCourierHandler struct {
-	repo adapters.CourierRepository
+	repo ports.CourierRepository
 }
 
-func NewGetCourierHandler(repo adapters.CourierRepository) GetCourierHandler {
+func NewGetCourierHandler(repo ports.CourierRepository) GetCourierHandler {
 	return GetCourierHandler{repo: repo}
 }
 

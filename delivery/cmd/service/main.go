@@ -3,8 +3,6 @@ package main
 import (
 	"github.com/stackus/ftgogo/delivery/internal/adapters"
 	"github.com/stackus/ftgogo/delivery/internal/application"
-	"github.com/stackus/ftgogo/delivery/internal/application/commands"
-	"github.com/stackus/ftgogo/delivery/internal/application/queries"
 	"github.com/stackus/ftgogo/delivery/internal/handlers"
 	"github.com/stackus/ftgogo/serviceapis"
 	"shared-go/applications"
@@ -25,19 +23,7 @@ func initService(svc *applications.Service) error {
 	deliveryRepo := adapters.NewDeliveryPostgresRepository(svc.PgConn)
 	restaurantRepo := adapters.NewRestaurantPostgresRepository(svc.PgConn)
 
-	app := application.Service{
-		Commands: application.Commands{
-			CreateDelivery:         commands.NewCreateDeliveryHandler(deliveryRepo, restaurantRepo),
-			CreateRestaurant:       commands.NewCreateRestaurantHandler(restaurantRepo),
-			SetCourierAvailability: commands.NewSetCourierAvailabilityHandler(courierRepo),
-			ScheduleDelivery:       commands.NewScheduleDeliveryHandler(deliveryRepo, courierRepo),
-			CancelDelivery:         commands.NewCancelDeliveryHandler(deliveryRepo, courierRepo),
-		},
-		Queries: application.Queries{
-			GetCourier:  queries.NewGetCourierHandler(courierRepo),
-			GetDelivery: queries.NewGetDeliveryHandler(deliveryRepo),
-		},
-	}
+	app := application.NewServiceApplication(courierRepo, deliveryRepo, restaurantRepo)
 
 	// Drivers
 	handlers.NewRestaurantEventHandlers(app).Mount(svc.Subscriber)

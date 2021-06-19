@@ -11,9 +11,11 @@ import (
 	"github.com/stackus/ftgogo/serviceapis/orderapi"
 )
 
-type OrderEventHandlers struct{ app application.Service }
+type OrderEventHandlers struct {
+	app application.ServiceApplication
+}
 
-func NewOrderEventHandlers(app application.Service) OrderEventHandlers {
+func NewOrderEventHandlers(app application.ServiceApplication) OrderEventHandlers {
 	return OrderEventHandlers{app: app}
 }
 
@@ -25,7 +27,7 @@ func (h OrderEventHandlers) Mount(subscriber *msg.Subscriber) {
 func (h OrderEventHandlers) OrderCreated(ctx context.Context, evtMsg msg.EntityEvent) error {
 	evt := evtMsg.Event().(*orderapi.OrderCreated)
 
-	return h.app.Commands.CreateDelivery.Handle(ctx, commands.CreateDelivery{
+	return h.app.CreateDelivery(ctx, commands.CreateDelivery{
 		OrderID:      evtMsg.EntityID(),
 		RestaurantID: evt.RestaurantID,
 		DeliveryAddress: &commonapi.Address{

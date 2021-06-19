@@ -3,24 +3,24 @@ package queries
 import (
 	"context"
 
-	"github.com/stackus/ftgogo/delivery/internal/adapters"
+	"github.com/stackus/ftgogo/delivery/internal/application/ports"
 	"github.com/stackus/ftgogo/delivery/internal/domain"
 )
 
 type GetDelivery struct {
-	DeliveryID string
+	OrderID string
 }
 
 type GetDeliveryHandler struct {
-	repo adapters.DeliveryRepository
+	repo ports.DeliveryRepository
 }
 
-func NewGetDeliveryHandler(repo adapters.DeliveryRepository) GetDeliveryHandler {
+func NewGetDeliveryHandler(repo ports.DeliveryRepository) GetDeliveryHandler {
 	return GetDeliveryHandler{
 		repo: repo,
 	}
 }
 
 func (h GetDeliveryHandler) Handle(ctx context.Context, query GetDelivery) (*domain.Delivery, error) {
-	return h.repo.Find(ctx, query.DeliveryID)
+	return h.repo.Find(ctx, query.OrderID)
 }

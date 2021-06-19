@@ -10,6 +10,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/stackus/edat-pgx"
 
+	"github.com/stackus/ftgogo/delivery/internal/application/ports"
 	"github.com/stackus/ftgogo/delivery/internal/domain"
 )
 
@@ -26,7 +27,7 @@ type CourierPostgresRepository struct {
 
 var CouriersTableName = "couriers"
 
-var _ CourierRepository = (*CourierPostgresRepository)(nil)
+var _ ports.CourierRepository = (*CourierPostgresRepository)(nil)
 
 func NewCourierPostgresRepository(client edatpgx.Client) *CourierPostgresRepository {
 	return &CourierPostgresRepository{

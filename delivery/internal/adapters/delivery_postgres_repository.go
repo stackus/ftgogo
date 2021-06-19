@@ -9,6 +9,7 @@ import (
 
 	"github.com/stackus/edat-pgx"
 
+	"github.com/stackus/ftgogo/delivery/internal/application/ports"
 	"github.com/stackus/ftgogo/delivery/internal/domain"
 )
 
@@ -24,7 +25,7 @@ type DeliveryPostgresRepository struct {
 
 var DeliveriesTableName = "deliveries"
 
-var _ DeliveryRepository = (*DeliveryPostgresRepository)(nil)
+var _ ports.DeliveryRepository = (*DeliveryPostgresRepository)(nil)
 
 func NewDeliveryPostgresRepository(client edatpgx.Client) *DeliveryPostgresRepository {
 	return &DeliveryPostgresRepository{

@@ -15,13 +15,13 @@ import (
 )
 
 type RpcHandlers struct {
-	app application.Service
+	app application.ServiceApplication
 	deliverypb.UnimplementedDeliveryServiceServer
 }
 
 var _ deliverypb.DeliveryServiceServer = (*RpcHandlers)(nil)
 
-func NewRpcHandlers(app application.Service) RpcHandlers {
+func NewRpcHandlers(app application.ServiceApplication) RpcHandlers {
 	return RpcHandlers{app: app}
 }
 
@@ -30,7 +30,7 @@ func (h RpcHandlers) Mount(registrar grpc.ServiceRegistrar) {
 }
 
 func (h RpcHandlers) GetCourier(ctx context.Context, request *deliverypb.GetCourierRequest) (*deliverypb.GetCourierResponse, error) {
-	courier, err := h.app.Queries.GetCourier.Handle(ctx, queries.GetCourier{CourierID: request.CourierID})
+	courier, err := h.app.GetCourier(ctx, queries.GetCourier{CourierID: request.CourierID})
 	if err != nil {
 		return nil, err
 	}
@@ -40,7 +40,7 @@ func (h RpcHandlers) GetCourier(ctx context.Context, request *deliverypb.GetCour
 }
 
 func (h RpcHandlers) SetCourierAvailability(ctx context.Context, request *deliverypb.SetCourierAvailabilityRequest) (*deliverypb.SetCourierAvailabilityResponse, error) {
-	err := h.app.Commands.SetCourierAvailability.Handle(ctx, commands.SetCourierAvailability{
+	err := h.app.SetCourierAvailability(ctx, commands.SetCourierAvailability{
 		CourierID: request.CourierID,
 		Available: request.Available,
 	})
@@ -52,7 +52,7 @@ func (h RpcHandlers) SetCourierAvailability(ctx context.Context, request *delive
 }
 
 func (h RpcHandlers) GetDelivery(ctx context.Context, request *deliverypb.GetDeliveryRequest) (*deliverypb.GetDeliveryResponse, error) {
-	delivery, err := h.app.Queries.GetDelivery.Handle(ctx, queries.GetDelivery{DeliveryID: request.DeliveryID})
+	delivery, err := h.app.GetDelivery(ctx, queries.GetDelivery{OrderID: request.DeliveryID})
 	if err != nil {
 		return nil, err
 	}
@@ -60,20 +60,6 @@ func (h RpcHandlers) GetDelivery(ctx context.Context, request *deliverypb.GetDel
 		Delivery: h.toDeliveryProto(delivery),
 	}, nil
 }
-
-// func (h RpcHandlers) GetDeliveryStatus(ctx context.Context, request *deliverypb.GetDeliveryStatusRequest) (*deliverypb.GetDeliveryStatusResponse, error) {
-// 	status, err := h.app.Queries.GetDeliveryStatus.Handle(ctx, queries.GetDeliveryStatus{DeliveryID: request.DeliveryID})
-// 	if err != nil {
-// 		return nil, err
-// 	}
-//
-// 	return &deliverypb.GetDeliveryStatusResponse{
-// 		DeliveryID:        status.ID,
-// 		AssignedCourierID: status.AssignedCourier,
-// 		CourierActions:    status.CourierActions,
-// 		Status:            status.Status,
-// 	}, nil
-// }
 
 func (h RpcHandlers) toDeliveryProto(delivery *domain.Delivery) *deliverypb.Delivery {
 	return &deliverypb.Delivery{

@@ -10,9 +10,11 @@ import (
 	"github.com/stackus/ftgogo/serviceapis/kitchenapi"
 )
 
-type TicketEventHandlers struct{ app application.Service }
+type TicketEventHandlers struct {
+	app application.ServiceApplication
+}
 
-func NewTicketEventHandlers(app application.Service) TicketEventHandlers {
+func NewTicketEventHandlers(app application.ServiceApplication) TicketEventHandlers {
 	return TicketEventHandlers{app: app}
 }
 
@@ -25,7 +27,7 @@ func (h TicketEventHandlers) Mount(subscriber *msg.Subscriber) {
 func (h TicketEventHandlers) TicketAccepted(ctx context.Context, evtMsg msg.EntityEvent) error {
 	evt := evtMsg.Event().(*kitchenapi.TicketAccepted)
 
-	return h.app.Commands.ScheduleDelivery.Handle(ctx, commands.ScheduleDelivery{
+	return h.app.ScheduleDelivery(ctx, commands.ScheduleDelivery{
 		OrderID: evt.OrderID,
 		ReadyBy: evt.ReadyBy,
 	})
@@ -34,5 +36,5 @@ func (h TicketEventHandlers) TicketAccepted(ctx context.Context, evtMsg msg.Enti
 func (h TicketEventHandlers) TicketCancelled(ctx context.Context, evtMsg msg.EntityEvent) error {
 	evt := evtMsg.Event().(*kitchenapi.TicketCancelled)
 
-	return h.app.Commands.CancelDelivery.Handle(ctx, commands.CancelDelivery{OrderID: evt.OrderID})
+	return h.app.CancelDelivery(ctx, commands.CancelDelivery{OrderID: evt.OrderID})
 }
