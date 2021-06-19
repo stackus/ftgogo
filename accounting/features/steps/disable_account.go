@@ -2,6 +2,7 @@ package steps
 
 import (
 	"context"
+	"encoding/json"
 
 	"github.com/cucumber/godog"
 
@@ -12,13 +13,15 @@ func (f *FeatureState) RegisterDisableAccountSteps(ctx *godog.ScenarioContext) {
 	ctx.Step(`^I disabled? (?:an|the) account with:?$`, f.iDisableAnAccountWith)
 }
 
-func (f *FeatureState) iDisableAnAccountWith(table *godog.Table) error {
-	cmd, err := assist.CreateInstance(new(commands.DisableAccount), table)
+func (f *FeatureState) iDisableAnAccountWith(doc *godog.DocString) error {
+	var cmd commands.DisableAccount
+
+	err := json.Unmarshal([]byte(doc.Content), &cmd)
 	if err != nil {
 		return err
 	}
 
-	f.err = f.app.DisableAccount(context.Background(), *cmd.(*commands.DisableAccount))
+	f.err = f.app.DisableAccount(context.Background(), cmd)
 
 	return nil
 }

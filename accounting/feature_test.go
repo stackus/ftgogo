@@ -5,13 +5,21 @@ import (
 	"testing"
 
 	"github.com/cucumber/godog"
+	flag "github.com/spf13/pflag"
 
 	"github.com/stackus/ftgogo/accounting/features/steps"
 )
 
-type featureTests struct{}
+var opts = godog.Options{
+	Format:   "progress",
+	NoColors: true,
+}
 
-func (f featureTests) initScenario(ctx *godog.ScenarioContext) {
+func init() {
+	godog.BindCommandLineFlags("godog.", &opts)
+}
+
+func InitializeScenario(ctx *godog.ScenarioContext) {
 	state := steps.NewFeatureState()
 
 	ctx.BeforeScenario(func(*godog.Scenario) {
@@ -26,28 +34,26 @@ func (f featureTests) initScenario(ctx *godog.ScenarioContext) {
 	state.RegisterAuthorizeOrderSteps(ctx)
 }
 
-func TestFeatures(t *testing.T) {
-	format := "progress"
+func TestMain(m *testing.M) {
+	flag.Parse()
 	for _, arg := range os.Args[1:] {
-		if arg == "-test.v=true" { // go test transforms -v option
-			format = "pretty"
+		if arg == "-test.v=true" {
+			opts.Format = "pretty"
 			break
 		}
 	}
 
-	opts := godog.Options{
-		Format: format,
-	}
-
-	features := featureTests{}
-
 	status := godog.TestSuite{
 		Name:                "accounting features",
-		ScenarioInitializer: features.initScenario,
+		ScenarioInitializer: InitializeScenario,
 		Options:             &opts,
 	}.Run()
 
+	if st := m.Run(); st != 0 {
+		os.Exit(st)
+	}
+
 	if status != 0 {
-		t.Fail()
+		os.Exit(status)
 	}
 }

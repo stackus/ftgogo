@@ -11,7 +11,7 @@ require (
 	github.com/gofrs/uuid v4.0.0+incompatible // indirect
 	github.com/hashicorp/go-memdb v1.3.2 // indirect
 	github.com/mattn/go-colorable v0.1.8 // indirect
-	github.com/rdumont/assistdog v0.0.0-20201106100018-168b06230d14
+	github.com/spf13/pflag v1.0.5
 	github.com/stackus/edat v0.0.6
 	github.com/stackus/edat-msgpack v0.0.2
 	github.com/stackus/edat-pgx v0.0.2

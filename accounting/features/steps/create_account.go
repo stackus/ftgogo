@@ -2,6 +2,7 @@ package steps
 
 import (
 	"context"
+	"encoding/json"
 
 	"github.com/cucumber/godog"
 
@@ -12,13 +13,15 @@ func (f *FeatureState) RegisterCreateAccountSteps(ctx *godog.ScenarioContext) {
 	ctx.Step(`^I create an account with:?$`, f.iCreateAnAccountWith)
 }
 
-func (f *FeatureState) iCreateAnAccountWith(table *godog.Table) error {
-	cmd, err := assist.CreateInstance(new(commands.CreateAccount), table)
+func (f *FeatureState) iCreateAnAccountWith(doc *godog.DocString) error {
+	var cmd commands.CreateAccount
+
+	err := json.Unmarshal([]byte(doc.Content), &cmd)
 	if err != nil {
 		return err
 	}
 
-	f.err = f.app.CreateAccount(context.Background(), *cmd.(*commands.CreateAccount))
+	f.err = f.app.CreateAccount(context.Background(), cmd)
 
 	return nil
 }

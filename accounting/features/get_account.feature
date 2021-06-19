@@ -1,12 +1,21 @@
+@query
 Feature: Get Accounts
 
   Scenario: Get an account by ID
     Given I create an account with:
-      | ConsumerID | a123        |
-      | Name       | TestAccount |
+    """
+    {
+      "ConsumerID": "a123",
+      "Name": "TestAccount"
+    }
+    """
     When I request an account with:
-      | AccountID | a123 |
-    Then I expect the command to succeed
+    """
+    {
+      "AccountID": "a123"
+    }
+    """
+    Then I expect the request to succeed
     And the returned account matches:
     """
     {
@@ -18,13 +27,25 @@ Feature: Get Accounts
 
   Scenario: Get a disabled account by ID
     Given I create an account with:
-      | ConsumerID | a123        |
-      | Name       | TestAccount |
+    """
+    {
+      "ConsumerID": "a123",
+      "Name": "TestAccount"
+    }
+    """
     And I disable the account with:
-      | AccountID | a123 |
+    """
+    {
+      "AccountID": "a123"
+    }
+    """
     When I request an account with:
-      | AccountID | a123 |
-    Then I expect the command to succeed
+    """
+    {
+      "AccountID": "a123"
+    }
+    """
+    Then I expect the request to succeed
     And the returned account matches:
     """
     {
@@ -36,11 +57,19 @@ Feature: Get Accounts
 
   Scenario: Getting an account that does not exist returns an error
     Given I create an account with:
-      | ConsumerID | a123        |
-      | Name       | TestAccount |
+    """
+    {
+      "ConsumerID": "a123",
+      "Name": "TestAccount"
+    }
+    """
     When I request an account with:
-      | AccountID | b456 |
-    Then I expect the command to fail
+    """
+    {
+      "AccountID": "b456"
+    }
+    """
+    Then I expect the request to fail
     And the returned error message is:
     """
     account not found

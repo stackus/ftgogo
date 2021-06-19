@@ -2,6 +2,7 @@ package steps
 
 import (
 	"context"
+	"encoding/json"
 
 	"github.com/cucumber/godog"
 
@@ -12,13 +13,15 @@ func (f *FeatureState) RegisterAuthorizeOrderSteps(ctx *godog.ScenarioContext) {
 	ctx.Step(`^I authorize (?:an|the) order with:?$`, f.iAuthorizeAnOrderWith)
 }
 
-func (f *FeatureState) iAuthorizeAnOrderWith(table *godog.Table) error {
-	cmd, err := assist.CreateInstance(new(commands.AuthorizeOrder), table)
+func (f *FeatureState) iAuthorizeAnOrderWith(doc *godog.DocString) error {
+	var cmd commands.AuthorizeOrder
+
+	err := json.Unmarshal([]byte(doc.Content), &cmd)
 	if err != nil {
 		return err
 	}
 
-	f.err = f.app.AuthorizeOrder(context.Background(), *cmd.(*commands.AuthorizeOrder))
+	f.err = f.app.AuthorizeOrder(context.Background(), cmd)
 
 	return nil
 }

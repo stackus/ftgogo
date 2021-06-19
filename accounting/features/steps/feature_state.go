@@ -5,7 +5,6 @@ import (
 	"reflect"
 
 	"github.com/cucumber/godog"
-	"github.com/rdumont/assistdog"
 	_ "github.com/stackus/edat-msgpack"
 	"github.com/stackus/edat/inmem"
 	"github.com/stackus/errors"
@@ -35,10 +34,7 @@ func NewFeatureState() *FeatureState {
 	return f
 }
 
-var assist *assistdog.Assist
-
 func init() {
-	assist = assistdog.NewDefault()
 	serviceapis.RegisterTypes()
 	domain.RegisterTypes()
 }
@@ -52,8 +48,8 @@ func (f *FeatureState) Reset() {
 }
 
 func (f *FeatureState) RegisterCommonSteps(ctx *godog.ScenarioContext) {
-	ctx.Step(`^I expect the command to fail$`, f.iExpectTheCommandToFail)
-	ctx.Step(`^I expect the command to succeed$`, f.iExpectTheCommandToSucceed)
+	ctx.Step(`^I expect the (?:request|command|query) to fail$`, f.iExpectTheCommandToFail)
+	ctx.Step(`^I expect the (?:request|command|query) to succeed$`, f.iExpectTheCommandToSucceed)
 
 	ctx.Step(`^(?:ensure )?the returned account matches:$`, f.theReturnedAccountMatches)
 	ctx.Step(`^(?:ensure )?the returned error message is:$`, f.theReturnedErrorMessageIs)
