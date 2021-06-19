@@ -5,7 +5,7 @@ import (
 
 	"github.com/stackus/errors"
 
-	"github.com/stackus/ftgogo/consumer/internal/adapters"
+	"github.com/stackus/ftgogo/consumer/internal/application/ports"
 	"github.com/stackus/ftgogo/serviceapis/commonapi"
 )
 
@@ -15,10 +15,10 @@ type GetAddress struct {
 }
 
 type GetAddressHandler struct {
-	repo adapters.ConsumerRepository
+	repo ports.ConsumerRepository
 }
 
-func NewGetAddressHandler(repo adapters.ConsumerRepository) GetAddressHandler {
+func NewGetAddressHandler(repo ports.ConsumerRepository) GetAddressHandler {
 	return GetAddressHandler{repo: repo}
 }
 

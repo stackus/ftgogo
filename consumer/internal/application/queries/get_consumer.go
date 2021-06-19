@@ -3,7 +3,7 @@ package queries
 import (
 	"context"
 
-	"github.com/stackus/ftgogo/consumer/internal/adapters"
+	"github.com/stackus/ftgogo/consumer/internal/application/ports"
 	"github.com/stackus/ftgogo/consumer/internal/domain"
 )
 
@@ -12,10 +12,10 @@ type GetConsumer struct {
 }
 
 type GetConsumerHandler struct {
-	repo adapters.ConsumerRepository
+	repo ports.ConsumerRepository
 }
 
-func NewGetConsumerHandler(consumerRepo adapters.ConsumerRepository) GetConsumerHandler {
+func NewGetConsumerHandler(consumerRepo ports.ConsumerRepository) GetConsumerHandler {
 	return GetConsumerHandler{repo: consumerRepo}
 }
 

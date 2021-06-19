@@ -3,8 +3,6 @@ package main
 import (
 	"github.com/stackus/ftgogo/consumer/internal/adapters"
 	"github.com/stackus/ftgogo/consumer/internal/application"
-	"github.com/stackus/ftgogo/consumer/internal/application/commands"
-	"github.com/stackus/ftgogo/consumer/internal/application/queries"
 	"github.com/stackus/ftgogo/consumer/internal/domain"
 	"github.com/stackus/ftgogo/consumer/internal/handlers"
 	"github.com/stackus/ftgogo/serviceapis"
@@ -28,20 +26,7 @@ func initService(svc *applications.Service) error {
 		adapters.NewConsumerEntityEventPublisher(svc.Publisher),
 	)
 
-	app := application.Service{
-		Commands: application.Commands{
-			RegisterConsumer:        commands.NewRegisterConsumerHandler(consumerRepo),
-			UpdateConsumer:          commands.NewUpdateConsumerHandler(consumerRepo),
-			ValidateOrderByConsumer: commands.NewValidateOrderByConsumerHandler(consumerRepo),
-			AddAddress:              commands.NewAddAddressHandler(consumerRepo),
-			UpdateAddress:           commands.NewUpdateAddressHandler(consumerRepo),
-			RemoveAddress:           commands.NewRemoveAddressHandler(consumerRepo),
-		},
-		Queries: application.Queries{
-			GetConsumer: queries.NewGetConsumerHandler(consumerRepo),
-			GetAddress:  queries.NewGetAddressHandler(consumerRepo),
-		},
-	}
+	app := application.NewServiceApplication(consumerRepo)
 
 	// Drivers
 	handlers.NewCommandHandlers(app).Mount(svc.Subscriber, svc.Publisher)

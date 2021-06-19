@@ -14,13 +14,13 @@ import (
 )
 
 type RpcHandlers struct {
-	app application.Service
+	app application.ServiceApplication
 	consumerpb.UnimplementedConsumerServiceServer
 }
 
 var _ consumerpb.ConsumerServiceServer = (*RpcHandlers)(nil)
 
-func NewRpcHandlers(app application.Service) RpcHandlers {
+func NewRpcHandlers(app application.ServiceApplication) RpcHandlers {
 	return RpcHandlers{app: app}
 }
 
@@ -29,7 +29,7 @@ func (h RpcHandlers) Mount(registrar grpc.ServiceRegistrar) {
 }
 
 func (h RpcHandlers) RegisterConsumer(ctx context.Context, request *consumerpb.RegisterConsumerRequest) (*consumerpb.RegisterConsumerResponse, error) {
-	consumerID, err := h.app.Commands.RegisterConsumer.Handle(ctx, commands.RegisterConsumer{Name: request.Name})
+	consumerID, err := h.app.RegisterConsumer(ctx, commands.RegisterConsumer{Name: request.Name})
 	if err != nil {
 		return nil, err
 	}
@@ -37,7 +37,7 @@ func (h RpcHandlers) RegisterConsumer(ctx context.Context, request *consumerpb.R
 }
 
 func (h RpcHandlers) GetConsumer(ctx context.Context, request *consumerpb.GetConsumerRequest) (*consumerpb.GetConsumerResponse, error) {
-	consumer, err := h.app.Queries.GetConsumer.Handle(ctx, queries.GetConsumer{ConsumerID: request.ConsumerID})
+	consumer, err := h.app.GetConsumer(ctx, queries.GetConsumer{ConsumerID: request.ConsumerID})
 	if err != nil {
 		return nil, err
 	}
@@ -48,7 +48,7 @@ func (h RpcHandlers) GetConsumer(ctx context.Context, request *consumerpb.GetCon
 }
 
 func (h RpcHandlers) UpdateConsumer(ctx context.Context, request *consumerpb.UpdateConsumerRequest) (*emptypb.Empty, error) {
-	err := h.app.Commands.UpdateConsumer.Handle(ctx, commands.UpdateConsumer{
+	err := h.app.UpdateConsumer(ctx, commands.UpdateConsumer{
 		ConsumerID: request.ConsumerID,
 		Name:       request.Name,
 	})
@@ -56,7 +56,7 @@ func (h RpcHandlers) UpdateConsumer(ctx context.Context, request *consumerpb.Upd
 }
 
 func (h RpcHandlers) AddAddress(ctx context.Context, request *consumerpb.AddAddressRequest) (*emptypb.Empty, error) {
-	err := h.app.Commands.AddAddress.Handle(ctx, commands.AddAddress{
+	err := h.app.AddAddress(ctx, commands.AddAddress{
 		ConsumerID: request.ConsumerID,
 		AddressID:  request.AddressID,
 		Address:    commonapi.FromAddressProto(request.Address),
@@ -65,7 +65,7 @@ func (h RpcHandlers) AddAddress(ctx context.Context, request *consumerpb.AddAddr
 }
 
 func (h RpcHandlers) GetAddress(ctx context.Context, request *consumerpb.GetAddressRequest) (*consumerpb.GetAddressResponse, error) {
-	address, err := h.app.Queries.GetAddress.Handle(ctx, queries.GetAddress{
+	address, err := h.app.GetAddress(ctx, queries.GetAddress{
 		ConsumerID: request.ConsumerID,
 		AddressID:  request.AddressID,
 	})
@@ -81,7 +81,7 @@ func (h RpcHandlers) GetAddress(ctx context.Context, request *consumerpb.GetAddr
 }
 
 func (h RpcHandlers) UpdateAddress(ctx context.Context, request *consumerpb.UpdateAddressRequest) (*emptypb.Empty, error) {
-	err := h.app.Commands.UpdateAddress.Handle(ctx, commands.UpdateAddress{
+	err := h.app.UpdateAddress(ctx, commands.UpdateAddress{
 		ConsumerID: request.ConsumerID,
 		AddressID:  request.AddressID,
 		Address:    commonapi.FromAddressProto(request.Address),
@@ -90,7 +90,7 @@ func (h RpcHandlers) UpdateAddress(ctx context.Context, request *consumerpb.Upda
 }
 
 func (h RpcHandlers) RemoveAddress(ctx context.Context, request *consumerpb.RemoveAddressRequest) (*emptypb.Empty, error) {
-	err := h.app.Commands.RemoveAddress.Handle(ctx, commands.RemoveAddress{
+	err := h.app.RemoveAddress(ctx, commands.RemoveAddress{
 		ConsumerID: request.ConsumerID,
 		AddressID:  request.AddressID,
 	})

@@ -14,6 +14,7 @@ var (
 	ErrConsumerUnhandledEvent    = errors.Wrap(errors.ErrInternal, "unhandled event in consumer aggregate")
 	ErrConsumerUnhandledSnapshot = errors.Wrap(errors.ErrInternal, "unhandled snapshot in consumer aggregate")
 	ErrConsumerNotFound          = errors.Wrap(errors.ErrNotFound, "consumer not found")
+	ErrConsumerNameMissing       = errors.Wrap(errors.ErrInvalidArgument, "cannot register a consumer without a name")
 	ErrOrderNotValidated         = errors.Wrap(errors.ErrBadRequest, "order not validated for consumer")
 	ErrAddressAlreadyExists      = errors.Wrap(errors.ErrConflict, "address with that identifier already exists")
 	ErrAddressDoesNotExist       = errors.Wrap(errors.ErrNotFound, "address with that identifier does not exist")
@@ -41,6 +42,10 @@ func (c *Consumer) Name() string {
 	return c.name
 }
 
+func (c *Consumer) Addresses() map[string]*commonapi.Address {
+	return c.addresses
+}
+
 func (c *Consumer) Address(addressID string) *commonapi.Address {
 	return c.addresses[addressID]
 }
@@ -55,6 +60,10 @@ func (c *Consumer) ValidateOrderByConsumer(orderTotal int) error {
 func (c *Consumer) ProcessCommand(command core.Command) error {
 	switch cmd := command.(type) {
 	case *RegisterConsumer:
+		if len([]rune(cmd.Name)) == 0 {
+			return ErrConsumerNameMissing
+		}
+
 		c.AddEvent(&consumerapi.ConsumerRegistered{
 			Name: cmd.Name,
 		})

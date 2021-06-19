@@ -3,7 +3,7 @@ package commands
 import (
 	"context"
 
-	"github.com/stackus/ftgogo/consumer/internal/adapters"
+	"github.com/stackus/ftgogo/consumer/internal/application/ports"
 	"github.com/stackus/ftgogo/consumer/internal/domain"
 )
 
@@ -13,10 +13,10 @@ type UpdateConsumer struct {
 }
 
 type UpdateConsumerHandler struct {
-	repo adapters.ConsumerRepository
+	repo ports.ConsumerRepository
 }
 
-func NewUpdateConsumerHandler(repo adapters.ConsumerRepository) UpdateConsumerHandler {
+func NewUpdateConsumerHandler(repo ports.ConsumerRepository) UpdateConsumerHandler {
 	return UpdateConsumerHandler{repo: repo}
 }
 

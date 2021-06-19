@@ -12,9 +12,13 @@ import (
 	"github.com/stackus/ftgogo/serviceapis/consumerapi"
 )
 
-type CommandHandlers struct{ app application.Service }
+type CommandHandlers struct {
+	app application.ServiceApplication
+}
 
-func NewCommandHandlers(app application.Service) CommandHandlers { return CommandHandlers{app: app} }
+func NewCommandHandlers(app application.ServiceApplication) CommandHandlers {
+	return CommandHandlers{app: app}
+}
 
 func (h CommandHandlers) Mount(subscriber *msg.Subscriber, publisher *msg.Publisher) {
 	subscriber.Subscribe(consumerapi.ConsumerServiceCommandChannel, saga.NewCommandDispatcher(publisher).
@@ -24,7 +28,7 @@ func (h CommandHandlers) Mount(subscriber *msg.Subscriber, publisher *msg.Publis
 func (h CommandHandlers) ValidateOrderByConsumer(ctx context.Context, cmdMsg saga.Command) ([]msg.Reply, error) {
 	cmd := cmdMsg.Command().(*consumerapi.ValidateOrderByConsumer)
 
-	err := h.app.Commands.ValidateOrderByConsumer.Handle(ctx, commands.ValidateOrderByConsumer{
+	err := h.app.ValidateOrderByConsumer(ctx, commands.ValidateOrderByConsumer{
 		ConsumerID: cmd.ConsumerID,
 		OrderID:    cmd.OrderID,
 		OrderTotal: cmd.OrderTotal,

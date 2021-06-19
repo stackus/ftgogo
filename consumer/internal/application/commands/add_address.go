@@ -3,7 +3,7 @@ package commands
 import (
 	"context"
 
-	"github.com/stackus/ftgogo/consumer/internal/adapters"
+	"github.com/stackus/ftgogo/consumer/internal/application/ports"
 	"github.com/stackus/ftgogo/consumer/internal/domain"
 	"github.com/stackus/ftgogo/serviceapis/commonapi"
 )
@@ -15,10 +15,10 @@ type AddAddress struct {
 }
 
 type AddAddressHandler struct {
-	repo adapters.ConsumerRepository
+	repo ports.ConsumerRepository
 }
 
-func NewAddAddressHandler(repo adapters.ConsumerRepository) AddAddressHandler {
+func NewAddAddressHandler(repo ports.ConsumerRepository) AddAddressHandler {
 	return AddAddressHandler{repo: repo}
 }
 

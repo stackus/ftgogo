@@ -6,17 +6,18 @@ import (
 	"github.com/stackus/edat/core"
 	"github.com/stackus/edat/es"
 
+	"github.com/stackus/ftgogo/consumer/internal/application/ports"
 	"github.com/stackus/ftgogo/consumer/internal/domain"
 )
 
 type consumerRepositoryPublisherMiddleware struct {
-	ConsumerRepository
-	publisher ConsumerPublisher
+	ports.ConsumerRepository
+	publisher ports.ConsumerPublisher
 }
 
-var _ ConsumerRepository = (*consumerRepositoryPublisherMiddleware)(nil)
+var _ ports.ConsumerRepository = (*consumerRepositoryPublisherMiddleware)(nil)
 
-func NewConsumerRepositoryPublisherMiddleware(repository ConsumerRepository, publisher ConsumerPublisher) ConsumerRepository {
+func NewConsumerRepositoryPublisherMiddleware(repository ports.ConsumerRepository, publisher ports.ConsumerPublisher) ports.ConsumerRepository {
 	return &consumerRepositoryPublisherMiddleware{
 		ConsumerRepository: repository,
 		publisher:          publisher,

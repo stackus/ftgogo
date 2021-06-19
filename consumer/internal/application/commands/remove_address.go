@@ -3,7 +3,7 @@ package commands
 import (
 	"context"
 
-	"github.com/stackus/ftgogo/consumer/internal/adapters"
+	"github.com/stackus/ftgogo/consumer/internal/application/ports"
 	"github.com/stackus/ftgogo/consumer/internal/domain"
 )
 
@@ -13,10 +13,10 @@ type RemoveAddress struct {
 }
 
 type RemoveAddressHandler struct {
-	repo adapters.ConsumerRepository
+	repo ports.ConsumerRepository
 }
 
-func NewRemoveAddressHandler(repo adapters.ConsumerRepository) RemoveAddressHandler {
+func NewRemoveAddressHandler(repo ports.ConsumerRepository) RemoveAddressHandler {
 	return RemoveAddressHandler{repo: repo}
 }
 
