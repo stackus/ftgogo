@@ -57,9 +57,9 @@ func (f *FeatureState) RegisterCommonSteps(ctx *godog.ScenarioContext) {
 	ctx.Step(`^I expect the (?:request|command|query) to fail$`, f.iExpectTheCommandToFail)
 	ctx.Step(`^I expect the (?:request|command|query) to succeed$`, f.iExpectTheCommandToSucceed)
 
+	ctx.Step(`^(?:ensure )?the returned error message is:$`, f.theReturnedErrorMessageIs)
 	ctx.Step(`^(?:ensure )?the returned courier matches:$`, f.theReturnedCourierMatches)
 	ctx.Step(`^(?:ensure )?the returned delivery matches:$`, f.theReturnedDeliveryMatches)
-	ctx.Step(`^(?:ensure )?the returned error message is:$`, f.theReturnedErrorMessageIs)
 	ctx.Step(`^(?:ensure )?the returned delivery status is:$`, f.theReturnedDeliveryStatusIs)
 	ctx.Step(`^(?:ensure )?the returned delivery is not assigned to:$`, f.theReturnedDeliveryIsNotAssignedTo)
 	ctx.Step(`^(?:ensure )?the returned courier is (not(?: ))?available$`, f.theReturnedCourierIsAvailable)

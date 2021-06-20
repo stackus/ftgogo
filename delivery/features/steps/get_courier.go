@@ -10,7 +10,7 @@ import (
 )
 
 func (f *FeatureState) RegisterGetCourierSteps(ctx *godog.ScenarioContext) {
-	ctx.Step(`^I (?:get|setup) (?:a|the|another) courier with:$`, f.iGetACourierWith)
+	ctx.Step(`^I (?:get|fetch|request) (?:a|the|another) courier with:$`, f.iGetACourierWith)
 }
 
 func (f *FeatureState) iGetACourierWith(doc *godog.DocString) error {

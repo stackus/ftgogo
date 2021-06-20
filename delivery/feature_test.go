@@ -46,7 +46,7 @@ func TestMain(m *testing.M) {
 	}
 
 	status := godog.TestSuite{
-		Name:                "consumer features",
+		Name:                "delivery features",
 		ScenarioInitializer: InitializeScenario,
 		Options:             &opts,
 	}.Run()
