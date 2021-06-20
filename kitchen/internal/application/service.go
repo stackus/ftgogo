@@ -22,6 +22,7 @@ type ServiceApplication interface {
 	AcceptTicket(ctx context.Context, cmd commands.AcceptTicket) error
 	CreateRestaurant(ctx context.Context, cmd commands.CreateRestaurant) error
 	ReviseRestaurantMenu(ctx context.Context, cmd commands.ReviseRestaurantMenu) error
+	GetTicket(ctx context.Context, query queries.GetTicket) (*domain.Ticket, error)
 	GetRestaurant(ctx context.Context, query queries.GetRestaurant) (*domain.Restaurant, error)
 }
 
@@ -46,6 +47,7 @@ type Commands struct {
 }
 
 type Queries struct {
+	GetTicket     queries.GetTicketHandler
 	GetRestaurant queries.GetRestaurantHandler
 }
 
@@ -66,6 +68,7 @@ func NewServiceApplication(ticketRepo ports.TicketRepository, restaurantRepo por
 			ReviseRestaurantMenu: commands.NewReviseRestaurantMenuHandler(restaurantRepo),
 		},
 		Queries: Queries{
+			GetTicket:     queries.NewGetTicketHandler(ticketRepo),
 			GetRestaurant: queries.NewGetRestaurantHandler(restaurantRepo),
 		},
 	}
@@ -117,6 +120,10 @@ func (s Service) CreateRestaurant(ctx context.Context, cmd commands.CreateRestau
 
 func (s Service) ReviseRestaurantMenu(ctx context.Context, cmd commands.ReviseRestaurantMenu) error {
 	return s.Commands.ReviseRestaurantMenu.Handle(ctx, cmd)
+}
+
+func (s Service) GetTicket(ctx context.Context, query queries.GetTicket) (*domain.Ticket, error) {
+	return s.Queries.GetTicket.Handle(ctx, query)
 }
 
 func (s Service) GetRestaurant(ctx context.Context, query queries.GetRestaurant) (*domain.Restaurant, error) {

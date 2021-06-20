@@ -46,6 +46,31 @@ type Ticket struct {
 	PreviousState    TicketState
 }
 
+func (s TicketState) String() string {
+	switch s {
+	case CreatePending:
+		return "CreatePending"
+	case AwaitingAcceptance:
+		return "AwaitingAcceptance"
+	case Accepted:
+		return "Accepted"
+	case Preparing:
+		return "Preparing"
+	case ReadyForPickup:
+		return "ReadyForPickup"
+	case PickedUp:
+		return "PickedUp"
+	case CancelPending:
+		return "CancelPending"
+	case Cancelled:
+		return "Cancelled"
+	case RevisionPending:
+		return "RevisionPending"
+	default:
+		return "CreatePending"
+	}
+}
+
 func NewTicket() es.Aggregate {
 	return &Ticket{}
 }
