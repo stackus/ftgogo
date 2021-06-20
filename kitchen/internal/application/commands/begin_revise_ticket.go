@@ -3,7 +3,7 @@ package commands
 import (
 	"context"
 
-	"github.com/stackus/ftgogo/kitchen/internal/adapters"
+	"github.com/stackus/ftgogo/kitchen/internal/application/ports"
 	"github.com/stackus/ftgogo/kitchen/internal/domain"
 )
 
@@ -14,10 +14,10 @@ type BeginReviseTicket struct {
 }
 
 type BeginReviseTicketHandler struct {
-	repo adapters.TicketRepository
+	repo ports.TicketRepository
 }
 
-func NewBeginReviseTicketHandler(ticketRepo adapters.TicketRepository) BeginReviseTicketHandler {
+func NewBeginReviseTicketHandler(ticketRepo ports.TicketRepository) BeginReviseTicketHandler {
 	return BeginReviseTicketHandler{repo: ticketRepo}
 }
 

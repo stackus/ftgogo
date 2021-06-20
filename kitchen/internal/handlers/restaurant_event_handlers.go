@@ -10,9 +10,11 @@ import (
 	"github.com/stackus/ftgogo/serviceapis/restaurantapi"
 )
 
-type RestaurantEventHandlers struct{ app application.Service }
+type RestaurantEventHandlers struct {
+	app application.ServiceApplication
+}
 
-func NewRestaurantEventHandlers(app application.Service) RestaurantEventHandlers {
+func NewRestaurantEventHandlers(app application.ServiceApplication) RestaurantEventHandlers {
 	return RestaurantEventHandlers{app: app}
 }
 
@@ -26,7 +28,7 @@ func (h RestaurantEventHandlers) Mount(subscriber *msg.Subscriber) {
 func (h RestaurantEventHandlers) RestaurantCreated(ctx context.Context, evtMsg msg.EntityEvent) error {
 	evt := evtMsg.Event().(*restaurantapi.RestaurantCreated)
 
-	return h.app.Commands.CreateRestaurant.Handle(ctx, commands.CreateRestaurant{
+	return h.app.CreateRestaurant(ctx, commands.CreateRestaurant{
 		RestaurantID: evtMsg.EntityID(),
 		Name:         evt.Name,
 		Menu:         evt.Menu,
@@ -36,7 +38,7 @@ func (h RestaurantEventHandlers) RestaurantCreated(ctx context.Context, evtMsg m
 func (h RestaurantEventHandlers) RestaurantMenuRevised(ctx context.Context, evtMsg msg.EntityEvent) error {
 	evt := evtMsg.Event().(*restaurantapi.RestaurantMenuRevised)
 
-	return h.app.Commands.ReviseRestaurantMenu.Handle(ctx, commands.ReviseRestaurantMenu{
+	return h.app.ReviseRestaurantMenu(ctx, commands.ReviseRestaurantMenu{
 		RestaurantID: evtMsg.EntityID(),
 		Menu:         evt.Menu,
 	})

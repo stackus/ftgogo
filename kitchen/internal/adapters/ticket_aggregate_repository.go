@@ -7,6 +7,7 @@ import (
 	"github.com/stackus/edat/es"
 	"github.com/stackus/errors"
 
+	"github.com/stackus/ftgogo/kitchen/internal/application/ports"
 	"github.com/stackus/ftgogo/kitchen/internal/domain"
 )
 
@@ -14,7 +15,7 @@ type TicketAggregateRepository struct {
 	store es.AggregateRepository
 }
 
-var _ TicketRepository = (*TicketAggregateRepository)(nil)
+var _ ports.TicketRepository = (*TicketAggregateRepository)(nil)
 
 func NewTicketAggregateRepository(store es.AggregateRootStore) *TicketAggregateRepository {
 	return &TicketAggregateRepository{store: es.NewAggregateRootRepository(domain.NewTicket, store)}

@@ -12,13 +12,13 @@ import (
 )
 
 type RpcHandlers struct {
-	app application.Service
+	app application.ServiceApplication
 	kitchenpb.UnimplementedKitchenServiceServer
 }
 
 var _ kitchenpb.KitchenServiceServer = (*RpcHandlers)(nil)
 
-func NewRpcHandlers(app application.Service) RpcHandlers {
+func NewRpcHandlers(app application.ServiceApplication) RpcHandlers {
 	return RpcHandlers{app: app}
 }
 
@@ -27,7 +27,7 @@ func (h RpcHandlers) Mount(registrar grpc.ServiceRegistrar) {
 }
 
 func (h RpcHandlers) GetRestaurant(ctx context.Context, request *kitchenpb.GetRestaurantRequest) (*kitchenpb.GetRestaurantResponse, error) {
-	_, err := h.app.Queries.GetRestaurant.Handle(ctx, queries.GetRestaurant{RestaurantID: request.RestaurantID})
+	_, err := h.app.GetRestaurant(ctx, queries.GetRestaurant{RestaurantID: request.RestaurantID})
 	if err != nil {
 		return nil, err
 	}
@@ -36,7 +36,7 @@ func (h RpcHandlers) GetRestaurant(ctx context.Context, request *kitchenpb.GetRe
 }
 
 func (h RpcHandlers) AcceptTicket(ctx context.Context, request *kitchenpb.AcceptTicketRequest) (*kitchenpb.AcceptTicketResponse, error) {
-	err := h.app.Commands.AcceptTicket.Handle(ctx, commands.AcceptTicket{
+	err := h.app.AcceptTicket(ctx, commands.AcceptTicket{
 		TicketID: request.TicketID,
 		ReadyBy:  request.ReadyBy.AsTime(),
 	})

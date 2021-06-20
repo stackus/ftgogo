@@ -11,9 +11,13 @@ import (
 	"github.com/stackus/ftgogo/serviceapis/kitchenapi"
 )
 
-type CommandHandlers struct{ app application.Service }
+type CommandHandlers struct {
+	app application.ServiceApplication
+}
 
-func NewCommandHandlers(app application.Service) CommandHandlers { return CommandHandlers{app: app} }
+func NewCommandHandlers(app application.ServiceApplication) CommandHandlers {
+	return CommandHandlers{app: app}
+}
 
 func (h CommandHandlers) Mount(subscriber *msg.Subscriber, publisher *msg.Publisher) {
 	subscriber.Subscribe(kitchenapi.KitchenServiceCommandChannel, saga.NewCommandDispatcher(publisher).
@@ -31,7 +35,7 @@ func (h CommandHandlers) Mount(subscriber *msg.Subscriber, publisher *msg.Publis
 func (h CommandHandlers) CreateTicket(ctx context.Context, cmdMsg saga.Command) ([]msg.Reply, error) {
 	cmd := cmdMsg.Command().(*kitchenapi.CreateTicket)
 
-	ticketID, err := h.app.Commands.CreateTicket.Handle(ctx, commands.CreateTicket{
+	ticketID, err := h.app.CreateTicket(ctx, commands.CreateTicket{
 		OrderID:      cmd.OrderID,
 		RestaurantID: cmd.RestaurantID,
 		LineItems:    cmd.TicketDetails,
@@ -46,7 +50,7 @@ func (h CommandHandlers) CreateTicket(ctx context.Context, cmdMsg saga.Command) 
 func (h CommandHandlers) ConfirmCreateTicket(ctx context.Context, cmdMsg saga.Command) ([]msg.Reply, error) {
 	cmd := cmdMsg.Command().(*kitchenapi.ConfirmCreateTicket)
 
-	err := h.app.Commands.ConfirmCreateTicket.Handle(ctx, commands.ConfirmCreateTicket{TicketID: cmd.TicketID})
+	err := h.app.ConfirmCreateTicket(ctx, commands.ConfirmCreateTicket{TicketID: cmd.TicketID})
 	if err != nil {
 		return []msg.Reply{msg.WithFailure()}, nil
 	}
@@ -57,7 +61,7 @@ func (h CommandHandlers) ConfirmCreateTicket(ctx context.Context, cmdMsg saga.Co
 func (h CommandHandlers) CancelCreateTicket(ctx context.Context, cmdMsg saga.Command) ([]msg.Reply, error) {
 	cmd := cmdMsg.Command().(*kitchenapi.CancelCreateTicket)
 
-	err := h.app.Commands.CancelCreateTicket.Handle(ctx, commands.CancelCreateTicket{TicketID: cmd.TicketID})
+	err := h.app.CancelCreateTicket(ctx, commands.CancelCreateTicket{TicketID: cmd.TicketID})
 	if err != nil {
 		return []msg.Reply{msg.WithFailure()}, nil
 	}
@@ -68,7 +72,7 @@ func (h CommandHandlers) CancelCreateTicket(ctx context.Context, cmdMsg saga.Com
 func (h CommandHandlers) BeginCancelTicket(ctx context.Context, cmdMsg saga.Command) ([]msg.Reply, error) {
 	cmd := cmdMsg.Command().(*kitchenapi.BeginCancelTicket)
 
-	err := h.app.Commands.BeginCancelTicket.Handle(ctx, commands.BeginCancelTicket{
+	err := h.app.BeginCancelTicket(ctx, commands.BeginCancelTicket{
 		TicketID:     cmd.TicketID,
 		RestaurantID: cmd.RestaurantID,
 	})
@@ -82,7 +86,7 @@ func (h CommandHandlers) BeginCancelTicket(ctx context.Context, cmdMsg saga.Comm
 func (h CommandHandlers) ConfirmCancelTicket(ctx context.Context, cmdMsg saga.Command) ([]msg.Reply, error) {
 	cmd := cmdMsg.Command().(*kitchenapi.ConfirmCancelTicket)
 
-	err := h.app.Commands.ConfirmCancelTicket.Handle(ctx, commands.ConfirmCancelTicket{
+	err := h.app.ConfirmCancelTicket(ctx, commands.ConfirmCancelTicket{
 		TicketID:     cmd.TicketID,
 		RestaurantID: cmd.RestaurantID,
 	})
@@ -96,7 +100,7 @@ func (h CommandHandlers) ConfirmCancelTicket(ctx context.Context, cmdMsg saga.Co
 func (h CommandHandlers) UndoCancelTicket(ctx context.Context, cmdMsg saga.Command) ([]msg.Reply, error) {
 	cmd := cmdMsg.Command().(*kitchenapi.UndoCancelTicket)
 
-	err := h.app.Commands.UndoCancelTicket.Handle(ctx, commands.UndoCancelTicket{
+	err := h.app.UndoCancelTicket(ctx, commands.UndoCancelTicket{
 		TicketID:     cmd.TicketID,
 		RestaurantID: cmd.RestaurantID,
 	})
@@ -110,7 +114,7 @@ func (h CommandHandlers) UndoCancelTicket(ctx context.Context, cmdMsg saga.Comma
 func (h CommandHandlers) BeginReviseTicket(ctx context.Context, cmdMsg saga.Command) ([]msg.Reply, error) {
 	cmd := cmdMsg.Command().(*kitchenapi.BeginReviseTicket)
 
-	err := h.app.Commands.BeginReviseTicket.Handle(ctx, commands.BeginReviseTicket{
+	err := h.app.BeginReviseTicket(ctx, commands.BeginReviseTicket{
 		TicketID:          cmd.TicketID,
 		RestaurantID:      cmd.RestaurantID,
 		RevisedQuantities: cmd.RevisedQuantities,
@@ -125,7 +129,7 @@ func (h CommandHandlers) BeginReviseTicket(ctx context.Context, cmdMsg saga.Comm
 func (h CommandHandlers) ConfirmReviseTicket(ctx context.Context, cmdMsg saga.Command) ([]msg.Reply, error) {
 	cmd := cmdMsg.Command().(*kitchenapi.ConfirmReviseTicket)
 
-	err := h.app.Commands.ConfirmReviseTicket.Handle(ctx, commands.ConfirmReviseTicket{
+	err := h.app.ConfirmReviseTicket(ctx, commands.ConfirmReviseTicket{
 		TicketID:          cmd.TicketID,
 		RestaurantID:      cmd.RestaurantID,
 		RevisedQuantities: cmd.RevisedQuantities,
@@ -140,7 +144,7 @@ func (h CommandHandlers) ConfirmReviseTicket(ctx context.Context, cmdMsg saga.Co
 func (h CommandHandlers) UndoReviseTicket(ctx context.Context, cmdMsg saga.Command) ([]msg.Reply, error) {
 	cmd := cmdMsg.Command().(*kitchenapi.UndoReviseTicket)
 
-	err := h.app.Commands.UndoReviseTicket.Handle(ctx, commands.UndoReviseTicket{
+	err := h.app.UndoReviseTicket(ctx, commands.UndoReviseTicket{
 		TicketID:     cmd.TicketID,
 		RestaurantID: cmd.RestaurantID,
 	})

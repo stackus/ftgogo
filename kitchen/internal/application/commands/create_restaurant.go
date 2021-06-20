@@ -3,7 +3,7 @@ package commands
 import (
 	"context"
 
-	"github.com/stackus/ftgogo/kitchen/internal/adapters"
+	"github.com/stackus/ftgogo/kitchen/internal/application/ports"
 	"github.com/stackus/ftgogo/kitchen/internal/domain"
 	"github.com/stackus/ftgogo/serviceapis/restaurantapi"
 )
@@ -15,10 +15,10 @@ type CreateRestaurant struct {
 }
 
 type CreateRestaurantHandler struct {
-	repo adapters.RestaurantRepository
+	repo ports.RestaurantRepository
 }
 
-func NewCreateRestaurantHandler(restaurantRepo adapters.RestaurantRepository) CreateRestaurantHandler {
+func NewCreateRestaurantHandler(restaurantRepo ports.RestaurantRepository) CreateRestaurantHandler {
 	return CreateRestaurantHandler{repo: restaurantRepo}
 }
 

@@ -6,17 +6,18 @@ import (
 	"github.com/stackus/edat/core"
 	"github.com/stackus/edat/es"
 
+	"github.com/stackus/ftgogo/kitchen/internal/application/ports"
 	"github.com/stackus/ftgogo/kitchen/internal/domain"
 )
 
 type ticketRepositoryPublisherMiddleware struct {
-	TicketRepository
-	publisher TicketPublisher
+	ports.TicketRepository
+	publisher ports.TicketPublisher
 }
 
-var _ TicketRepository = (*ticketRepositoryPublisherMiddleware)(nil)
+var _ ports.TicketRepository = (*ticketRepositoryPublisherMiddleware)(nil)
 
-func NewTicketRepositoryPublisherMiddleware(repository TicketRepository, publisher TicketPublisher) TicketRepository {
+func NewTicketRepositoryPublisherMiddleware(repository ports.TicketRepository, publisher ports.TicketPublisher) ports.TicketRepository {
 	return &ticketRepositoryPublisherMiddleware{
 		TicketRepository: repository,
 		publisher:        publisher,
