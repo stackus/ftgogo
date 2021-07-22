@@ -2,104 +2,33 @@
 Feature: Remove Consumer Address
 
   Background: Setup a consumer
-    Given I setup a consumer with:
-    """
-    {
-      "Name": "TestConsumer"
-    }
-    """
+    Given I register a consumer named "Able Anders"
 
   Scenario: Can remove consumer addresses
-    Given I add an address with:
-    """
-    {
-      "ConsumerID": "<ConsumerID>",
-      "AddressID": "home",
-      "Address": {
-        "Street1": "123 Address St.",
-        "City": "HomeTown",
-        "State": "HomeState",
-        "Zip": "12345"
-      }
-    }
-    """
-    When I remove an address with:
-    """
-    {
-      "ConsumerID": "<ConsumerID>",
-      "AddressID": "home",
-      "Address": {
-        "Street1": "456 Address St.",
-        "City": "HomeTown",
-        "State": "HomeState",
-        "Zip": "67890"
-      }
-    }
-    """
+    Given I add an address for "Able Anders" with label "Home"
+      | Street1 | 123 Address St. |
+      | City    | BigTown         |
+      | State   | Colorado        |
+      | Zip     | 80120           |
+    When I remove an address for "Able Anders" with label "Home"
     Then I expect the command to succeed
 
-  Scenario: Updating addresses on consumers that do not exist returns an error
-    Given I add an address with:
-    """
-    {
-      "ConsumerID": "<ConsumerID>",
-      "AddressID": "home",
-      "Address": {
-        "Street1": "123 Address St.",
-        "City": "HomeTown",
-        "State": "HomeState",
-        "Zip": "12345"
-      }
-    }
-    """
-    When I remove an address with:
-    """
-    {
-      "ConsumerID": "b456",
-      "AddressID": "home",
-      "Address": {
-        "Street1": "456 Address St.",
-        "City": "HomeTown",
-        "State": "HomeState",
-        "Zip": "67890"
-      }
-    }
-    """
+  Scenario: Removing addresses on consumers that do not exist returns an error
+    Given I add an address for "Able Anders" with label "Home"
+      | Street1 | 123 Address St. |
+      | City    | BigTown         |
+      | State   | Colorado        |
+      | Zip     | 80120           |
+    When I remove an address for "Betty Burns" with label "Home"
     Then I expect the command to fail
-    And the returned error message is:
-    """
-    consumer not found
-    """
+    And the returned error message is "consumer not found"
 
-  Scenario: Updating addresses that do not exist returns an error
-    Given I add an address with:
-    """
-    {
-      "ConsumerID": "<ConsumerID>",
-      "AddressID": "home",
-      "Address": {
-        "Street1": "123 Address St.",
-        "City": "HomeTown",
-        "State": "HomeState",
-        "Zip": "12345"
-      }
-    }
-    """
-    When I remove an address with:
-    """
-    {
-      "ConsumerID": "<ConsumerID>",
-      "AddressID": "other",
-      "Address": {
-        "Street1": "456 Address St.",
-        "City": "HomeTown",
-        "State": "HomeState",
-        "Zip": "67890"
-      }
-    }
-    """
+  Scenario: Removing addresses that do not exist returns an error
+    Given I add an address for "Able Anders" with label "Home"
+      | Street1 | 123 Address St. |
+      | City    | BigTown         |
+      | State   | Colorado        |
+      | Zip     | 80120           |
+    When I remove an address for "Able Anders" with label "Other"
     Then I expect the command to fail
-    And the returned error message is:
-    """
-    address with that identifier does not exist
-    """
+    And the returned error message is "address with that identifier does not exist"

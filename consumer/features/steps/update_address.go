@@ -2,30 +2,31 @@ package steps
 
 import (
 	"context"
-	"encoding/json"
 
 	"github.com/cucumber/godog"
+	"github.com/stackus/errors"
 
 	"github.com/stackus/ftgogo/consumer/internal/application/commands"
+	"github.com/stackus/ftgogo/serviceapis/commonapi"
 )
 
 func (f *FeatureState) RegisterUpdateAddressSteps(ctx *godog.ScenarioContext) {
-	ctx.Step(`^I update (?:an|the|another) address with:$`, f.iUpdateAnAddressWith)
+	ctx.Step(`^I update an address for "([^"]*)" with label "([^"]*)"$`, f.iUpdateAnAddressForWithLabel)
 }
 
-func (f *FeatureState) iUpdateAnAddressWith(doc *godog.DocString) error {
-	var cmd commands.UpdateAddress
+func (f *FeatureState) iUpdateAnAddressForWithLabel(consumerName, addressLabel string, table *godog.Table) error {
+	consumerID := f.registeredConsumers[consumerName]
 
-	err := json.Unmarshal([]byte(doc.Content), &cmd)
+	address, err := assist.CreateInstance(new(commonapi.Address), table)
 	if err != nil {
-		return err
+		return errors.Wrapf(errors.ErrUnknown, "error parsing address table: %w", err)
 	}
 
-	if cmd.ConsumerID == "<ConsumerID>" {
-		cmd.ConsumerID = f.consumerID
-	}
-
-	f.err = f.app.UpdateAddress(context.Background(), cmd)
+	f.err = f.app.UpdateAddress(context.Background(), commands.UpdateAddress{
+		ConsumerID: consumerID,
+		AddressID:  addressLabel,
+		Address:    address.(*commonapi.Address),
+	})
 
 	return nil
 }

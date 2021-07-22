@@ -2,7 +2,6 @@ package steps
 
 import (
 	"context"
-	"encoding/json"
 
 	"github.com/cucumber/godog"
 
@@ -10,22 +9,16 @@ import (
 )
 
 func (f *FeatureState) RegisterRemoveAddressSteps(ctx *godog.ScenarioContext) {
-	ctx.Step(`^I remove (?:an|the|another) address with:$`, f.iRemoveAnAddressWith)
+	ctx.Step(`^I remove an address for "([^"]*)" with label "([^"]*)"$`, f.iRemoveAnAddressForWithLabel)
 }
 
-func (f *FeatureState) iRemoveAnAddressWith(doc *godog.DocString) error {
-	var cmd commands.RemoveAddress
+func (f *FeatureState) iRemoveAnAddressForWithLabel(consumerName, addressLabel string) error {
+	consumerID := f.registeredConsumers[consumerName]
 
-	err := json.Unmarshal([]byte(doc.Content), &cmd)
-	if err != nil {
-		return err
-	}
-
-	if cmd.ConsumerID == "<ConsumerID>" {
-		cmd.ConsumerID = f.consumerID
-	}
-
-	f.err = f.app.RemoveAddress(context.Background(), cmd)
+	f.err = f.app.RemoveAddress(context.Background(), commands.RemoveAddress{
+		ConsumerID: consumerID,
+		AddressID:  addressLabel,
+	})
 
 	return nil
 }

@@ -2,7 +2,6 @@ package steps
 
 import (
 	"context"
-	"encoding/json"
 
 	"github.com/cucumber/godog"
 
@@ -10,22 +9,21 @@ import (
 )
 
 func (f *FeatureState) RegisterUpdateConsumerSteps(ctx *godog.ScenarioContext) {
-	ctx.Step(`^I update (?:a|the) consumer with:$`, f.iUpdateAConsumerWith)
+	ctx.Step(`^I change "([^"]*)" name to "([^"]*)"$`, f.iChangeNameTo)
 }
 
-func (f *FeatureState) iUpdateAConsumerWith(doc *godog.DocString) error {
-	var cmd commands.UpdateConsumer
+func (f *FeatureState) iChangeNameTo(currentName, newName string) error {
+	consumerID := f.registeredConsumers[currentName]
 
-	err := json.Unmarshal([]byte(doc.Content), &cmd)
-	if err != nil {
-		return err
+	f.err = f.app.UpdateConsumer(context.Background(), commands.UpdateConsumer{
+		ConsumerID: consumerID,
+		Name:       newName,
+	})
+
+	if f.err == nil {
+		delete(f.registeredConsumers, currentName)
+		f.registeredConsumers[newName] = consumerID
 	}
-
-	if cmd.ConsumerID == "<ConsumerID>" {
-		cmd.ConsumerID = f.consumerID
-	}
-
-	f.err = f.app.UpdateConsumer(context.Background(), cmd)
 
 	return nil
 }

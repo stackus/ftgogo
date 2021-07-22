@@ -2,31 +2,38 @@
 Feature: Get Consumer
 
   Background: Setup a consumer
-    Given I setup a consumer with:
-    """
-    {
-      "Name": "TestConsumer"
-    }
-    """
+    Given I register a consumer named "Able Anders"
 
   Scenario: Can get consumers
-    When I request a consumer with:
-    """
-    {
-      "ConsumerID": "<ConsumerID>"
-    }
-    """
+    When I request the consumer named "Able Anders"
     Then I expect the request to succeed
 
   Scenario: Asking for a consumer that does not exist returns an error
-    When I request a consumer with:
-    """
-    {
-      "ConsumerID": "b456"
-    }
-    """
+    When I request the consumer named "Betty Burns"
     Then I expect the request to fail
-    And the returned error message is:
-    """
-    consumer not found
-    """
+    And the returned error message is "consumer not found"
+
+  Scenario: Consumer is returned with labeled addresses
+    Given I add an address for "Able Anders" with label "Home"
+      | Street1 | 123 Address St. |
+      | City    | BigTown         |
+      | State   | Colorado        |
+      | Zip     | 80120           |
+    When I request the consumer named "Able Anders"
+    Then I expect the request to succeed
+    And the returned consumer has an address with label "Home"
+
+  Scenario: Consumer is returned with all addresses
+    Given I add an address for "Able Anders" with label "Home"
+      | Street1 | 123 Address St. |
+      | City    | BigTown         |
+      | State   | Colorado        |
+      | Zip     | 80120           |
+    Given I add an address for "Able Anders" with label "Work"
+      | Street1 | 123 Address St. |
+      | City    | SmallCity       |
+      | State   | Colorado        |
+      | Zip     | 80120           |
+    When I request the consumer named "Able Anders"
+    Then I expect the request to succeed
+    And the returned consumer has 2 addresses

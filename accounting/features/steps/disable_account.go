@@ -2,7 +2,6 @@ package steps
 
 import (
 	"context"
-	"encoding/json"
 
 	"github.com/cucumber/godog"
 
@@ -10,16 +9,13 @@ import (
 )
 
 func (f *FeatureState) RegisterDisableAccountSteps(ctx *godog.ScenarioContext) {
-	ctx.Step(`^I disabled? (?:an|the) account with:?$`, f.iDisableAnAccountWith)
+	ctx.Step(`^I disable the account for "([^"]*)"$`, f.iDisableTheAccountFor)
 }
 
-func (f *FeatureState) iDisableAnAccountWith(doc *godog.DocString) error {
-	var cmd commands.DisableAccount
+func (f *FeatureState) iDisableTheAccountFor(consumerName string) error {
+	accountID := f.accountNames[consumerName]
 
-	err := json.Unmarshal([]byte(doc.Content), &cmd)
-	if err != nil {
-		return err
-	}
+	cmd := commands.DisableAccount{AccountID: accountID}
 
 	f.err = f.app.DisableAccount(context.Background(), cmd)
 

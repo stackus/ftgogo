@@ -2,75 +2,20 @@
 Feature: Get Accounts
 
   Scenario: Get an account by ID
-    Given I create an account with:
-    """
-    {
-      "ConsumerID": "a123",
-      "Name": "TestAccount"
-    }
-    """
-    When I request an account with:
-    """
-    {
-      "AccountID": "a123"
-    }
-    """
+    Given I create an account for the consumer "Able Anders"
+    When I request the account for "Able Anders"
     Then I expect the request to succeed
-    And the returned account matches:
-    """
-    {
-      "ID": "a123",
-      "Name": "TestAccount",
-      "Enabled": true
-    }
-    """
+    And the returned account is enabled
 
   Scenario: Get a disabled account by ID
-    Given I create an account with:
-    """
-    {
-      "ConsumerID": "a123",
-      "Name": "TestAccount"
-    }
-    """
-    And I disable the account with:
-    """
-    {
-      "AccountID": "a123"
-    }
-    """
-    When I request an account with:
-    """
-    {
-      "AccountID": "a123"
-    }
-    """
+    Given I create an account for the consumer "Able Anders"
+    And I disable the account for "Able Anders"
+    When I request the account for "Able Anders"
     Then I expect the request to succeed
-    And the returned account matches:
-    """
-    {
-      "ID": "a123",
-      "Name": "TestAccount",
-      "Enabled": false
-    }
-    """
+    And the returned account is disabled
 
   Scenario: Getting an account that does not exist returns an error
-    Given I create an account with:
-    """
-    {
-      "ConsumerID": "a123",
-      "Name": "TestAccount"
-    }
-    """
-    When I request an account with:
-    """
-    {
-      "AccountID": "b456"
-    }
-    """
+    Given I create an account for the consumer "Able Anders"
+    When I request the account for "Betty Burns"
     Then I expect the request to fail
-    And the returned error message is:
-    """
-    account not found
-    """
+    And the returned error message is "account not found"

@@ -2,7 +2,6 @@ package steps
 
 import (
 	"context"
-	"encoding/json"
 
 	"github.com/cucumber/godog"
 
@@ -10,16 +9,13 @@ import (
 )
 
 func (f *FeatureState) RegisterEnableAccountSteps(ctx *godog.ScenarioContext) {
-	ctx.Step(`^I enabled? (?:an|the) account with:?$`, f.iEnableAnAccountWith)
+	ctx.Step(`^I enable the account for "([^"]*)"$`, f.iEnableTheAccountFor)
 }
 
-func (f *FeatureState) iEnableAnAccountWith(doc *godog.DocString) error {
-	var cmd commands.EnableAccount
+func (f *FeatureState) iEnableTheAccountFor(consumerName string) error {
+	accountID := f.accountNames[consumerName]
 
-	err := json.Unmarshal([]byte(doc.Content), &cmd)
-	if err != nil {
-		return err
-	}
+	cmd := commands.EnableAccount{AccountID: accountID}
 
 	f.err = f.app.EnableAccount(context.Background(), cmd)
 

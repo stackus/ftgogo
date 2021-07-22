@@ -2,23 +2,29 @@ package steps
 
 import (
 	"context"
-	"encoding/json"
 
 	"github.com/cucumber/godog"
+	"github.com/google/uuid"
 
 	"github.com/stackus/ftgogo/accounting/internal/application/commands"
 )
 
 func (f *FeatureState) RegisterCreateAccountSteps(ctx *godog.ScenarioContext) {
-	ctx.Step(`^I create an account with:?$`, f.iCreateAnAccountWith)
+	ctx.Step(`^I create an account for the consumer "([^"]*)"$`, f.iCreateAnAccountForTheConsumer)
 }
 
-func (f *FeatureState) iCreateAnAccountWith(doc *godog.DocString) error {
-	var cmd commands.CreateAccount
+func (f *FeatureState) iCreateAnAccountForTheConsumer(consumerName string) error {
+	var consumerID string
 
-	err := json.Unmarshal([]byte(doc.Content), &cmd)
-	if err != nil {
-		return err
+	consumerID = f.accountNames[consumerName]
+	if consumerID == "" {
+		consumerID = uuid.New().String()
+		f.accountNames[consumerName] = consumerID
+	}
+
+	cmd := commands.CreateAccount{
+		ConsumerID: consumerID,
+		Name:       consumerName,
 	}
 
 	f.err = f.app.CreateAccount(context.Background(), cmd)

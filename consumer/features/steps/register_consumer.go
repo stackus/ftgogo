@@ -2,7 +2,6 @@ package steps
 
 import (
 	"context"
-	"encoding/json"
 
 	"github.com/cucumber/godog"
 
@@ -10,18 +9,16 @@ import (
 )
 
 func (f *FeatureState) RegisterRegisterConsumerSteps(ctx *godog.ScenarioContext) {
-	ctx.Step(`^I (?:register|setup) (?:a|the|another) consumer with:$`, f.iRegisterAConsumerWith)
+	ctx.Step(`^I register (?:a|another) consumer named "([^"]*)"$`, f.iRegisterAConsumerNamed)
 }
 
-func (f *FeatureState) iRegisterAConsumerWith(doc *godog.DocString) error {
-	var cmd commands.RegisterConsumer
-
-	err := json.Unmarshal([]byte(doc.Content), &cmd)
-	if err != nil {
-		return err
+func (f *FeatureState) iRegisterAConsumerNamed(consumerName string) error {
+	cmd := commands.RegisterConsumer{
+		Name: consumerName,
 	}
 
 	f.consumerID, f.err = f.app.RegisterConsumer(context.Background(), cmd)
+	f.registeredConsumers[consumerName] = f.consumerID
 
 	return nil
 }
