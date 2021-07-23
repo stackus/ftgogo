@@ -2,7 +2,7 @@ package steps
 
 import (
 	"context"
-	"encoding/json"
+	"time"
 
 	"github.com/cucumber/godog"
 
@@ -10,18 +10,14 @@ import (
 )
 
 func (f *FeatureState) RegisterScheduleDeliverySteps(ctx *godog.ScenarioContext) {
-	ctx.Step(`^I schedule (?:a|the) delivery with:$`, f.iScheduleADeliveryWith)
+	ctx.Step(`^I schedule the delivery for order "([^"]*)"$`, f.iScheduleTheDeliveryForOrder)
 }
 
-func (f *FeatureState) iScheduleADeliveryWith(doc *godog.DocString) error {
-	var cmd commands.ScheduleDelivery
-
-	err := json.Unmarshal([]byte(doc.Content), &cmd)
-	if err != nil {
-		return err
-	}
-
-	f.err = f.app.ScheduleDelivery(context.Background(), cmd)
+func (f *FeatureState) iScheduleTheDeliveryForOrder(orderID string) error {
+	f.err = f.app.ScheduleDelivery(context.Background(), commands.ScheduleDelivery{
+		OrderID: orderID,
+		ReadyBy: time.Now(),
+	})
 
 	return nil
 }

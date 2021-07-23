@@ -2,7 +2,6 @@ package steps
 
 import (
 	"context"
-	"encoding/json"
 
 	"github.com/cucumber/godog"
 
@@ -10,18 +9,22 @@ import (
 )
 
 func (f *FeatureState) RegisterCreateDeliverySteps(ctx *godog.ScenarioContext) {
-	ctx.Step(`^I (?:create|setup) (?:a|the|another) delivery with:$`, f.iCreateADeliveryWith)
+	ctx.Step(`^I create (?:a|another) delivery for order "([^"]*)" from "([^"]*)" to address$`, f.iCreateADeliveryForOrderFromToAddress)
 }
 
-func (f *FeatureState) iCreateADeliveryWith(doc *godog.DocString) error {
-	var cmd commands.CreateDelivery
-
-	err := json.Unmarshal([]byte(doc.Content), &cmd)
+func (f *FeatureState) iCreateADeliveryForOrderFromToAddress(orderID, restaurantName string, table *godog.Table) error {
+	address, err := parseAddressFromTable(table)
 	if err != nil {
 		return err
 	}
 
-	f.err = f.app.CreateDelivery(context.Background(), cmd)
+	restaurantID := f.restaurantIDs[restaurantName]
+
+	f.err = f.app.CreateDelivery(context.Background(), commands.CreateDelivery{
+		OrderID:         orderID,
+		RestaurantID:    restaurantID,
+		DeliveryAddress: address,
+	})
 
 	return nil
 }

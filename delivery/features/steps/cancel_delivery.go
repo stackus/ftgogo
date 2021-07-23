@@ -2,7 +2,6 @@ package steps
 
 import (
 	"context"
-	"encoding/json"
 
 	"github.com/cucumber/godog"
 
@@ -10,18 +9,11 @@ import (
 )
 
 func (f *FeatureState) RegisterCancelDeliverySteps(ctx *godog.ScenarioContext) {
-	ctx.Step(`^I cancel (?:a|the) delivery with:$`, f.iCancelADeliveryWith)
+	ctx.Step(`^I cancel delivery for order "([^"]*)"$`, f.iCancelDeliveryForOrder)
 }
 
-func (f *FeatureState) iCancelADeliveryWith(doc *godog.DocString) error {
-	var cmd commands.CancelDelivery
-
-	err := json.Unmarshal([]byte(doc.Content), &cmd)
-	if err != nil {
-		return err
-	}
-
-	f.err = f.app.CancelDelivery(context.Background(), cmd)
+func (f *FeatureState) iCancelDeliveryForOrder(orderID string) error {
+	f.err = f.app.CancelDelivery(context.Background(), commands.CancelDelivery{OrderID: orderID})
 
 	return nil
 }

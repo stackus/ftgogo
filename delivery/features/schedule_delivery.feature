@@ -2,137 +2,46 @@
 Feature: Scheduling Deliveries
 
   Background: Setup resources
-    Given I setup a restaurant with:
-    """
-    {
-      "RestaurantID": "a123",
-      "Name": "TestRestaurant",
-      "Address": {
-        "Street1": "123 Address St.",
-        "City": "HomeTown",
-        "State": "HomeState",
-        "Zip": "12345"
-      }
-    }
-    """
-    And I setup a delivery with:
-    """
-    {
-      "OrderID": "a123",
-      "RestaurantID": "a123",
-      "DeliveryAddress": {
-        "Street1": "123 Address St.",
-        "City": "HomeTown",
-        "State": "HomeState",
-        "Zip": "12345"
-      }
-    }
-    """
+    Given a restaurant named "Best Foods" exists with address
+      | Street1 | 123 Address St. |
+      | City    | BigTown         |
+      | State   | Colorado        |
+      | Zip     | 80120           |
+    And a courier exists named "Quick Courier"
+    And I create a delivery for order "A123" from "Best Foods" to address
+      | Street1 | 456 Address St. |
+      | City    | SmallCity       |
+      | State   | Colorado        |
+      | Zip     | 80120           |
 
   Scenario: Deliveries can be scheduled with a courier
-    When I schedule a delivery with:
-    """
-    {
-      "OrderID": "a123",
-      "ReadyBy": "2006-01-02T15:04:05Z"
-    }
-    """
+    When I schedule the delivery for order "A123"
     Then I expect the command to succeed
 
   Scenario: Scheduling a delivery sets the status to "SCHEDULED"
-    When I schedule a delivery with:
-    """
-    {
-      "OrderID": "a123",
-      "ReadyBy": "2006-01-02T15:04:05Z"
-    }
-    """
-    And I get the delivery with:
-    """
-    {
-      "OrderID": "a123"
-    }
-    """
+    When I schedule the delivery for order "A123"
+    And I get the delivery information for order "A123"
     Then I expect the request to succeed
-    And the returned delivery status is:
-    """
-    SCHEDULED
-    """
+    And the returned delivery status is "SCHEDULED"
 
   Scenario: Couriers are given a two step delivery plan when scheduled with a delivery
-    When I schedule a delivery with:
-    """
-    {
-      "OrderID": "a123",
-      "ReadyBy": "2006-01-02T15:04:05Z"
-    }
-    """
-    And I get the delivery with:
-    """
-    {
-      "OrderID": "a123"
-    }
-    """
-    Then I get the courier with:
-    """
-    {
-      "CourierID": "<AssignedCourierID>"
-    }
-    """
-    And I expect the request to succeed
-    And the returned courier matches:
-    """
-    {
-      "CourierID": "<AssignedCourierID>",
-      "Plan": [
-        {
-          "DeliveryID": "a123",
-          "ActionType": "PICKUP",
-          "Address": {
-            "Street1": "123 Address St.",
-            "City": "HomeTown",
-            "State": "HomeState",
-            "Zip": "12345"
-          },
-          "When": "2006-01-02T15:04:05Z"
-        }, {
-          "DeliveryID": "a123",
-          "ActionType": "DROPOFF",
-          "Address": {
-            "Street1": "123 Address St.",
-            "City": "HomeTown",
-            "State": "HomeState",
-            "Zip": "12345"
-          },
-          "When": "2006-01-02T15:34:05Z"
-        }
-      ],
-      "Available": true
-    }
-    """
+    Given I schedule the delivery for order "A123"
+    When I get the assigned courier for order "A123"
+    Then I expect the request to succeed
+    And the returned courier will pickup the food at address
+      | Street1 | 123 Address St. |
+      | City    | BigTown         |
+      | State   | Colorado        |
+      | Zip     | 80120           |
+    And the returned courier will dropoff the food at address
+      | Street1 | 456 Address St. |
+      | City    | SmallCity       |
+      | State   | Colorado        |
+      | Zip     | 80120           |
 
   Scenario: Unavailable couriers are not assigned to deliveries
-    Given I create a courier with:
-    """
-    {
-      "CourierID": "a123",
-      "Available": false
-    }
-    """
-    When I schedule a delivery with:
-    """
-    {
-      "OrderID": "a123",
-      "ReadyBy": "2006-01-02T15:04:05Z"
-    }
-    """
-    And I get the delivery with:
-    """
-    {
-      "OrderID": "a123"
-    }
-    """
-    Then the returned delivery is not assigned to:
-    """
-    a123
-    """
+    Given I set the courier "Quick Courier" to be unavailable
+    And I schedule the delivery for order "A123"
+    When I get the assigned courier for order "A123"
+    Then I expect the request to succeed
+    And "Quick Courier" is not the assigned courier

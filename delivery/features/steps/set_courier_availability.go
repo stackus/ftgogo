@@ -2,27 +2,57 @@ package steps
 
 import (
 	"context"
-	"encoding/json"
 
 	"github.com/cucumber/godog"
+	"github.com/google/uuid"
 
 	"github.com/stackus/ftgogo/delivery/internal/application/commands"
+	"github.com/stackus/ftgogo/delivery/internal/application/queries"
 )
 
 func (f *FeatureState) RegisterSetCourierAvailabilitySteps(ctx *godog.ScenarioContext) {
-	ctx.Step(`^I (?:create|setup) (?:a|the|another) courier with:$`, f.iSetACourierAvailabilityWith)
-	ctx.Step(`^I set (?:a|the) couriers? availability with:$`, f.iSetACourierAvailabilityWith)
+	ctx.Step(`^a courier exists named "([^"]*)"$`, f.aCourierExistsNamed)
+
+	ctx.Step(`^I set the courier "([^"]*)" to be (available|unavailable)$`, f.iSetTheCourierToBe)
+
+	ctx.Step(`^I get the courier named "([^"]*)"$`, f.iGetTheCourierNamed)
 }
 
-func (f *FeatureState) iSetACourierAvailabilityWith(doc *godog.DocString) error {
-	var cmd commands.SetCourierAvailability
-
-	err := json.Unmarshal([]byte(doc.Content), &cmd)
-	if err != nil {
-		return err
+func (f *FeatureState) aCourierExistsNamed(courierName string) error {
+	courierID := f.courierIDs[courierName]
+	if courierID == "" {
+		courierID = uuid.New().String()
+		f.courierIDs[courierName] = courierID
 	}
 
-	f.err = f.app.SetCourierAvailability(context.Background(), cmd)
+	f.err = f.app.SetCourierAvailability(context.Background(), commands.SetCourierAvailability{
+		CourierID: courierID,
+		Available: true,
+	})
+
+	return nil
+}
+
+func (f *FeatureState) iSetTheCourierToBe(courierName, availability string) error {
+	courierID := f.courierIDs[courierName]
+
+	available := true
+	if availability == "unavailable" {
+		available = false
+	}
+
+	f.err = f.app.SetCourierAvailability(context.Background(), commands.SetCourierAvailability{
+		CourierID: courierID,
+		Available: available,
+	})
+
+	return nil
+}
+
+func (f *FeatureState) iGetTheCourierNamed(courierName string) error {
+	courierID := f.courierIDs[courierName]
+
+	f.courier, f.err = f.app.GetCourier(context.Background(), queries.GetCourier{CourierID: courierID})
 
 	return nil
 }
