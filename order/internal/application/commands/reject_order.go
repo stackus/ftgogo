@@ -3,7 +3,7 @@ package commands
 import (
 	"context"
 
-	"github.com/stackus/ftgogo/order/internal/adapters"
+	"github.com/stackus/ftgogo/order/internal/application/ports"
 	"github.com/stackus/ftgogo/order/internal/domain"
 )
 
@@ -12,11 +12,11 @@ type RejectOrder struct {
 }
 
 type RejectOrderHandler struct {
-	repo    adapters.OrderRepository
-	counter adapters.Counter
+	repo    ports.OrderRepository
+	counter ports.Counter
 }
 
-func NewRejectOrderHandler(repo adapters.OrderRepository, counter adapters.Counter) RejectOrderHandler {
+func NewRejectOrderHandler(repo ports.OrderRepository, counter ports.Counter) RejectOrderHandler {
 	return RejectOrderHandler{
 		repo:    repo,
 		counter: counter,

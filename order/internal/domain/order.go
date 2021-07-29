@@ -29,7 +29,7 @@ type Order struct {
 	LineItems    []orderapi.LineItem
 	State        orderapi.OrderState
 	DeliverAt    time.Time
-	DeliverTo    commonapi.Address
+	DeliverTo    *commonapi.Address
 }
 
 var _ es.Aggregate = (*Order)(nil)

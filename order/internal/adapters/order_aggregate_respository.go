@@ -7,6 +7,7 @@ import (
 	"github.com/stackus/edat/es"
 	"github.com/stackus/errors"
 
+	"github.com/stackus/ftgogo/order/internal/application/ports"
 	"github.com/stackus/ftgogo/order/internal/domain"
 )
 
@@ -14,7 +15,7 @@ type OrderAggregateRepository struct {
 	store es.AggregateRepository
 }
 
-var _ OrderRepository = (*OrderAggregateRepository)(nil)
+var _ ports.OrderRepository = (*OrderAggregateRepository)(nil)
 
 func NewOrderAggregateRepository(store es.AggregateRootStore) *OrderAggregateRepository {
 	return &OrderAggregateRepository{store: es.NewAggregateRootRepository(domain.NewOrder, store)}

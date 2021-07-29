@@ -3,7 +3,7 @@ package queries
 import (
 	"context"
 
-	"github.com/stackus/ftgogo/order/internal/adapters"
+	"github.com/stackus/ftgogo/order/internal/application/ports"
 	"github.com/stackus/ftgogo/order/internal/domain"
 )
 
@@ -12,10 +12,10 @@ type GetOrder struct {
 }
 
 type GetOrderHandler struct {
-	orderRepo adapters.OrderRepository
+	orderRepo ports.OrderRepository
 }
 
-func NewGetOrderHandler(orderRepo adapters.OrderRepository) GetOrderHandler {
+func NewGetOrderHandler(orderRepo ports.OrderRepository) GetOrderHandler {
 	return GetOrderHandler{orderRepo: orderRepo}
 }
 

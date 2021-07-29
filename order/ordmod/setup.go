@@ -7,8 +7,6 @@ import (
 
 	"github.com/stackus/ftgogo/order/internal/adapters"
 	"github.com/stackus/ftgogo/order/internal/application"
-	"github.com/stackus/ftgogo/order/internal/application/commands"
-	"github.com/stackus/ftgogo/order/internal/application/queries"
 	"github.com/stackus/ftgogo/order/internal/domain"
 	"github.com/stackus/ftgogo/order/internal/handlers"
 	"shared-go/applications"
@@ -48,32 +46,15 @@ func Setup(svc *applications.Monolith) error {
 	reviseOrderSaga := adapters.NewReviseOrderOrchestrationSaga(sagaInstanceStore, publisher)
 	svc.Subscriber.Subscribe(reviseOrderSaga.ReplyChannel(), reviseOrderSaga)
 
-	ordersPlacedCounter := adapters.NewOrdersPlacedCounter()
-	ordersApprovedCounter := adapters.NewOrdersApprovedCounter()
-	ordersRejectedCounter := adapters.NewOrdersRejectedCounter()
+	ordersPlacedCounter := adapters.NewPrometheusCounter("orders_placed")
+	ordersApprovedCounter := adapters.NewPrometheusCounter("orders_approved")
+	ordersRejectedCounter := adapters.NewPrometheusCounter("orders_rejected")
 
-	app := application.Service{
-		Commands: application.Commands{
-			CreateOrder:          commands.NewCreateOrderHandler(orderRepo, restaurantRepo, svc.Logger),
-			ApproveOrder:         commands.NewApproveOrderHandler(orderRepo, ordersApprovedCounter),
-			RejectOrder:          commands.NewRejectOrderHandler(orderRepo, ordersRejectedCounter),
-			BeginCancelOrder:     commands.NewBeginCancelOrderHandler(orderRepo),
-			UndoCancelOrder:      commands.NewUndoCancelOrderHandler(orderRepo),
-			ConfirmCancelOrder:   commands.NewConfirmCancelOrderHandler(orderRepo),
-			BeginReviseOrder:     commands.NewBeginReviseOrderHandler(orderRepo),
-			UndoReviseOrder:      commands.NewUndoReviseOrderHandler(orderRepo),
-			ConfirmReviseOrder:   commands.NewConfirmReviseOrderHandler(orderRepo),
-			StartCreateOrderSaga: commands.NewStartCreateOrderSagaHandler(createOrderSaga, ordersPlacedCounter),
-			StartCancelOrderSaga: commands.NewStartCancelOrderSagaHandler(orderRepo, cancelOrderSaga),
-			StartReviseOrderSaga: commands.NewStartReviseOrderSagaHandler(orderRepo, reviseOrderSaga),
-			CreateRestaurant:     commands.NewCreateRestaurantHandler(restaurantRepo),
-			ReviseRestaurantMenu: commands.NewReviseRestaurantMenuHandler(restaurantRepo),
-		},
-		Queries: application.Queries{
-			GetOrder:      queries.NewGetOrderHandler(orderRepo),
-			GetRestaurant: queries.NewGetRestaurantHandler(restaurantRepo),
-		},
-	}
+	app := application.NewServiceApplication(
+		orderRepo, restaurantRepo,
+		createOrderSaga, cancelOrderSaga, reviseOrderSaga,
+		ordersPlacedCounter, ordersApprovedCounter, ordersRejectedCounter,
+	)
 
 	// Drivers
 	handlers.NewCommandHandlers(app).Mount(svc.Subscriber, publisher)

@@ -3,7 +3,7 @@ package commands
 import (
 	"context"
 
-	"github.com/stackus/ftgogo/order/internal/adapters"
+	"github.com/stackus/ftgogo/order/internal/application/ports"
 	"github.com/stackus/ftgogo/order/internal/domain"
 )
 
@@ -13,10 +13,10 @@ type BeginReviseOrder struct {
 }
 
 type BeginReviseOrderHandler struct {
-	repo adapters.OrderRepository
+	repo ports.OrderRepository
 }
 
-func NewBeginReviseOrderHandler(repo adapters.OrderRepository) BeginReviseOrderHandler {
+func NewBeginReviseOrderHandler(repo ports.OrderRepository) BeginReviseOrderHandler {
 	return BeginReviseOrderHandler{
 		repo: repo,
 	}

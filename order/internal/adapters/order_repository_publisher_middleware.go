@@ -6,17 +6,18 @@ import (
 	"github.com/stackus/edat/core"
 	"github.com/stackus/edat/es"
 
+	"github.com/stackus/ftgogo/order/internal/application/ports"
 	"github.com/stackus/ftgogo/order/internal/domain"
 )
 
 type orderRepositoryPublisherMiddleware struct {
-	OrderRepository
-	publisher OrderPublisher
+	ports.OrderRepository
+	publisher ports.OrderPublisher
 }
 
-var _ OrderRepository = (*orderRepositoryPublisherMiddleware)(nil)
+var _ ports.OrderRepository = (*orderRepositoryPublisherMiddleware)(nil)
 
-func NewOrderRepositoryPublisherMiddleware(repository OrderRepository, publisher OrderPublisher) OrderRepository {
+func NewOrderRepositoryPublisherMiddleware(repository ports.OrderRepository, publisher ports.OrderPublisher) ports.OrderRepository {
 	return &orderRepositoryPublisherMiddleware{
 		OrderRepository: repository,
 		publisher:       publisher,

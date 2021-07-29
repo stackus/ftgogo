@@ -11,9 +11,13 @@ import (
 	"github.com/stackus/ftgogo/serviceapis/orderapi"
 )
 
-type CommandHandlers struct{ app application.Service }
+type CommandHandlers struct {
+	app application.ServiceApplication
+}
 
-func NewCommandHandlers(app application.Service) CommandHandlers { return CommandHandlers{app: app} }
+func NewCommandHandlers(app application.ServiceApplication) CommandHandlers {
+	return CommandHandlers{app: app}
+}
 
 func (h CommandHandlers) Mount(subscriber *msg.Subscriber, publisher *msg.Publisher) {
 	subscriber.Subscribe(orderapi.OrderServiceCommandChannel, saga.NewCommandDispatcher(publisher).
@@ -30,7 +34,7 @@ func (h CommandHandlers) Mount(subscriber *msg.Subscriber, publisher *msg.Publis
 func (h CommandHandlers) RejectOrder(ctx context.Context, cmdMsg saga.Command) ([]msg.Reply, error) {
 	cmd := cmdMsg.Command().(*orderapi.RejectOrder)
 
-	err := h.app.Commands.RejectOrder.Handle(ctx, commands.RejectOrder{OrderID: cmd.OrderID})
+	err := h.app.RejectOrder(ctx, commands.RejectOrder{OrderID: cmd.OrderID})
 	if err != nil {
 		return []msg.Reply{msg.WithFailure()}, nil
 	}
@@ -41,7 +45,7 @@ func (h CommandHandlers) RejectOrder(ctx context.Context, cmdMsg saga.Command) (
 func (h CommandHandlers) ApproveOrder(ctx context.Context, cmdMsg saga.Command) ([]msg.Reply, error) {
 	cmd := cmdMsg.Command().(*orderapi.ApproveOrder)
 
-	err := h.app.Commands.ApproveOrder.Handle(ctx, commands.ApproveOrder{
+	err := h.app.ApproveOrder(ctx, commands.ApproveOrder{
 		OrderID:  cmd.OrderID,
 		TicketID: cmd.TicketID,
 	})
@@ -55,7 +59,7 @@ func (h CommandHandlers) ApproveOrder(ctx context.Context, cmdMsg saga.Command) 
 func (h CommandHandlers) BeginCancel(ctx context.Context, cmdMsg saga.Command) ([]msg.Reply, error) {
 	cmd := cmdMsg.Command().(orderapi.BeginCancelOrder)
 
-	err := h.app.Commands.BeginCancelOrder.Handle(ctx, commands.BeginCancelOrder{OrderID: cmd.OrderID})
+	err := h.app.BeginCancelOrder(ctx, commands.BeginCancelOrder{OrderID: cmd.OrderID})
 	if err != nil {
 		return []msg.Reply{msg.WithFailure()}, nil
 	}
@@ -66,7 +70,7 @@ func (h CommandHandlers) BeginCancel(ctx context.Context, cmdMsg saga.Command) (
 func (h CommandHandlers) UndoCancel(ctx context.Context, cmdMsg saga.Command) ([]msg.Reply, error) {
 	cmd := cmdMsg.Command().(orderapi.UndoCancelOrder)
 
-	err := h.app.Commands.UndoCancelOrder.Handle(ctx, commands.UndoCancelOrder{OrderID: cmd.OrderID})
+	err := h.app.UndoCancelOrder(ctx, commands.UndoCancelOrder{OrderID: cmd.OrderID})
 	if err != nil {
 		return []msg.Reply{msg.WithFailure()}, nil
 	}
@@ -77,7 +81,7 @@ func (h CommandHandlers) UndoCancel(ctx context.Context, cmdMsg saga.Command) ([
 func (h CommandHandlers) ConfirmCancel(ctx context.Context, cmdMsg saga.Command) ([]msg.Reply, error) {
 	cmd := cmdMsg.Command().(orderapi.ConfirmCancelOrder)
 
-	err := h.app.Commands.ConfirmCancelOrder.Handle(ctx, commands.ConfirmCancelOrder{OrderID: cmd.OrderID})
+	err := h.app.ConfirmCancelOrder(ctx, commands.ConfirmCancelOrder{OrderID: cmd.OrderID})
 	if err != nil {
 		return []msg.Reply{msg.WithFailure()}, nil
 	}
@@ -88,7 +92,7 @@ func (h CommandHandlers) ConfirmCancel(ctx context.Context, cmdMsg saga.Command)
 func (h CommandHandlers) BeginRevise(ctx context.Context, cmdMsg saga.Command) ([]msg.Reply, error) {
 	cmd := cmdMsg.Command().(orderapi.BeginReviseOrder)
 
-	newTotal, err := h.app.Commands.BeginReviseOrder.Handle(ctx, commands.BeginReviseOrder{
+	newTotal, err := h.app.BeginReviseOrder(ctx, commands.BeginReviseOrder{
 		OrderID:           cmd.OrderID,
 		RevisedQuantities: cmd.RevisedQuantities,
 	})
@@ -102,7 +106,7 @@ func (h CommandHandlers) BeginRevise(ctx context.Context, cmdMsg saga.Command) (
 func (h CommandHandlers) UndoRevise(ctx context.Context, cmdMsg saga.Command) ([]msg.Reply, error) {
 	cmd := cmdMsg.Command().(orderapi.UndoReviseOrder)
 
-	err := h.app.Commands.UndoReviseOrder.Handle(ctx, commands.UndoReviseOrder{OrderID: cmd.OrderID})
+	err := h.app.UndoReviseOrder(ctx, commands.UndoReviseOrder{OrderID: cmd.OrderID})
 	if err != nil {
 		return []msg.Reply{msg.WithFailure()}, nil
 	}
@@ -113,7 +117,7 @@ func (h CommandHandlers) UndoRevise(ctx context.Context, cmdMsg saga.Command) ([
 func (h CommandHandlers) ConfirmRevise(ctx context.Context, cmdMsg saga.Command) ([]msg.Reply, error) {
 	cmd := cmdMsg.Command().(orderapi.ConfirmReviseOrder)
 
-	err := h.app.Commands.ConfirmReviseOrder.Handle(ctx, commands.ConfirmReviseOrder{
+	err := h.app.ConfirmReviseOrder(ctx, commands.ConfirmReviseOrder{
 		OrderID:           cmd.OrderID,
 		RevisedQuantities: cmd.RevisedQuantities,
 	})

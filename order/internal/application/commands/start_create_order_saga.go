@@ -3,7 +3,7 @@ package commands
 import (
 	"context"
 
-	"github.com/stackus/ftgogo/order/internal/adapters"
+	"github.com/stackus/ftgogo/order/internal/application/ports"
 	"github.com/stackus/ftgogo/order/internal/domain"
 	"github.com/stackus/ftgogo/serviceapis/orderapi"
 )
@@ -17,11 +17,11 @@ type StartCreateOrderSaga struct {
 }
 
 type StartCreateOrderSagaHandler struct {
-	saga    adapters.CreateOrderSaga
-	counter adapters.Counter
+	saga    ports.CreateOrderSaga
+	counter ports.Counter
 }
 
-func NewStartCreateOrderSagaHandler(createOrderSaga adapters.CreateOrderSaga, ordersPlaced adapters.Counter) StartCreateOrderSagaHandler {
+func NewStartCreateOrderSagaHandler(createOrderSaga ports.CreateOrderSaga, ordersPlaced ports.Counter) StartCreateOrderSagaHandler {
 	return StartCreateOrderSagaHandler{
 		saga:    createOrderSaga,
 		counter: ordersPlaced,

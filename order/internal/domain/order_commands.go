@@ -25,7 +25,7 @@ type CreateOrder struct {
 	LineItems      commonapi.MenuItemQuantities
 	OrderTotal     int
 	DeliverAt      time.Time
-	DeliverTo      commonapi.Address
+	DeliverTo      *commonapi.Address
 }
 
 // CommandName command method

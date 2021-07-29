@@ -15,13 +15,13 @@ import (
 )
 
 type RpcHandlers struct {
-	app application.Service
+	app application.ServiceApplication
 	orderpb.UnimplementedOrderServiceServer
 }
 
 var _ orderpb.OrderServiceServer = (*RpcHandlers)(nil)
 
-func NewRpcHandlers(app application.Service) RpcHandlers {
+func NewRpcHandlers(app application.ServiceApplication) RpcHandlers {
 	return RpcHandlers{app: app}
 }
 
@@ -35,18 +35,12 @@ func (h RpcHandlers) CreateOrder(ctx context.Context, request *orderpb.CreateOrd
 		lineItems[s] = int(i)
 	}
 
-	orderID, err := h.app.Commands.CreateOrder.Handle(ctx, commands.CreateOrder{
+	orderID, err := h.app.CreateOrder(ctx, commands.CreateOrder{
 		ConsumerID:   request.ConsumerID,
 		RestaurantID: request.RestaurantID,
 		DeliverAt:    request.DeliverAt.AsTime(),
-		DeliverTo: commonapi.Address{
-			Street1: request.DeliverTo.Street1,
-			Street2: request.DeliverTo.Street2,
-			City:    request.DeliverTo.City,
-			State:   request.DeliverTo.State,
-			Zip:     request.DeliverTo.Zip,
-		},
-		LineItems: lineItems,
+		DeliverTo:    commonapi.FromAddressProto(request.DeliverTo),
+		LineItems:    lineItems,
 	})
 	if err != nil {
 		return nil, err
@@ -56,7 +50,7 @@ func (h RpcHandlers) CreateOrder(ctx context.Context, request *orderpb.CreateOrd
 }
 
 func (h RpcHandlers) GetOrder(ctx context.Context, request *orderpb.GetOrderRequest) (*orderpb.GetOrderResponse, error) {
-	order, err := h.app.Queries.GetOrder.Handle(ctx, queries.GetOrder{OrderID: request.OrderID})
+	order, err := h.app.GetOrder(ctx, queries.GetOrder{OrderID: request.OrderID})
 	if err != nil {
 		return nil, err
 	}
@@ -67,7 +61,7 @@ func (h RpcHandlers) GetOrder(ctx context.Context, request *orderpb.GetOrderRequ
 }
 
 func (h RpcHandlers) CancelOrder(ctx context.Context, request *orderpb.CancelOrderRequest) (*orderpb.CancelOrderResponse, error) {
-	status, err := h.app.Commands.StartCancelOrderSaga.Handle(ctx, commands.StartCancelOrderSaga{OrderID: request.OrderID})
+	status, err := h.app.StartCancelOrderSaga(ctx, commands.StartCancelOrderSaga{OrderID: request.OrderID})
 	if err != nil {
 		return nil, err
 	}
@@ -76,7 +70,7 @@ func (h RpcHandlers) CancelOrder(ctx context.Context, request *orderpb.CancelOrd
 }
 
 func (h RpcHandlers) ReviseOrder(ctx context.Context, request *orderpb.ReviseOrderRequest) (*orderpb.ReviseOrderResponse, error) {
-	status, err := h.app.Commands.StartReviseOrderSaga.Handle(ctx, commands.StartReviseOrderSaga{
+	status, err := h.app.StartReviseOrderSaga(ctx, commands.StartReviseOrderSaga{
 		OrderID:           request.OrderID,
 		RevisedQuantities: commonapi.FromMenuItemQuantitiesProto(request.RevisedQuantities),
 	})

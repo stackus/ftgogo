@@ -3,7 +3,7 @@ package commands
 import (
 	"context"
 
-	"github.com/stackus/ftgogo/order/internal/adapters"
+	"github.com/stackus/ftgogo/order/internal/application/ports"
 	"github.com/stackus/ftgogo/order/internal/domain"
 )
 
@@ -12,10 +12,10 @@ type ConfirmCancelOrder struct {
 }
 
 type ConfirmCancelOrderHandler struct {
-	repo adapters.OrderRepository
+	repo ports.OrderRepository
 }
 
-func NewConfirmCancelOrderHandler(repo adapters.OrderRepository) ConfirmCancelOrderHandler {
+func NewConfirmCancelOrderHandler(repo ports.OrderRepository) ConfirmCancelOrderHandler {
 	return ConfirmCancelOrderHandler{
 		repo: repo,
 	}

@@ -4,9 +4,7 @@ import (
 	"context"
 	"time"
 
-	"github.com/rs/zerolog"
-
-	"github.com/stackus/ftgogo/order/internal/adapters"
+	"github.com/stackus/ftgogo/order/internal/application/ports"
 	"github.com/stackus/ftgogo/order/internal/domain"
 	"github.com/stackus/ftgogo/serviceapis/commonapi"
 )
@@ -15,21 +13,19 @@ type CreateOrder struct {
 	ConsumerID   string
 	RestaurantID string
 	DeliverAt    time.Time
-	DeliverTo    commonapi.Address
+	DeliverTo    *commonapi.Address
 	LineItems    map[string]int
 }
 
 type CreateOrderHandler struct {
-	orderRepo      adapters.OrderRepository
-	restaurantRepo adapters.RestaurantRepository
-	logger         zerolog.Logger // TODO Eliminate passing logger everywhere use a pkg logger i.e. logging.Error()...
+	orderRepo      ports.OrderRepository
+	restaurantRepo ports.RestaurantRepository
 }
 
-func NewCreateOrderHandler(orderRepo adapters.OrderRepository, restaurantRepo adapters.RestaurantRepository, logger zerolog.Logger) CreateOrderHandler {
+func NewCreateOrderHandler(orderRepo ports.OrderRepository, restaurantRepo ports.RestaurantRepository) CreateOrderHandler {
 	return CreateOrderHandler{
 		orderRepo:      orderRepo,
 		restaurantRepo: restaurantRepo,
-		logger:         logger,
 	}
 }
 
@@ -47,7 +43,6 @@ func (h CreateOrderHandler) Handle(ctx context.Context, cmd CreateOrder) (string
 		DeliverTo:  cmd.DeliverTo,
 	})
 	if err != nil {
-		h.logger.Error().Err(err).Msg("error while saving the order")
 		return "", err
 	}
 
