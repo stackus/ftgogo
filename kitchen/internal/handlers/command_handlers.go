@@ -73,8 +73,7 @@ func (h CommandHandlers) BeginCancelTicket(ctx context.Context, cmdMsg saga.Comm
 	cmd := cmdMsg.Command().(*kitchenapi.BeginCancelTicket)
 
 	err := h.app.BeginCancelTicket(ctx, commands.BeginCancelTicket{
-		TicketID:     cmd.TicketID,
-		RestaurantID: cmd.RestaurantID,
+		TicketID: cmd.TicketID,
 	})
 	if err != nil {
 		return []msg.Reply{msg.WithFailure()}, nil
@@ -115,9 +114,7 @@ func (h CommandHandlers) BeginReviseTicket(ctx context.Context, cmdMsg saga.Comm
 	cmd := cmdMsg.Command().(*kitchenapi.BeginReviseTicket)
 
 	err := h.app.BeginReviseTicket(ctx, commands.BeginReviseTicket{
-		TicketID:          cmd.TicketID,
-		RestaurantID:      cmd.RestaurantID,
-		RevisedQuantities: cmd.RevisedQuantities,
+		TicketID: cmd.TicketID,
 	})
 	if err != nil {
 		return []msg.Reply{msg.WithFailure()}, nil

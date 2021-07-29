@@ -8,8 +8,8 @@ Feature: Remove Consumer Address
     Given I add an address for "Able Anders" with label "Home"
       | Street1 | 123 Address St. |
       | City    | BigTown         |
-      | State   | Colorado        |
-      | Zip     | 80120           |
+      | State   | Tristate        |
+      | Zip     | 90210           |
     When I remove an address for "Able Anders" with label "Home"
     Then I expect the command to succeed
 
@@ -17,8 +17,8 @@ Feature: Remove Consumer Address
     Given I add an address for "Able Anders" with label "Home"
       | Street1 | 123 Address St. |
       | City    | BigTown         |
-      | State   | Colorado        |
-      | Zip     | 80120           |
+      | State   | Tristate        |
+      | Zip     | 90210           |
     When I remove an address for "Betty Burns" with label "Home"
     Then I expect the command to fail
     And the returned error message is "consumer not found"
@@ -27,8 +27,8 @@ Feature: Remove Consumer Address
     Given I add an address for "Able Anders" with label "Home"
       | Street1 | 123 Address St. |
       | City    | BigTown         |
-      | State   | Colorado        |
-      | Zip     | 80120           |
+      | State   | Tristate        |
+      | Zip     | 90210           |
     When I remove an address for "Able Anders" with label "Other"
     Then I expect the command to fail
     And the returned error message is "address with that identifier does not exist"

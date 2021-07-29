@@ -6,23 +6,23 @@ Feature: Update Consumer Address
     And I add an address for "Able Anders" with label "Home"
       | Street1 | 123 Address St. |
       | City    | BigTown         |
-      | State   | Colorado        |
-      | Zip     | 80120           |
+      | State   | Tristate        |
+      | Zip     | 90210           |
 
   Scenario: Can update consumer addresses
     When I update an address for "Able Anders" with label "Home"
       | Street1 | 456 Address St. |
       | City    | BigTown         |
-      | State   | Colorado        |
-      | Zip     | 80120           |
+      | State   | Tristate        |
+      | Zip     | 90210           |
     Then I expect the command to succeed
 
   Scenario: Updating addresses on consumers that do not exist returns an error
     When I update an address for "Betty Burns" with label "Home"
       | Street1 | 456 Address St. |
       | City    | BigTown         |
-      | State   | Colorado        |
-      | Zip     | 80120           |
+      | State   | Tristate        |
+      | Zip     | 90210           |
     Then I expect the command to fail
     And the returned error message is "consumer not found"
 
@@ -31,7 +31,7 @@ Feature: Update Consumer Address
     When I update an address for "Able Anders" with label "Other"
       | Street1 | 456 Address St. |
       | City    | BigTown         |
-      | State   | Colorado        |
-      | Zip     | 80120           |
+      | State   | Tristate        |
+      | Zip     | 90210           |
     Then I expect the command to fail
     And the returned error message is "address with that identifier does not exist"

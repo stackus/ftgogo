@@ -14,7 +14,7 @@ import (
 func (f *FeatureState) RegisterGetAddressSteps(ctx *godog.ScenarioContext) {
 	ctx.Step(`^I request the "([^"]*)" address for "([^"]*)"$`, f.iRequestTheAddressFor)
 
-	ctx.Step(`^(?:ensure )?the returned address (?:to match|matches)$`, f.theReturnedAddressToMatch)
+	ctx.Step(`^(?:ensure |expect )?the returned address (?:to match|matches)$`, f.theReturnedAddressToMatch)
 }
 
 func (f *FeatureState) iRequestTheAddressFor(addressLabel, consumerName string) error {

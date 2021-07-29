@@ -2,73 +2,23 @@
 Feature: Cancelling Tickets
 
   Background: Setup Ticket
-    Given I create a ticket with:
-    """
-    {
-      "OrderID": "a123",
-      "RestaurantID": "a123",
-      "LineItems": [
-        {
-          "MenuItemID": "a123",
-          "Name": "TestMenuItem",
-          "Quantity": 1
-        }
-      ]
-    }
-    """
-    And I have confirmed creating a ticket with:
-    """
-    {
-      "TicketID": "<TicketID>"
-    }
-    """
-    And I have accepted the ticket with:
-    """
-    {
-      "TicketID": "<TicketID>",
-      "ReadyBy": "2026-01-02T15:04:05Z"
-    }
-    """
+    Given I have created a ticket for order "A123" at restaurant "Best Foods" with items
+      | MenuItemID | Name       | Quantity |
+      | I123       | Yummy Dish | 1        |
+    And I have confirmed creating a ticket for order "A123"
+    And I have accepted the ticket for order "A123" will be ready in 30 minutes
 
   Scenario: Accepted tickets can be cancelled
-    When I begin cancelling the ticket with:
-    """
-    {
-      "TicketID": "<TicketID>"
-    }
-    """
+    When I begin cancelling the ticket for order "A123"
     Then I expect the command to succeed
 
   Scenario: Tickets can be fully cancelled
-    Given I have begun cancelling the ticket with:
-    """
-    {
-      "TicketID": "<TicketID>"
-    }
-    """
-    When I confirm cancelling the ticket with:
-    """
-    {
-      "TicketID": "<TicketID>"
-    }
-    """
+    Given I have begun cancelling the ticket for order "A123"
+    When I confirm cancelling the ticket for order "A123"
     Then I expect the command to succeed
 
   Scenario: Tickets being cancelled cannot be revised
-    Given I have begun cancelling the ticket with:
-    """
-    {
-      "TicketID": "<TicketID>"
-    }
-    """
-    When I begin revising the ticket with:
-    """
-    {
-      "TicketID": "<TicketID>"
-    }
-    """
+    Given I have begun cancelling the ticket for order "A123"
+    When I begin revising the ticket for order "A123"
     Then I expect the command to fail
-    And the returned error message is:
-    """
-    ticket state does not allow action
-    """
+    And the returned error message is "ticket state does not allow action"

@@ -5,13 +5,13 @@ Feature: Get Deliveries
     Given a restaurant named "Best Foods" exists with address
       | Street1 | 123 Address St. |
       | City    | BigTown         |
-      | State   | Colorado        |
-      | Zip     | 80120           |
+      | State   | Tristate        |
+      | Zip     | 90210           |
     And I create a delivery for order "A123" from "Best Foods" to address
       | Street1 | 123 Address St. |
       | City    | BigTown         |
-      | State   | Colorado        |
-      | Zip     | 80120           |
+      | State   | Tristate        |
+      | Zip     | 90210           |
 
   Scenario: Can get deliveries
     When I get the delivery information for order "A123"

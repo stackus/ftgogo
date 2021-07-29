@@ -8,21 +8,21 @@ Feature: Add Consumer Address
     When I add an address for "Able Anders" with label "Home"
       | Street1 | 123 Address St. |
       | City    | BigTown         |
-      | State   | Colorado        |
-      | Zip     | 80120           |
+      | State   | Tristate        |
+      | Zip     | 90210           |
     Then I expect the command to succeed
 
   Scenario: Can multiple delivery addresses to consumers
     Given I add an address for "Able Anders" with label "Home"
       | Street1 | 123 Address St. |
       | City    | BigTown         |
-      | State   | Colorado        |
-      | Zip     | 80120           |
+      | State   | Tristate        |
+      | Zip     | 90210           |
     When I add another address for "Able Anders" with label "Work"
       | Street1 | 123 Address St. |
       | City    | SmallCity       |
-      | State   | Colorado        |
-      | Zip     | 80120           |
+      | State   | Tristate        |
+      | Zip     | 90210           |
     Then I expect the command to succeed
 
 
@@ -30,8 +30,8 @@ Feature: Add Consumer Address
     When I add an address for "Betty Burns" with label "Home"
       | Street1 | 123 Address St. |
       | City    | BigTown         |
-      | State   | Colorado        |
-      | Zip     | 80120           |
+      | State   | Tristate        |
+      | Zip     | 90210           |
     Then I expect the command to fail
     And the returned error message is "consumer not found"
 
@@ -39,12 +39,12 @@ Feature: Add Consumer Address
     Given I add an address for "Able Anders" with label "Home"
       | Street1 | 123 Address St. |
       | City    | BigTown         |
-      | State   | Colorado        |
-      | Zip     | 80120           |
+      | State   | Tristate        |
+      | Zip     | 90210           |
     When I add another address for "Able Anders" with label "Home"
       | Street1 | 123 Address St. |
       | City    | BigTown         |
-      | State   | Colorado        |
-      | Zip     | 80120           |
+      | State   | Tristate        |
+      | Zip     | 90210           |
     Then I expect the command to fail
     And the returned error message is "address with that identifier already exists"

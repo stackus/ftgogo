@@ -17,8 +17,8 @@ Feature: Get Consumer
     Given I add an address for "Able Anders" with label "Home"
       | Street1 | 123 Address St. |
       | City    | BigTown         |
-      | State   | Colorado        |
-      | Zip     | 80120           |
+      | State   | Tristate        |
+      | Zip     | 90210           |
     When I request the consumer named "Able Anders"
     Then I expect the request to succeed
     And the returned consumer has an address with label "Home"
@@ -27,13 +27,13 @@ Feature: Get Consumer
     Given I add an address for "Able Anders" with label "Home"
       | Street1 | 123 Address St. |
       | City    | BigTown         |
-      | State   | Colorado        |
-      | Zip     | 80120           |
+      | State   | Tristate        |
+      | Zip     | 90210           |
     Given I add an address for "Able Anders" with label "Work"
       | Street1 | 123 Address St. |
       | City    | SmallCity       |
-      | State   | Colorado        |
-      | Zip     | 80120           |
+      | State   | Tristate        |
+      | Zip     | 90210           |
     When I request the consumer named "Able Anders"
     Then I expect the request to succeed
     And the returned consumer has 2 addresses

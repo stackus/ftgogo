@@ -14,9 +14,9 @@ import (
 func (f *FeatureState) RegisterGetCourierSteps(ctx *godog.ScenarioContext) {
 	ctx.Step(`^I get the assigned courier for order "([^"]*)"$`, f.iGetTheAssignedCourierForOrder)
 
-	ctx.Step(`^(?:ensure )?the returned courier will (pick-?up|drop-?off) the food at address$`, f.theReturnedCourierWillTheFoodAtAddress)
-	ctx.Step(`^(?:ensure )?"([^"]*)" is (not(?: ))?the assigned courier$`, f.isTheAssignedCourier)
-	ctx.Step(`^(?:ensure )?the returned courier is (not(?: ))?available$`, f.theReturnedCourierIsAvailable)
+	ctx.Step(`^(?:ensure |expect )?the returned courier will (pick-?up|drop-?off) the food at address$`, f.theReturnedCourierWillTheFoodAtAddress)
+	ctx.Step(`^(?:ensure |expect )?"([^"]*)" is (not(?: ))?the assigned courier$`, f.isTheAssignedCourier)
+	ctx.Step(`^(?:ensure |expect )?the returned courier is (not(?: ))?available$`, f.theReturnedCourierIsAvailable)
 }
 
 func (f *FeatureState) iGetTheAssignedCourierForOrder(orderID string) error {

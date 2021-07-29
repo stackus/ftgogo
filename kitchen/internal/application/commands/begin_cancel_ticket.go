@@ -8,8 +8,7 @@ import (
 )
 
 type BeginCancelTicket struct {
-	TicketID     string
-	RestaurantID string
+	TicketID string
 }
 
 type BeginCancelTicketHandler struct {

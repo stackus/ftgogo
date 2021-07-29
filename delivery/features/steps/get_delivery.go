@@ -15,9 +15,9 @@ import (
 func (f *FeatureState) RegisterGetDeliverySteps(ctx *godog.ScenarioContext) {
 	ctx.Step(`^I (?:get|fetch|request) the delivery information for order "([^"]*)"$`, f.iRequestDeliveryInformationForOrder)
 
-	ctx.Step(`^(?:ensure )?the returned delivery status is "([^"]*)"$`, f.theReturnedDeliveryStatusIs)
-	ctx.Step(`^(?:ensure )?the returned delivery matches:$`, f.theReturnedDeliveryMatches)
-	ctx.Step(`^(?:ensure )?the returned delivery is not assigned to:$`, f.theReturnedDeliveryIsNotAssignedTo)
+	ctx.Step(`^(?:ensure |expect )?the returned delivery status is "([^"]*)"$`, f.theReturnedDeliveryStatusIs)
+	ctx.Step(`^(?:ensure |expect )?the returned delivery matches:$`, f.theReturnedDeliveryMatches)
+	ctx.Step(`^(?:ensure |expect )?the returned delivery is not assigned to:$`, f.theReturnedDeliveryIsNotAssignedTo)
 }
 
 func (f *FeatureState) iRequestDeliveryInformationForOrder(orderID string) error {

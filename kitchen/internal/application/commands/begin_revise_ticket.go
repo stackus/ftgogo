@@ -8,9 +8,7 @@ import (
 )
 
 type BeginReviseTicket struct {
-	TicketID          string
-	RestaurantID      string
-	RevisedQuantities map[string]int
+	TicketID string
 }
 
 type BeginReviseTicketHandler struct {

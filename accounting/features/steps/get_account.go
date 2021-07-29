@@ -12,8 +12,8 @@ import (
 func (f *FeatureState) RegisterGetAccountSteps(ctx *godog.ScenarioContext) {
 	ctx.Step(`^I request the account for "([^"]*)"$`, f.iRequestTheAccountFor)
 
-	ctx.Step(`^(?:ensure )?the returned account is disabled$`, f.theReturnedAccountIsDisabled)
-	ctx.Step(`^(?:ensure )?the returned account is enabled$`, f.theReturnedAccountIsEnabled)
+	ctx.Step(`^(?:ensure |expect )?the returned account is disabled$`, f.theReturnedAccountIsDisabled)
+	ctx.Step(`^(?:ensure |expect )?the returned account is enabled$`, f.theReturnedAccountIsEnabled)
 }
 
 func (f *FeatureState) iRequestTheAccountFor(consumerName string) error {

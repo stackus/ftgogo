@@ -2,7 +2,6 @@ package steps
 
 import (
 	"context"
-	"encoding/json"
 
 	"github.com/cucumber/godog"
 
@@ -10,58 +9,37 @@ import (
 )
 
 func (f *FeatureState) RegisterCancelTicketSteps(ctx *godog.ScenarioContext) {
-	ctx.Step(`^I (?:begin|began|have begun) (?:to cancel|cancelling) (?:a|the|another) ticket with:$`, f.iBeginToCancelATicketWith)
-	ctx.Step(`^I (?:undo|have undone) cancell?ing (?:a|the|another) ticket with:$`, f.iUndoCancelATicketWith)
-	ctx.Step(`^I (?:confirm|have confirmed) cancell?ing (?:a|the|another) ticket with:$`, f.iConfirmCancelATicketWith)
+	ctx.Step(`^I (?:begin|began|have begun) (?:to cancel|cancelling) (?:a|the|another) ticket for order "([^"]*)"$`, f.iBeginToCancelATicketForOrder)
+	ctx.Step(`^I (?:undo|have undone) cancell?ing (?:a|the|another) ticket for order "([^"]*)"$`, f.iUndoCancelATicketForOrder)
+	ctx.Step(`^I (?:confirm|have confirmed) cancell?ing (?:a|the|another) ticket for order "([^"]*)"$`, f.iConfirmCancelATicketForOrder)
 }
 
-func (f *FeatureState) iBeginToCancelATicketWith(doc *godog.DocString) error {
-	var cmd commands.BeginCancelTicket
+func (f *FeatureState) iBeginToCancelATicketForOrder(orderID string) error {
+	ticketID := f.ticketIDs[orderID]
 
-	err := json.Unmarshal([]byte(doc.Content), &cmd)
-	if err != nil {
-		return err
-	}
-
-	if cmd.TicketID == "<TicketID>" {
-		cmd.TicketID = f.ticketID
-	}
-
-	f.err = f.app.BeginCancelTicket(context.Background(), cmd)
+	f.err = f.app.BeginCancelTicket(context.Background(), commands.BeginCancelTicket{
+		TicketID: ticketID,
+	})
 
 	return nil
 }
 
-func (f *FeatureState) iUndoCancelATicketWith(doc *godog.DocString) error {
-	var cmd commands.UndoCancelTicket
+func (f *FeatureState) iConfirmCancelATicketForOrder(orderID string) error {
+	ticketID := f.ticketIDs[orderID]
 
-	err := json.Unmarshal([]byte(doc.Content), &cmd)
-	if err != nil {
-		return err
-	}
-
-	if cmd.TicketID == "<TicketID>" {
-		cmd.TicketID = f.ticketID
-	}
-
-	f.err = f.app.UndoCancelTicket(context.Background(), cmd)
+	f.err = f.app.ConfirmCancelTicket(context.Background(), commands.ConfirmCancelTicket{
+		TicketID: ticketID,
+	})
 
 	return nil
 }
 
-func (f *FeatureState) iConfirmCancelATicketWith(doc *godog.DocString) error {
-	var cmd commands.ConfirmCancelTicket
+func (f *FeatureState) iUndoCancelATicketForOrder(orderID string) error {
+	ticketID := f.ticketIDs[orderID]
 
-	err := json.Unmarshal([]byte(doc.Content), &cmd)
-	if err != nil {
-		return err
-	}
-
-	if cmd.TicketID == "<TicketID>" {
-		cmd.TicketID = f.ticketID
-	}
-
-	f.err = f.app.ConfirmCancelTicket(context.Background(), cmd)
+	f.err = f.app.UndoCancelTicket(context.Background(), commands.UndoCancelTicket{
+		TicketID: ticketID,
+	})
 
 	return nil
 }

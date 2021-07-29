@@ -12,9 +12,9 @@ import (
 func (f *FeatureState) RegisterGetConsumerSteps(ctx *godog.ScenarioContext) {
 	ctx.Step(`^I (?:get|fetch|request) (?:a|the|some) consumer named "([^"]*)"$`, f.iRequestTheConsumerNamed)
 
-	ctx.Step(`^(?:ensure )?the returned consumer (?:to have|has) the name "([^"]*)"$`, f.theReturnedConsumerHasTheName)
-	ctx.Step(`^(?:ensure )?the returned consumer (?:to have|has) (\d+) addresses$`, f.theReturnedConsumerHasAddresses)
-	ctx.Step(`^(?:ensure )?the returned consumer (?:to have|has) an address with label "([^"]*)"$`, f.theReturnedConsumerHasAnAddressWithLabel)
+	ctx.Step(`^(?:ensure |expect )?the returned consumer (?:to have|has) the name "([^"]*)"$`, f.theReturnedConsumerHasTheName)
+	ctx.Step(`^(?:ensure |expect )?the returned consumer (?:to have|has) (\d+) addresses$`, f.theReturnedConsumerHasAddresses)
+	ctx.Step(`^(?:ensure |expect )?the returned consumer (?:to have|has) an address with label "([^"]*)"$`, f.theReturnedConsumerHasAnAddressWithLabel)
 }
 
 func (f *FeatureState) iRequestTheConsumerNamed(consumerName string) error {

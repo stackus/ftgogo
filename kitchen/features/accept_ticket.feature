@@ -2,75 +2,17 @@
 Feature: Accept Tickets
 
   Background: Setup Ticket
-    Given I create a ticket with:
-    """
-    {
-      "OrderID": "a123",
-      "RestaurantID": "a123",
-      "LineItems": [
-        {
-          "MenuItemID": "a123",
-          "Name": "TestMenuItem",
-          "Quantity": 1
-        }
-      ]
-    }
-    """
+    Given I have created a ticket for order "A123" at restaurant "Best Foods" with items
+      | MenuItemID | Name       | Quantity |
+      | I123       | Yummy Dish | 1        |
+    And I have confirmed creating a ticket for order "A123"
 
   Scenario: Confirmed tickets can be accepted
-    Given I have confirmed creating a ticket with:
-    """
-    {
-      "TicketID": "<TicketID>"
-    }
-    """
-    When I accept a ticket with:
-    """
-    {
-      "TicketID": "<TicketID>",
-      "ReadyBy": "2026-01-02T15:04:05Z"
-    }
-    """
-    Then I expect the command to succeed
-
-  Scenario: Confirmed tickets can be accepted
-    Given I have confirmed creating a ticket with:
-    """
-    {
-      "TicketID": "<TicketID>"
-    }
-    """
-    When I accept the ticket with:
-    """
-    {
-      "TicketID": "<TicketID>",
-      "ReadyBy": "2026-01-02T15:04:05Z"
-    }
-    """
+    When I accept the ticket for order "A123" will be ready in 30 minutes
     Then I expect the command to succeed
 
   Scenario: Accepted tickets have the status "Accepted"
-    Given I have confirmed creating a ticket with:
-    """
-    {
-      "TicketID": "<TicketID>"
-    }
-    """
-    And I have accepted the ticket with:
-    """
-    {
-      "TicketID": "<TicketID>",
-      "ReadyBy": "2026-01-02T15:04:05Z"
-    }
-    """
-    When I get the ticket with:
-    """
-    {
-      "TicketID": "<TicketID>"
-    }
-    """
+    Given I accept the ticket for order "A123" will be ready in 30 minutes
+    When I get the ticket for order "A123"
     Then I expect the command to succeed
-    And the returned ticket status is:
-    """
-    Accepted
-    """
+    And the returned ticket status is "Accepted"

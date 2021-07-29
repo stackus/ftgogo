@@ -2,7 +2,7 @@ package steps
 
 import (
 	"context"
-	"encoding/json"
+	"time"
 
 	"github.com/cucumber/godog"
 
@@ -10,22 +10,16 @@ import (
 )
 
 func (f *FeatureState) RegisterAcceptTicketSteps(ctx *godog.ScenarioContext) {
-	ctx.Step(`^I (?:accept|have accepted) (?:a|the|another) ticket with:$`, f.iAcceptATicketWith)
+	ctx.Step(`^I (?:accept|have accepted) (?:a|the|another) ticket for order "([^"]*)" will be ready in (\d+) minutes$`, f.iAcceptThatTicketWillBeReadyInMinutesForOrder)
 }
 
-func (f *FeatureState) iAcceptATicketWith(doc *godog.DocString) error {
-	var cmd commands.AcceptTicket
+func (f *FeatureState) iAcceptThatTicketWillBeReadyInMinutesForOrder(orderID string, minutes int) error {
+	ticketID := f.ticketIDs[orderID]
 
-	err := json.Unmarshal([]byte(doc.Content), &cmd)
-	if err != nil {
-		return err
-	}
-
-	if cmd.TicketID == "<TicketID>" {
-		cmd.TicketID = f.ticketID
-	}
-
-	f.err = f.app.AcceptTicket(context.Background(), cmd)
+	f.err = f.app.AcceptTicket(context.Background(), commands.AcceptTicket{
+		TicketID: ticketID,
+		ReadyBy:  time.Now().Add(time.Minute * time.Duration(minutes)),
+	})
 
 	return nil
 }

@@ -5,14 +5,14 @@ Feature: Scheduling Deliveries
     Given a restaurant named "Best Foods" exists with address
       | Street1 | 123 Address St. |
       | City    | BigTown         |
-      | State   | Colorado        |
-      | Zip     | 80120           |
+      | State   | Tristate        |
+      | Zip     | 90210           |
     And a courier exists named "Quick Courier"
     And I create a delivery for order "A123" from "Best Foods" to address
       | Street1 | 456 Address St. |
       | City    | SmallCity       |
-      | State   | Colorado        |
-      | Zip     | 80120           |
+      | State   | Tristate        |
+      | Zip     | 90210           |
 
   Scenario: Deliveries can be scheduled with a courier
     When I schedule the delivery for order "A123"
@@ -31,13 +31,13 @@ Feature: Scheduling Deliveries
     And the returned courier will pickup the food at address
       | Street1 | 123 Address St. |
       | City    | BigTown         |
-      | State   | Colorado        |
-      | Zip     | 80120           |
+      | State   | Tristate        |
+      | Zip     | 90210           |
     And the returned courier will dropoff the food at address
       | Street1 | 456 Address St. |
       | City    | SmallCity       |
-      | State   | Colorado        |
-      | Zip     | 80120           |
+      | State   | Tristate        |
+      | Zip     | 90210           |
 
   Scenario: Unavailable couriers are not assigned to deliveries
     Given I set the courier "Quick Courier" to be unavailable

@@ -2,7 +2,6 @@ package steps
 
 import (
 	"context"
-	"encoding/json"
 
 	"github.com/cucumber/godog"
 
@@ -10,58 +9,37 @@ import (
 )
 
 func (f *FeatureState) RegisterReviseTicketSteps(ctx *godog.ScenarioContext) {
-	ctx.Step(`^I (?:begin|began|have begun) (?:to revise|revising) (?:a|the|another) ticket with:$`, f.iBeginToReviseATicketWith)
-	ctx.Step(`^I (?:undo|have undone) revising (?:a|the|another) ticket with:$`, f.iUndoReviseATicketWith)
-	ctx.Step(`^I (?:confirm|have confirmed) revising (?:a|the|another) ticket with:$`, f.iConfirmReviseATicketWith)
+	ctx.Step(`^I (?:begin|began|have begun) (?:to revise|revising) (?:a|the|another) ticket for order "([^"]*)"$`, f.iBeginToReviseATicketForOrder)
+	ctx.Step(`^I (?:undo|have undone) revising (?:a|the|another) ticket for order "([^"]*)"$`, f.iUndoReviseATicketForOrder)
+	ctx.Step(`^I (?:confirm|have confirmed) revising (?:a|the|another) ticket for order "([^"]*)"$`, f.iConfirmReviseATicketForOrder)
 }
 
-func (f *FeatureState) iBeginToReviseATicketWith(doc *godog.DocString) error {
-	var cmd commands.BeginReviseTicket
+func (f *FeatureState) iBeginToReviseATicketForOrder(orderID string) error {
+	ticketID := f.ticketIDs[orderID]
 
-	err := json.Unmarshal([]byte(doc.Content), &cmd)
-	if err != nil {
-		return err
-	}
-
-	if cmd.TicketID == "<TicketID>" {
-		cmd.TicketID = f.ticketID
-	}
-
-	f.err = f.app.BeginReviseTicket(context.Background(), cmd)
+	f.err = f.app.BeginReviseTicket(context.Background(), commands.BeginReviseTicket{
+		TicketID: ticketID,
+	})
 
 	return nil
 }
 
-func (f *FeatureState) iUndoReviseATicketWith(doc *godog.DocString) error {
-	var cmd commands.UndoReviseTicket
+func (f *FeatureState) iConfirmReviseATicketForOrder(orderID string) error {
+	ticketID := f.ticketIDs[orderID]
 
-	err := json.Unmarshal([]byte(doc.Content), &cmd)
-	if err != nil {
-		return err
-	}
-
-	if cmd.TicketID == "<TicketID>" {
-		cmd.TicketID = f.ticketID
-	}
-
-	f.err = f.app.UndoReviseTicket(context.Background(), cmd)
+	f.err = f.app.ConfirmReviseTicket(context.Background(), commands.ConfirmReviseTicket{
+		TicketID: ticketID,
+	})
 
 	return nil
 }
 
-func (f *FeatureState) iConfirmReviseATicketWith(doc *godog.DocString) error {
-	var cmd commands.ConfirmReviseTicket
+func (f *FeatureState) iUndoReviseATicketForOrder(orderID string) error {
+	ticketID := f.ticketIDs[orderID]
 
-	err := json.Unmarshal([]byte(doc.Content), &cmd)
-	if err != nil {
-		return err
-	}
-
-	if cmd.TicketID == "<TicketID>" {
-		cmd.TicketID = f.ticketID
-	}
-
-	f.err = f.app.ConfirmReviseTicket(context.Background(), cmd)
+	f.err = f.app.UndoReviseTicket(context.Background(), commands.UndoReviseTicket{
+		TicketID: ticketID,
+	})
 
 	return nil
 }
