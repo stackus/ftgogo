@@ -14,13 +14,13 @@ import (
 )
 
 type RpcHandlers struct {
-	app application.Application
+	app application.ServiceApplication
 	restaurantpb.UnimplementedRestaurantServiceServer
 }
 
 var _ restaurantpb.RestaurantServiceServer = (*RpcHandlers)(nil)
 
-func NewRpcHandlers(app application.Application) RpcHandlers {
+func NewRpcHandlers(app application.ServiceApplication) RpcHandlers {
 	return RpcHandlers{app: app}
 }
 
@@ -34,7 +34,7 @@ func (h RpcHandlers) CreateRestaurant(ctx context.Context, request *restaurantpb
 		menuItems = append(menuItems, restaurantapi.FromMenuItemProto(item))
 	}
 
-	restaurantID, err := h.app.Commands.CreateRestaurant.Handle(ctx, commands.CreateRestaurant{
+	restaurantID, err := h.app.CreateRestaurant(ctx, commands.CreateRestaurant{
 		Name:      request.Name,
 		Address:   commonapi.FromAddressProto(request.Address),
 		MenuItems: menuItems,
@@ -47,7 +47,7 @@ func (h RpcHandlers) CreateRestaurant(ctx context.Context, request *restaurantpb
 }
 
 func (h RpcHandlers) GetRestaurant(ctx context.Context, request *restaurantpb.GetRestaurantRequest) (*restaurantpb.GetRestaurantResponse, error) {
-	restaurant, err := h.app.Queries.GetRestaurant.Handle(ctx, queries.GetRestaurant{RestaurantID: request.RestaurantID})
+	restaurant, err := h.app.GetRestaurant(ctx, queries.GetRestaurant{RestaurantID: request.RestaurantID})
 	if err != nil {
 		return nil, err
 	}

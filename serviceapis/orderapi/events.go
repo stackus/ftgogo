@@ -28,7 +28,7 @@ type OrderCreated struct {
 	LineItems      []LineItem
 	OrderTotal     int
 	DeliverAt      time.Time
-	DeliverTo      commonapi.Address
+	DeliverTo      *commonapi.Address
 }
 
 func (OrderCreated) EventName() string { return "orderapi.OrderCreated" }

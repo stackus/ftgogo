@@ -3,17 +3,18 @@ package adapters
 import (
 	"context"
 
+	"github.com/stackus/ftgogo/restaurant/internal/application/ports"
 	"github.com/stackus/ftgogo/restaurant/internal/domain"
 )
 
 type restaurantPostgresPublisherMiddleware struct {
-	RestaurantRepository
-	publisher RestaurantPublisher
+	ports.RestaurantRepository
+	publisher ports.RestaurantPublisher
 }
 
-var _ RestaurantRepository = (*restaurantPostgresPublisherMiddleware)(nil)
+var _ ports.RestaurantRepository = (*restaurantPostgresPublisherMiddleware)(nil)
 
-func NewRestaurantPostgresPublisherMiddleware(repository RestaurantRepository, publisher RestaurantPublisher) RestaurantRepository {
+func NewRestaurantPostgresPublisherMiddleware(repository ports.RestaurantRepository, publisher ports.RestaurantPublisher) ports.RestaurantRepository {
 	return &restaurantPostgresPublisherMiddleware{
 		RestaurantRepository: repository,
 		publisher:            publisher,

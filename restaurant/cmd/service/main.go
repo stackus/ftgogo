@@ -3,8 +3,6 @@ package main
 import (
 	"github.com/stackus/ftgogo/restaurant/internal/adapters"
 	"github.com/stackus/ftgogo/restaurant/internal/application"
-	"github.com/stackus/ftgogo/restaurant/internal/application/commands"
-	"github.com/stackus/ftgogo/restaurant/internal/application/queries"
 	"github.com/stackus/ftgogo/restaurant/internal/handlers"
 	"github.com/stackus/ftgogo/serviceapis"
 	"shared-go/applications"
@@ -26,14 +24,7 @@ func initService(svc *applications.Service) error {
 		adapters.NewRestaurantEntityEventPublisher(svc.Publisher),
 	)
 
-	app := application.Application{
-		Commands: application.Commands{
-			CreateRestaurant: commands.NewCreateRestaurantHandler(restaurantRepo),
-		},
-		Queries: application.Queries{
-			GetRestaurant: queries.NewGetRestaurantHandler(restaurantRepo),
-		},
-	}
+	app := application.NewServiceApplication(restaurantRepo)
 
 	// Drivers
 	handlers.NewRpcHandlers(app).Mount(svc.RpcServer)

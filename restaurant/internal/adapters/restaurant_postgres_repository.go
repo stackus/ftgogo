@@ -9,6 +9,7 @@ import (
 
 	"github.com/stackus/edat-pgx"
 
+	"github.com/stackus/ftgogo/restaurant/internal/application/ports"
 	"github.com/stackus/ftgogo/restaurant/internal/domain"
 )
 
@@ -24,7 +25,7 @@ type RestaurantPostgresRepository struct {
 
 var RestaurantsTableName = "restaurants"
 
-var _ RestaurantRepository = (*RestaurantPostgresRepository)(nil)
+var _ ports.RestaurantRepository = (*RestaurantPostgresRepository)(nil)
 
 func NewRestaurantPostgresRepository(client edatpgx.Client) *RestaurantPostgresRepository {
 	return &RestaurantPostgresRepository{

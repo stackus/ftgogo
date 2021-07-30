@@ -3,7 +3,7 @@ package queries
 import (
 	"context"
 
-	"github.com/stackus/ftgogo/restaurant/internal/adapters"
+	"github.com/stackus/ftgogo/restaurant/internal/application/ports"
 	"github.com/stackus/ftgogo/restaurant/internal/domain"
 )
 
@@ -12,10 +12,10 @@ type GetRestaurant struct {
 }
 
 type GetRestaurantHandler struct {
-	repo adapters.RestaurantRepository
+	repo ports.RestaurantRepository
 }
 
-func NewGetRestaurantHandler(repo adapters.RestaurantRepository) GetRestaurantHandler {
+func NewGetRestaurantHandler(repo ports.RestaurantRepository) GetRestaurantHandler {
 	return GetRestaurantHandler{repo: repo}
 }
 
