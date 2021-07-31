@@ -223,13 +223,12 @@ The [Order History](/order-history) Service provides an order by consumer read-m
 ### Event Sourcing
 
 Several services use event sourcing and keep track of the changes to aggregates using commands and recorded events.
-Check out the [Order](https://github.com/stackus/ftgogo/blob/master/order/internal/domain/order.go) aggregate for an
-example.
+Check out the [Order](/order/internal/domain/order.go) aggregate for an example.
 
 ### Sagas
 
 The same three sagas found in [FTGO](https://github.com/microservices-patterns/ftgo-application) have been implemented
-here in the [order-service](https://github.com/stackus/ftgogo/blob/master/order/cmd/service).
+here in the [order-service](/order/cmd/service).
 
 - [CreateOrderSaga](/order/internal/adapters/create_order_orchestration_saga.go)
     - saga responsible for the creation of a new order  
