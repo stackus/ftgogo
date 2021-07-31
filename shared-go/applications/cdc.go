@@ -49,6 +49,9 @@ type CDC struct {
 	Processor    outbox.MessageProcessor
 }
 
+// NewCDC returns a new CDC instance
+//
+// See NewService for more information
 func NewCDC(appFn func(*CDC) error) *CDC {
 	svc := &CDC{
 		appFn: appFn,

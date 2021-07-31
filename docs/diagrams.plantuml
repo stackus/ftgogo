@@ -216,3 +216,15 @@ end
 
 footer revise order saga sequence v1
 @enduml
+
+@startuml
+!include theme.plantuml
+
+skinparam responseMessageBelowArrow true
+
+participant "User" as user
+participant "Customer Web" as web
+participant "Consumer Service" as consumer
+participant "Accounting Service" as accounts
+
+@enduml

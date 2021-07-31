@@ -22,7 +22,10 @@ replace github.com/stackus/ftgogo/serviceapis => ./../serviceapis
 
 replace shared-go => ../shared-go
 
-//replace github.com/stackus/edat => ../edat
+// Development replacements
+//replace github.com/stackus/edat => ../../edat
+//replace github.com/stackus/edat-msgpack => ../../edat-msgpack
+//replace github.com/stackus/edat-pgx => ../../edat-pgx
 
 require (
 	github.com/stackus/ftgogo/accounting v0.0.0-20210116185538-3dd9fbb69179

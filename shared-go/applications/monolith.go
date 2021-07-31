@@ -62,6 +62,9 @@ type Monolith struct {
 	Processors   []outbox.MessageProcessor
 }
 
+// NewMonolith returns a new CDC instance
+//
+// See NewService for more information
 func NewMonolith(appFn func(*Monolith) error) *Monolith {
 	mono := &Monolith{
 		appFn: appFn,
@@ -194,7 +197,7 @@ func (m *Monolith) run(*cobra.Command, []string) error {
 	waiter.Add(m.waitForProcessors)
 	waiter.Add(m.waitForConnections)
 
-	m.Logger.Debug().Msg("service starting")
+	m.Logger.Debug().Msg("gateway starting")
 
 	return waiter.Wait()
 }

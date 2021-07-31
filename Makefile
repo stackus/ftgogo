@@ -1,5 +1,5 @@
 .DEFAULT_GOAL := run
-.PHONY: tidy shiny build run build-monolith run-monolith
+.PHONY: tidy shiny build run build-monolith run-monolith run-feature-tests install-godog
 
 tidy:
 	@echo Tidying all mod files
@@ -13,6 +13,7 @@ tidy:
 	@cd serviceapis & go mod tidy & cd .. & echo serviceapis is tidy
 	@cd shared-go & go mod tidy & cd .. & echo shared-go is tidy
 	@cd customer-web & go mod tidy & cd .. & echo customer-web is tidy
+	@cd store-web & go mod tidy & cd .. & echo store-web is tidy
 	@cd monolith & go mod tidy & cd .. & echo monolith is tidy
 
 shiny:
@@ -27,6 +28,7 @@ shiny:
 	@cd serviceapis & go get -u ./... & cd .. & echo serviceapis has shiny new packages
 	@cd shared-go & go get -u ./... & cd .. & echo shared-go has shiny new packages
 	@cd customer-web & go get -u ./... & cd .. & echo customer-web has shiny new packages
+	@cd store-web & go get -u ./... & cd .. & echo store-web has shiny new packages
 	@cd monolith & go get -u ./... & cd .. & echo monolith has shiny new packages
 
 build:
@@ -40,3 +42,14 @@ build-monolith:
 
 run-monolith:
 	@docker-compose -p monolith -f docker-compose-monolith.yml up
+
+run-feature-tests:
+	@cd accounting & godog
+	@cd consumer & godog
+	@cd delivery & godog
+	@cd kitchen & godog
+	@cd order & godog
+	@cd restaurant & godog
+
+install-godog:
+	@go install github.com/cucumber/godog/cmd/godog@v0.11.0

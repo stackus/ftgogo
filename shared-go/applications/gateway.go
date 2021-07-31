@@ -45,6 +45,9 @@ type Gateway struct {
 	Clients   map[string]*grpc.ClientConn
 }
 
+// NewGateway returns a new CDC instance
+//
+// See NewService for more information
 func NewGateway(appFn func(*Gateway) error) *Gateway {
 	gateway := &Gateway{
 		appFn: appFn,
@@ -52,7 +55,7 @@ func NewGateway(appFn func(*Gateway) error) *Gateway {
 	}
 
 	gateway.app = &cobra.Command{
-		Use:           "service",
+		Use:           "gateway",
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		RunE:          gateway.run,

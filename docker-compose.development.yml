@@ -42,7 +42,8 @@ services:
     hostname: customer-web
     restart: on-failure
     build:
-      context: .
+      context: ..
+      dockerfile: ftgogo/Dockerfile.development
       args:
         service: customer-web
         cmd: gateway
@@ -58,7 +59,8 @@ services:
     hostname: accountingservice
     restart: on-failure
     build:
-      context: .
+      context: ..
+      dockerfile: ftgogo/Dockerfile.development
       args:
         service: accounting
     environment:
@@ -70,12 +72,14 @@ services:
       - stan
     networks:
       - mononet
+
   accounting-cdc:
     container_name: accountingcdc
     hostname: accountingcdc
     restart: on-failure
     build:
-      context: .
+      context: ..
+      dockerfile: ftgogo/Dockerfile.development
       args:
         service: accounting
         cmd: cdc
@@ -88,11 +92,13 @@ services:
       - stan
     networks:
       - mononet
+
   consumer-service:
     hostname: consumerservice
     restart: on-failure
     build:
-      context: .
+      context: ..
+      dockerfile: ftgogo/Dockerfile.development
       args:
         service: consumer
     environment:
@@ -104,12 +110,14 @@ services:
       - stan
     networks:
       - mononet
+
   consumer-cdc:
     container_name: consumercdc
     hostname: consumercdc
     restart: on-failure
     build:
-      context: .
+      context: ..
+      dockerfile: ftgogo/Dockerfile.development
       args:
         service: consumer
         cmd: cdc
@@ -122,11 +130,13 @@ services:
       - stan
     networks:
       - mononet
+
   delivery-service:
     hostname: deliveryservice
     restart: on-failure
     build:
-      context: .
+      context: ..
+      dockerfile: ftgogo/Dockerfile.development
       args:
         service: delivery
     environment:
@@ -138,11 +148,13 @@ services:
       - stan
     networks:
       - mononet
+
   kitchen-service:
     hostname: kitchenservice
     restart: on-failure
     build:
-      context: .
+      context: ..
+      dockerfile: ftgogo/Dockerfile.development
       args:
         service: kitchen
     environment:
@@ -154,12 +166,14 @@ services:
       - stan
     networks:
       - mononet
+
   kitchen-cdc:
     container_name: kitchencdc
     hostname: kitchencdc
     restart: on-failure
     build:
-      context: .
+      context: ..
+      dockerfile: ftgogo/Dockerfile.development
       args:
         service: kitchen
         cmd: cdc
@@ -172,11 +186,13 @@ services:
       - stan
     networks:
       - mononet
+
   order-service:
     hostname: orderservice
     restart: on-failure
     build:
-      context: .
+      context: ..
+      dockerfile: ftgogo/Dockerfile.development
       args:
         service: order
     environment:
@@ -188,11 +204,13 @@ services:
       - stan
     networks:
       - mononet
+
   order-history-service:
     hostname: orderhistoryservice
     restart: on-failure
     build:
-      context: .
+      context: ..
+      dockerfile: ftgogo/Dockerfile.development
       args:
         service: order-history
     environment:
@@ -204,12 +222,14 @@ services:
       - stan
     networks:
       - mononet
+
   order-cdc:
     container_name: ordercdc
     hostname: ordercdc
     restart: on-failure
     build:
-      context: .
+      context: ..
+      dockerfile: ftgogo/Dockerfile.development
       args:
         service: order
         cmd: cdc
@@ -222,11 +242,13 @@ services:
       - stan
     networks:
       - mononet
+
   restaurant-service:
     hostname: restaurantservice
     restart: on-failure
     build:
-      context: .
+      context: ..
+      dockerfile: ftgogo/Dockerfile.development
       args:
         service: restaurant
     environment:
@@ -238,12 +260,14 @@ services:
       - stan
     networks:
       - mononet
+
   restaurant-cdc:
     container_name: restaurantcdc
     hostname: restaurantcdc
     restart: on-failure
     build:
-      context: .
+      context: ..
+      dockerfile: ftgogo/Dockerfile.development
       args:
         service: restaurant
         cmd: cdc
@@ -261,6 +285,5 @@ networks:
   mononet:
 
 volumes:
-  consuldata:
   pgdata:
   standata:

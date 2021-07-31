@@ -14,6 +14,8 @@ replace shared-go => ../shared-go
 require (
 	github.com/cucumber/godog v0.11.0
 	github.com/google/uuid v1.3.0
+	github.com/hashicorp/go-immutable-radix v1.3.1 // indirect
+	github.com/hashicorp/go-memdb v1.3.2 // indirect
 	github.com/mattn/go-colorable v0.1.8 // indirect
 	github.com/rdumont/assistdog v0.0.0-20201106100018-168b06230d14
 	github.com/spf13/pflag v1.0.5

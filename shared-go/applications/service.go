@@ -61,6 +61,20 @@ type Service struct {
 	RpcServer         rpc.Server
 }
 
+// NewService returns a new Service instance
+//
+// This is completely unnecessary and does not represent any patterns or best practices.
+//
+// This function, and the others like it in this package exists to reduce some of the boilerplate
+// I'd need to write and maintain in this demonstration application while I keep the bootstrapping
+// the same across all of the services. It should not be a goal to have similar bootstraps for all
+// of the microservices you and your teams build.
+//
+// The config, use of cobra and the general initialization could be copied into each gateway, the
+// Service struct eliminated if desired or kept and customized. The code in NewService would go into
+// your main() function.
+//
+// Do not blindly copy this, do not try to DRY things from the get-go.
 func NewService(appFn func(*Service) error) *Service {
 	svc := &Service{
 		appFn: appFn,
@@ -68,7 +82,7 @@ func NewService(appFn func(*Service) error) *Service {
 	}
 
 	svc.app = &cobra.Command{
-		Use:           "service",
+		Use:           "gateway",
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		RunE:          svc.run,
@@ -191,7 +205,7 @@ func (s *Service) run(*cobra.Command, []string) error {
 	waiter.Add(s.waitForWebServer)
 	waiter.Add(s.waitForMessaging)
 
-	s.Logger.Debug().Msg("service starting")
+	s.Logger.Debug().Msg("gateway starting")
 
 	return waiter.Wait()
 }
