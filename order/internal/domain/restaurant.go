@@ -1,14 +1,15 @@
 package domain
 
 import (
-	"serviceapis/restaurantapi"
-	"shared-go/errs"
+	"github.com/stackus/ftgogo/serviceapis/restaurantapi"
+
+	"github.com/stackus/errors"
 )
 
 // Restaurant errors
 var (
-	ErrRestaurantNotFound = errs.NewError("restaurant not found", errs.ErrNotFound)
-	ErrMenuItemNotFound   = errs.NewError("menu item not found", errs.ErrNotFound)
+	ErrRestaurantNotFound = errors.Wrap(errors.ErrNotFound, "restaurant not found")
+	ErrMenuItemNotFound   = errors.Wrap(errors.ErrNotFound, "menu item not found")
 )
 
 type Restaurant struct {
@@ -26,11 +27,11 @@ func (r *Restaurant) FindMenuItem(menuItemID string) (restaurantapi.MenuItem, er
 		}
 	}
 
-	return restaurantapi.MenuItem{}, ErrMenuItemNotFound
+	return restaurantapi.MenuItem{}, errors.Wrap(ErrMenuItemNotFound, menuItemID)
 }
 
 // ReviseMenu updates the local menu
 // NOT IMPLEMENTED
 func (r *Restaurant) ReviseMenu(_ []restaurantapi.MenuItem) error {
-	return errs.ErrNotImplemented
+	return errors.ErrUnimplemented
 }

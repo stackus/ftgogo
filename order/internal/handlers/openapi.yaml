@@ -1,0 +1,172 @@
+openapi: "3.0.0"
+info:
+  version: "1.0.0"
+  title: Order Service API
+  description: The order-service API is part of the FTGOGO demonstration application
+  contact:
+    name: FTGOGO Issues
+    url: https://github.com/stackus/ftgogo/issues
+servers:
+  - url: https://{host}:{port}/api
+    variables:
+      host:
+        default: localhost
+      port:
+        default: "8005"
+paths:
+  /orders:
+    post:
+      summary: Create a new order for delivery
+      operationId: createOrder
+      requestBody:
+        description: create order request
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [ consumer_id, restaurant_id, delivery_time, delivery_address, line_items ]
+              properties:
+                consumer_id:
+                  type: string
+                restaurant_id:
+                  type: string
+                delivery_time:
+                  type: string
+                  format: date-time
+                delivery_address:
+                  $ref: '../../../serviceapis/commonapi/spec.yaml#/components/schemas/Address'
+                line_items:
+                  $ref: '../../../serviceapis/commonapi/spec.yaml#/components/schemas/MenuItemQuantities'
+      responses:
+        '201':
+          $ref: '#/components/responses/OrderIDResponse'
+        default:
+          $ref: '../../../shared-go/web/spec.yaml#/components/responses/ErrorResponse'
+  /orders/{orderID}:
+    get:
+      summary: Get basic information for an order by ID
+      operationId: getOrder
+      parameters:
+        - $ref: '#/components/parameters/OrderID'
+      responses:
+        '200':
+          $ref: '#/components/responses/OrderResponse'
+        default:
+          $ref: '../../../shared-go/web/spec.yaml#/components/responses/ErrorResponse'
+  /orders/{orderID}/cancel:
+    put:
+      summary: Cancel an order by ID
+      operationId: cancelOrder
+      parameters:
+        - $ref: '#/components/parameters/OrderID'
+      responses:
+        '202':
+          $ref: '#/components/responses/OrderStatusResponse'
+        default:
+          $ref: '../../../shared-go/web/spec.yaml#/components/responses/ErrorResponse'
+  /orders/{orderID}/revise:
+    put:
+      summary: Revise an orders menu items by ID
+      operationId: reviseOrder
+      parameters:
+        - $ref: '#/components/parameters/OrderID'
+      requestBody:
+        description: revise order request
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [ revised_quantities ]
+              properties:
+                revised_quantities:
+                  $ref: '../../../serviceapis/commonapi/spec.yaml#/components/schemas/MenuItemQuantities'
+      responses:
+        '202':
+          $ref: '#/components/responses/OrderStatusResponse'
+        default:
+          $ref: '../../../shared-go/web/spec.yaml#/components/responses/ErrorResponse'
+  /restaurants/{restaurantID}:
+    get:
+      summary: Get/Confirm a restaruant exists by ID
+      operationId: getRestaurant
+      parameters:
+        - $ref: '#/components/parameters/RestaurantID'
+      responses:
+        '200':
+          $ref: '#/components/responses/RestaurantIDResponse'
+        default:
+          $ref: '../../../shared-go/web/spec.yaml#/components/responses/ErrorResponse'
+
+components:
+  schemas:
+    MenuItemQuantities:
+      type: object
+      additionalProperties:
+        type: integer
+  parameters:
+    OrderID:
+      in: path
+      name: orderID
+      description: order id (uuid)
+      required: true
+      schema:
+        type: string
+        format: uuid
+    RestaurantID:
+      in: path
+      name: restaurantID
+      description: restaurant id (uuid)
+      required: true
+      schema:
+        type: string
+        format: uuid
+  responses:
+    EmptyResponse:
+      description: No Content
+    OrderIDResponse:
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            required: [ id ]
+            properties:
+              id:
+                type: string
+    OrderStatusResponse:
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            required: [ status ]
+            properties:
+              status:
+                type: string
+    OrderResponse:
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            required: [ order_id, state, order_total ]
+            properties:
+              order_id:
+                type: string
+              state:
+                type: string
+                enum: [ ApprovalPending, Approved, Rejected, CancelPending, Cancelled, RevisionPending ]
+              order_total:
+                type: integer
+    RestaurantIDResponse:
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            required: [ id ]
+            properties:
+              id:
+                type: string

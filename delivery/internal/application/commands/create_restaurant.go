@@ -3,21 +3,22 @@ package commands
 import (
 	"context"
 
+	"github.com/stackus/ftgogo/delivery/internal/application/ports"
 	"github.com/stackus/ftgogo/delivery/internal/domain"
-	"serviceapis/commonapi"
+	"github.com/stackus/ftgogo/serviceapis/commonapi"
 )
 
 type CreateRestaurant struct {
 	RestaurantID string
 	Name         string
-	Address      commonapi.Address
+	Address      *commonapi.Address
 }
 
 type CreateRestaurantHandler struct {
-	repo domain.RestaurantRepository
+	repo ports.RestaurantRepository
 }
 
-func NewCreateRestaurantHandler(restaurantRepo domain.RestaurantRepository) CreateRestaurantHandler {
+func NewCreateRestaurantHandler(restaurantRepo ports.RestaurantRepository) CreateRestaurantHandler {
 	return CreateRestaurantHandler{repo: restaurantRepo}
 }
 

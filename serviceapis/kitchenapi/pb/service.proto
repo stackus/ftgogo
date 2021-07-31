@@ -1,0 +1,29 @@
+syntax = "proto3";
+
+option go_package = "github.com/stackus/ftgogo/serviceapis/kitchenapi/pb;kitchenpb";
+
+import "google/protobuf/timestamp.proto";
+
+package kitchenpb;
+
+service KitchenService {
+  rpc GetRestaurant(GetRestaurantRequest) returns (GetRestaurantResponse);
+  rpc AcceptTicket(AcceptTicketRequest) returns (AcceptTicketResponse);
+}
+
+message GetRestaurantRequest {
+  string RestaurantID = 1;
+}
+
+message GetRestaurantResponse {
+  string RestaurantID = 1;
+}
+
+message AcceptTicketRequest {
+  string TicketID = 1;
+  google.protobuf.Timestamp ReadyBy = 2;
+}
+
+message AcceptTicketResponse {
+  string TicketID = 1;
+}

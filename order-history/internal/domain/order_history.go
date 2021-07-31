@@ -3,8 +3,12 @@ package domain
 import (
 	"time"
 
-	"serviceapis/orderapi"
+	"github.com/stackus/ftgogo/serviceapis/orderapi"
 )
+
+const OrderHistoryLimit = 20
+const OrderHistoryMinimum = 1
+const OrderHistoryMaximum = 50
 
 type OrderHistory struct {
 	OrderID        string

@@ -3,7 +3,8 @@ package queries
 import (
 	"context"
 
-	"github.com/stackus/ftgogo/account/internal/domain"
+	"github.com/stackus/ftgogo/accounting/internal/application/ports"
+	"github.com/stackus/ftgogo/accounting/internal/domain"
 )
 
 type GetAccount struct {
@@ -11,18 +12,13 @@ type GetAccount struct {
 }
 
 type GetAccountHandler struct {
-	repo domain.AccountRepository
+	repo ports.AccountRepository
 }
 
-func NewGetAccountHandler(accountRepo domain.AccountRepository) GetAccountHandler {
+func NewGetAccountHandler(accountRepo ports.AccountRepository) GetAccountHandler {
 	return GetAccountHandler{repo: accountRepo}
 }
 
 func (h GetAccountHandler) Handle(ctx context.Context, query GetAccount) (*domain.Account, error) {
-	root, err := h.repo.Load(ctx, query.AccountID)
-	if err != nil {
-		return nil, err
-	}
-
-	return root.Aggregate().(*domain.Account), nil
+	return h.repo.Load(ctx, query.AccountID)
 }

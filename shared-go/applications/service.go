@@ -8,30 +8,29 @@ import (
 	"sync"
 	"time"
 
-	"github.com/go-chi/chi"
 	"github.com/jackc/pgx/v4/pgxpool"
 	"github.com/joho/godotenv"
 	"github.com/kelseyhightower/envconfig"
 	"github.com/nats-io/stan.go"
-	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/rs/zerolog"
 	"github.com/spf13/cobra"
+	"github.com/stackus/edat-kafka-go"
 	_ "github.com/stackus/edat-msgpack"
 	"github.com/stackus/edat-pgx"
 	"github.com/stackus/edat-stan"
+	"golang.org/x/sync/errgroup"
+
 	"github.com/stackus/edat/es"
-	http2 "github.com/stackus/edat/http"
 	"github.com/stackus/edat/inmem"
 	"github.com/stackus/edat/log"
 	"github.com/stackus/edat/msg"
 	"github.com/stackus/edat/saga"
-	"golang.org/x/sync/errgroup"
 
-	"shared-go/eddsarama"
 	"shared-go/egress"
 	"shared-go/instrumentation"
 	"shared-go/logging"
 	"shared-go/logging/zerologto"
+	"shared-go/rpc"
 	"shared-go/web"
 )
 
@@ -41,6 +40,7 @@ type svcConfig struct {
 	LogLevel        logging.Level `envconfig:"LOG_LEVEL" default:"WARN" desc:"options: [TRACE,DEBUG,INFO,WARN,ERROR,PANIC]"`
 	ShutdownTimeout time.Duration `envconfig:"SHUTDOWN_TIMEOUT" default:"30s" desc:"time to allow services to gracefully stop"`
 	Web             webCfg        `envconfig:"WEB"`                                                             // Web Config
+	Rpc             rpc.ServerCfg `envconfig:"RPC"`                                                             // RPC Config
 	Postgres        pgCfg         `envconfig:"PG"`                                                              // DataDriver / Postgres
 	EventDriver     string        `envconfig:"EVENT_DRIVER" default:"inmem" desc:"options: [inmem,nats,kafka]"` // "inmem", "nats", "kafka"
 	Nats            natsCfg       `envconfig:"NATS"`                                                            // EventDriver / Nats Streaming Config
@@ -58,8 +58,23 @@ type Service struct {
 	Publisher         *msg.Publisher
 	Subscriber        *msg.Subscriber
 	WebServer         web.Server
+	RpcServer         rpc.Server
 }
 
+// NewService returns a new Service instance
+//
+// This is completely unnecessary and does not represent any patterns or best practices.
+//
+// This function, and the others like it in this package exists to reduce some of the boilerplate
+// I'd need to write and maintain in this demonstration application while I keep the bootstrapping
+// the same across all of the services. It should not be a goal to have similar bootstraps for all
+// of the microservices you and your teams build.
+//
+// The config, use of cobra and the general initialization could be copied into each gateway, the
+// Service struct eliminated if desired or kept and customized. The code in NewService would go into
+// your main() function.
+//
+// Do not blindly copy this, do not try to DRY things from the get-go.
 func NewService(appFn func(*Service) error) *Service {
 	svc := &Service{
 		appFn: appFn,
@@ -67,7 +82,7 @@ func NewService(appFn func(*Service) error) *Service {
 	}
 
 	svc.app = &cobra.Command{
-		Use:           "service",
+		Use:           "gateway",
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		RunE:          svc.run,
@@ -156,14 +171,18 @@ func (s *Service) run(*cobra.Command, []string) error {
 		msgConsumer = edatstan.NewConsumer(conn, s.Cfg.ServiceID,
 			edatstan.WithConsumerActWait(s.Cfg.Nats.AckWaitTimeout),
 		)
+		msgProducer = edatstan.NewProducer(conn)
 	case s.Cfg.EventDriver == "kafka":
-		msgConsumer = eddsarama.NewConsumer(s.Cfg.Kafka.Brokers, s.Cfg.ServiceID)
+		msgConsumer = edatkafkago.NewConsumer(s.Cfg.Kafka.Brokers, s.Cfg.ServiceID)
+		msgProducer = edatkafkago.NewProducer(s.Cfg.Kafka.Brokers)
 	default:
 		msgConsumer = inmem.NewConsumer()
+		msgProducer = inmem.NewProducer()
 	}
 
 	// 2. Outbox: Producer publishes into the db
 	msgProducer = edatpgx.NewMessageStore(s.PgConn)
+	s.Publisher = msg.NewPublisher(msgProducer)
 
 	s.Subscriber = msg.NewSubscriber(msgConsumer)
 	s.Subscriber.Use(
@@ -171,24 +190,9 @@ func (s *Service) run(*cobra.Command, []string) error {
 		// 3. Outbox: Use a message receiver middleware to start a new transaction for each incoming message
 		edatpgx.ReceiverSessionMiddleware(pgConn, zerologto.Logger(s.Logger)),
 	)
-	s.Publisher = msg.NewPublisher(msgProducer)
 
-	s.WebServer = web.NewServer(s.Cfg.Web.Http, web.WithHealthCheck(s.Cfg.Web.PingPath))
-
-	s.WebServer.Options(s.Cfg.Web.ApiPath,
-		web.WithSecure(),
-		web.WithCors(s.Cfg.Web.Cors),
-		web.WithMiddleware(
-			instrumentation.WebInstrumentation(),
-			web.ZeroLogger(s.Logger),
-			http2.RequestContext,
-			// 4. Outbox: Use a web request middleware to start a new transaction for each incoming request
-			edatpgx.WebSessionMiddleware(pgConn, zerologto.Logger(s.Logger)),
-		))
-
-	s.WebServer.Mount(s.Cfg.Web.MetricsPath, func(r chi.Router) http.Handler {
-		return promhttp.Handler()
-	})
+	s.RpcServer = initRpcServer(s.Cfg.Rpc, pgConn, s.Logger)
+	s.WebServer = initWebServer(s.Cfg.Web, pgConn, s.Logger)
 
 	err = s.appFn(s)
 	if err != nil {
@@ -197,10 +201,11 @@ func (s *Service) run(*cobra.Command, []string) error {
 
 	waiter := egress.NewWaiter()
 
+	waiter.Add(s.waitForRpcServer)
 	waiter.Add(s.waitForWebServer)
 	waiter.Add(s.waitForMessaging)
 
-	s.Logger.Debug().Msg("service starting")
+	s.Logger.Debug().Msg("gateway starting")
 
 	return waiter.Wait()
 }
@@ -275,6 +280,35 @@ func (s Service) waitForWebServer(ctx context.Context) (err error) {
 
 		if err = s.WebServer.Shutdown(ctx); err != nil {
 			s.Logger.Warn().Msg("timed out while shutting down the web server")
+		}
+
+		return nil
+	})
+
+	return group.Wait()
+}
+
+func (s Service) waitForRpcServer(ctx context.Context) (err error) {
+	defer s.Logger.Debug().Msg("rpc server has been shutdown")
+
+	group, gCtx := errgroup.WithContext(ctx)
+	group.Go(func() error {
+		defer s.Logger.Debug().Msg("rpc server exited")
+		err = s.RpcServer.Start()
+		if err != nil && err != http.ErrServerClosed {
+			return err
+		}
+		return nil
+	})
+
+	group.Go(func() error {
+		<-gCtx.Done()
+		s.Logger.Debug().Msg("shutting down the rpc server")
+		ctx, cancel := context.WithTimeout(context.Background(), s.Cfg.ShutdownTimeout)
+		defer cancel()
+
+		if err = s.RpcServer.Shutdown(ctx); err != nil {
+			s.Logger.Warn().Msg("timed out while shutting down the rpc server")
 		}
 
 		return nil

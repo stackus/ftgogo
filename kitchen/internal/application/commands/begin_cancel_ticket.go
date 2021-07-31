@@ -3,19 +3,19 @@ package commands
 import (
 	"context"
 
+	"github.com/stackus/ftgogo/kitchen/internal/application/ports"
 	"github.com/stackus/ftgogo/kitchen/internal/domain"
 )
 
 type BeginCancelTicket struct {
-	TicketID     string
-	RestaurantID string
+	TicketID string
 }
 
 type BeginCancelTicketHandler struct {
-	repo domain.TicketRepository
+	repo ports.TicketRepository
 }
 
-func NewBeginCancelTicketHandler(ticketRepo domain.TicketRepository) BeginCancelTicketHandler {
+func NewBeginCancelTicketHandler(ticketRepo ports.TicketRepository) BeginCancelTicketHandler {
 	return BeginCancelTicketHandler{repo: ticketRepo}
 }
 

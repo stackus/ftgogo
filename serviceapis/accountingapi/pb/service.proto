@@ -1,0 +1,30 @@
+syntax = "proto3";
+
+option go_package = "github.com/stackus/ftgogo/serviceapis/accountingapi/pb;accountingpb";
+
+package accountingpb;
+
+import 'google/protobuf/empty.proto';
+
+service AccountingService {
+  rpc GetAccount(GetAccountRequest) returns (GetAccountResponse);
+  rpc DisableAccount(DisableAccountRequest) returns (google.protobuf.Empty);
+  rpc EnableAccount(EnableAccountRequest) returns (google.protobuf.Empty);
+}
+
+message GetAccountRequest {
+  string AccountID = 1;
+}
+
+message GetAccountResponse {
+  string AccountID = 1;
+  bool Enabled = 2;
+}
+
+message DisableAccountRequest {
+  string AccountID = 1;
+}
+
+message EnableAccountRequest {
+  string AccountID = 1;
+}

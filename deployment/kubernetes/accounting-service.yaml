@@ -1,0 +1,74 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: accounting-service-secret
+  namespace: ftgogo
+type: Opaque
+data:
+  password: YWNjb3VudGluZ19wYXNz
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: accounting-service
+  namespace: ftgogo
+  labels:
+    service: accounting-service
+spec:
+  selector:
+    matchLabels:
+      service: accounting-service
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        service: accounting-service
+    spec:
+      hostname: accounting-service
+      containers:
+        - name: accounting-service
+          image: accounting-service
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 80
+              name: http
+            - containerPort: 8000
+              name: grpc
+          env:
+            - name: SERVICE_ID
+              value: accounting-service
+            - name: PG_CONN
+              value: host=postgres dbname=accounting user=accounting_user pool_max_conns=10
+            - name: PGPASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: accounting-service-secret
+                  key: password
+          envFrom:
+            - configMapRef:
+                name: common-config
+          livenessProbe:
+            initialDelaySeconds: 5
+            periodSeconds: 15
+            timeoutSeconds: 5
+            httpGet:
+              path: /ping
+              port: 80
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: accounting-service
+  namespace: ftgogo
+  labels:
+    service: accounting-service
+spec:
+  ports:
+    - port: 80
+      targetPort: 80
+      name: http
+    - port: 8000
+      targetPort: 8000
+      name: grpc
+  selector:
+    service: accounting-service

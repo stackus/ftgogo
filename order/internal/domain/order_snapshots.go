@@ -4,8 +4,9 @@ import (
 	"time"
 
 	"github.com/stackus/edat/core"
-	"serviceapis/commonapi"
-	"serviceapis/orderapi"
+
+	"github.com/stackus/ftgogo/serviceapis/commonapi"
+	"github.com/stackus/ftgogo/serviceapis/orderapi"
 )
 
 func registerOrderSnapshots() {
@@ -18,7 +19,7 @@ type OrderSnapshot struct {
 	TicketID     string
 	LineItems    []orderapi.LineItem
 	DeliverAt    time.Time
-	DeliverTo    commonapi.Address
+	DeliverTo    *commonapi.Address
 	State        orderapi.OrderState
 }
 

@@ -3,6 +3,7 @@ package queries
 import (
 	"context"
 
+	"github.com/stackus/ftgogo/restaurant/internal/application/ports"
 	"github.com/stackus/ftgogo/restaurant/internal/domain"
 )
 
@@ -11,11 +12,11 @@ type GetRestaurant struct {
 }
 
 type GetRestaurantHandler struct {
-	repo domain.RestaurantRepository
+	repo ports.RestaurantRepository
 }
 
-func NewGetRestaurantHandler(restaurantRepo domain.RestaurantRepository) GetRestaurantHandler {
-	return GetRestaurantHandler{repo: restaurantRepo}
+func NewGetRestaurantHandler(repo ports.RestaurantRepository) GetRestaurantHandler {
+	return GetRestaurantHandler{repo: repo}
 }
 
 func (h GetRestaurantHandler) Handle(ctx context.Context, query GetRestaurant) (*domain.Restaurant, error) {

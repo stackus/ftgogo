@@ -1,0 +1,78 @@
+syntax = "proto3";
+
+option go_package = "github.com/stackus/ftgogo/serviceapis/deliveryapi/pb;deliverypb";
+
+package deliverypb;
+
+import "google/protobuf/timestamp.proto";
+import 'commonapi/pb/service.proto';
+
+service DeliveryService {
+  rpc GetCourier(GetCourierRequest) returns (GetCourierResponse);
+  rpc SetCourierAvailability(SetCourierAvailabilityRequest) returns (SetCourierAvailabilityResponse);
+  rpc GetDelivery(GetDeliveryRequest) returns (GetDeliveryResponse);
+}
+
+enum DeliveryStatus {
+  Pending = 0;
+  Scheduled = 1;
+  Cancelled = 2;
+}
+
+message Delivery {
+  string DeliveryID = 1;
+  string RestaurantID = 2;
+  string AssignedCourierID = 3;
+  DeliveryStatus Status = 4;
+  commonpb.Address PickUpAddress = 5;
+  commonpb.Address DeliveryAddress = 6;
+  google.protobuf.Timestamp PickupTime = 7;
+  google.protobuf.Timestamp ReadyBy = 8;
+}
+
+enum ActionType {
+  PickUp = 0;
+  DropOff = 1;
+}
+
+message Action {
+  string DeliveryID = 1;
+  ActionType ActionType = 2;
+  commonpb.Address Address = 3;
+  google.protobuf.Timestamp When = 4;
+}
+
+message Plan {
+  repeated Action Actions = 1;
+}
+
+message Courier {
+  string CourierID = 1;
+  Plan Plan = 2;
+  bool Available = 3;
+}
+
+message GetCourierRequest {
+  string CourierID = 1;
+}
+
+message GetCourierResponse {
+  Courier Courier = 1;
+}
+
+message SetCourierAvailabilityRequest {
+  string CourierID = 1;
+  bool Available = 2;
+}
+
+message SetCourierAvailabilityResponse {
+  bool Available = 1;
+}
+
+message GetDeliveryRequest {
+  string DeliveryID = 1;
+}
+
+message GetDeliveryResponse {
+  Delivery Delivery = 1;
+}

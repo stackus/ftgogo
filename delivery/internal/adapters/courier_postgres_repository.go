@@ -5,25 +5,29 @@ import (
 	"database/sql"
 	"encoding/json"
 	"errors"
+	"fmt"
 
 	"github.com/google/uuid"
 	"github.com/stackus/edat-pgx"
 
+	"github.com/stackus/ftgogo/delivery/internal/application/ports"
 	"github.com/stackus/ftgogo/delivery/internal/domain"
 )
 
 const (
-	findCourierSQL        = "SELECT plan, available FROM couriers WHERE id = $1"
-	findFirstAvailableSQL = "SELECT id, plan, available FROM couriers WHERE available ORDER BY modified_at DESC LIMIT 1"
-	saveCourierSQL        = "INSERT INTO couriers (id, plan, available, modified_at) VALUES ($1, $2, $3, CURRENT_TIMESTAMP)"
-	updateCourierSQL      = "UPDATE couriers SET plan = $1, address = $2, modified_at = CURRENT_TIMESTAMP WHERE id = $3"
+	findCourierSQL        = "SELECT plan, available FROM %s WHERE id = $1"
+	findFirstAvailableSQL = "SELECT id, plan, available FROM %s WHERE available ORDER BY modified_at DESC LIMIT 1"
+	saveCourierSQL        = "INSERT INTO %s (id, plan, available, modified_at) VALUES ($1, $2, $3, CURRENT_TIMESTAMP)"
+	updateCourierSQL      = "UPDATE %s SET plan = $1, address = $2, modified_at = CURRENT_TIMESTAMP WHERE id = $3"
 )
 
 type CourierPostgresRepository struct {
 	client edatpgx.Client
 }
 
-var _ domain.CourierRepository = (*CourierPostgresRepository)(nil)
+var CouriersTableName = "couriers"
+
+var _ ports.CourierRepository = (*CourierPostgresRepository)(nil)
 
 func NewCourierPostgresRepository(client edatpgx.Client) *CourierPostgresRepository {
 	return &CourierPostgresRepository{
@@ -32,7 +36,7 @@ func NewCourierPostgresRepository(client edatpgx.Client) *CourierPostgresReposit
 }
 
 func (r *CourierPostgresRepository) Find(ctx context.Context, courierID string) (*domain.Courier, error) {
-	row := r.client.QueryRow(ctx, findCourierSQL, courierID)
+	row := r.client.QueryRow(ctx, fmt.Sprintf(findCourierSQL, CouriersTableName), courierID)
 
 	var planData []byte
 
@@ -78,7 +82,7 @@ func (r *CourierPostgresRepository) FindOrCreate(ctx context.Context, courierID 
 }
 
 func (r *CourierPostgresRepository) FindFirstAvailable(ctx context.Context) (*domain.Courier, error) {
-	row := r.client.QueryRow(ctx, findFirstAvailableSQL)
+	row := r.client.QueryRow(ctx, fmt.Sprintf(findFirstAvailableSQL, CouriersTableName))
 
 	var planData []byte
 
@@ -107,7 +111,7 @@ func (r *CourierPostgresRepository) Save(ctx context.Context, courier *domain.Co
 		return err
 	}
 
-	_, err = r.client.Exec(ctx, saveCourierSQL, courier.CourierID, planData, courier.Available)
+	_, err = r.client.Exec(ctx, fmt.Sprintf(saveCourierSQL, CouriersTableName), courier.CourierID, planData, courier.Available)
 
 	return err
 }
@@ -118,7 +122,7 @@ func (r *CourierPostgresRepository) Update(ctx context.Context, courierID string
 		return err
 	}
 
-	_, err = r.client.Exec(ctx, updateCourierSQL, planData, courier.Available, courierID)
+	_, err = r.client.Exec(ctx, fmt.Sprintf(updateCourierSQL, CouriersTableName), planData, courier.Available, courierID)
 
 	return err
 }

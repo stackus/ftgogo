@@ -3,8 +3,9 @@ package commands
 import (
 	"context"
 
+	"github.com/stackus/ftgogo/order/internal/application/ports"
 	"github.com/stackus/ftgogo/order/internal/domain"
-	"serviceapis/orderapi"
+	"github.com/stackus/ftgogo/serviceapis/orderapi"
 )
 
 type StartCreateOrderSaga struct {
@@ -16,11 +17,15 @@ type StartCreateOrderSaga struct {
 }
 
 type StartCreateOrderSagaHandler struct {
-	saga domain.CreateOrderSaga
+	saga    ports.CreateOrderSaga
+	counter ports.Counter
 }
 
-func NewStartCreateOrderSagaHandler(createOrderSaga domain.CreateOrderSaga) StartCreateOrderSagaHandler {
-	return StartCreateOrderSagaHandler{saga: createOrderSaga}
+func NewStartCreateOrderSagaHandler(createOrderSaga ports.CreateOrderSaga, ordersPlaced ports.Counter) StartCreateOrderSagaHandler {
+	return StartCreateOrderSagaHandler{
+		saga:    createOrderSaga,
+		counter: ordersPlaced,
+	}
 }
 
 func (h StartCreateOrderSagaHandler) Handle(ctx context.Context, cmd StartCreateOrderSaga) error {
@@ -31,6 +36,8 @@ func (h StartCreateOrderSagaHandler) Handle(ctx context.Context, cmd StartCreate
 		LineItems:    cmd.LineItems,
 		OrderTotal:   cmd.OrderTotal,
 	})
+
+	h.counter.Inc()
 
 	return err
 }

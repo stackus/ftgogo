@@ -3,6 +3,7 @@ package commands
 import (
 	"context"
 
+	"github.com/stackus/ftgogo/order/internal/application/ports"
 	"github.com/stackus/ftgogo/order/internal/domain"
 )
 
@@ -11,10 +12,10 @@ type UndoReviseOrder struct {
 }
 
 type UndoReviseOrderHandler struct {
-	repo domain.OrderRepository
+	repo ports.OrderRepository
 }
 
-func NewUndoReviseOrderHandler(orderRepo domain.OrderRepository) UndoReviseOrderHandler {
+func NewUndoReviseOrderHandler(orderRepo ports.OrderRepository) UndoReviseOrderHandler {
 	return UndoReviseOrderHandler{repo: orderRepo}
 }
 

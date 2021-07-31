@@ -2,6 +2,8 @@ package domain
 
 import (
 	"github.com/stackus/edat/core"
+
+	"github.com/stackus/ftgogo/serviceapis/commonapi"
 )
 
 func registerConsumerSnapshots() {
@@ -9,7 +11,8 @@ func registerConsumerSnapshots() {
 }
 
 type ConsumerSnapshot struct {
-	Name string
+	Name      string
+	Addresses map[string]*commonapi.Address
 }
 
 func (ConsumerSnapshot) SnapshotName() string {

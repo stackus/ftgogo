@@ -3,33 +3,31 @@ package commands
 import (
 	"context"
 
+	"github.com/stackus/ftgogo/kitchen/internal/application/ports"
 	"github.com/stackus/ftgogo/kitchen/internal/domain"
-	"serviceapis/commonapi"
 )
 
 type ConfirmReviseTicket struct {
 	TicketID          string
 	RestaurantID      string
-	RevisedQuantities commonapi.MenuItemQuantities
+	RevisedQuantities map[string]int
 }
 
 type ConfirmReviseTicketHandler struct {
-	repo      domain.TicketRepository
-	publisher domain.TicketPublisher
+	repo ports.TicketRepository
 }
 
-func NewConfirmReviseTicketHandler(ticketRepo domain.TicketRepository, ticketPublisher domain.TicketPublisher) ConfirmReviseTicketHandler {
+func NewConfirmReviseTicketHandler(repo ports.TicketRepository) ConfirmReviseTicketHandler {
 	return ConfirmReviseTicketHandler{
-		repo:      ticketRepo,
-		publisher: ticketPublisher,
+		repo: repo,
 	}
 }
 
 func (h ConfirmReviseTicketHandler) Handle(ctx context.Context, cmd ConfirmReviseTicket) error {
-	root, err := h.repo.Update(ctx, cmd.TicketID, &domain.ConfirmReviseTicket{})
+	_, err := h.repo.Update(ctx, cmd.TicketID, &domain.ConfirmReviseTicket{})
 	if err != nil {
 		return err
 	}
 
-	return h.publisher.PublishEntityEvents(ctx, root)
+	return nil
 }

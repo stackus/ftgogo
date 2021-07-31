@@ -4,7 +4,8 @@ import (
 	"time"
 
 	"github.com/stackus/edat/core"
-	"serviceapis/kitchenapi"
+
+	"github.com/stackus/ftgogo/serviceapis/kitchenapi"
 )
 
 func registerTicketSnapshots() {

@@ -3,8 +3,9 @@ package commands
 import (
 	"context"
 
+	"github.com/stackus/ftgogo/order/internal/application/ports"
 	"github.com/stackus/ftgogo/order/internal/domain"
-	"serviceapis/orderapi"
+	"github.com/stackus/ftgogo/serviceapis/orderapi"
 )
 
 type StartCancelOrderSaga struct {
@@ -12,24 +13,22 @@ type StartCancelOrderSaga struct {
 }
 
 type StartCancelOrderSagaHandler struct {
-	repo domain.OrderRepository
-	saga domain.CancelOrderSaga
+	repo ports.OrderRepository
+	saga ports.CancelOrderSaga
 }
 
-func NewStartCancelOrderSagaHandler(orderRepo domain.OrderRepository, cancelOrderSaga domain.CancelOrderSaga) StartCancelOrderSagaHandler {
+func NewStartCancelOrderSagaHandler(orderRepo ports.OrderRepository, cancelOrderSaga ports.CancelOrderSaga) StartCancelOrderSagaHandler {
 	return StartCancelOrderSagaHandler{
 		repo: orderRepo,
 		saga: cancelOrderSaga,
 	}
 }
 
-func (h StartCancelOrderSagaHandler) Handle(ctx context.Context, cmd StartCancelOrderSaga) (string, error) {
-	root, err := h.repo.Load(ctx, cmd.OrderID)
+func (h StartCancelOrderSagaHandler) Handle(ctx context.Context, cmd StartCancelOrderSaga) (orderapi.OrderState, error) {
+	order, err := h.repo.Load(ctx, cmd.OrderID)
 	if err != nil {
-		return "", err
+		return orderapi.UnknownOrderState, err
 	}
-
-	order := root.Aggregate().(*domain.Order)
 
 	_, err = h.saga.Start(ctx, &domain.CancelOrderSagaData{
 		OrderID:      cmd.OrderID,
@@ -39,5 +38,5 @@ func (h StartCancelOrderSagaHandler) Handle(ctx context.Context, cmd StartCancel
 		OrderTotal:   order.OrderTotal(),
 	})
 
-	return orderapi.CancelPending.String(), err
+	return orderapi.CancelPending, err
 }

@@ -4,22 +4,23 @@ import (
 	"context"
 	"time"
 
+	"github.com/stackus/ftgogo/delivery/internal/application/ports"
 	"github.com/stackus/ftgogo/delivery/internal/domain"
-	"serviceapis/commonapi"
+	"github.com/stackus/ftgogo/serviceapis/commonapi"
 )
 
 type CreateDelivery struct {
 	OrderID         string
 	RestaurantID    string
-	DeliveryAddress commonapi.Address
+	DeliveryAddress *commonapi.Address
 }
 
 type CreateDeliveryHandler struct {
-	deliveryRepo   domain.DeliveryRepository
-	restaurantRepo domain.RestaurantRepository
+	deliveryRepo   ports.DeliveryRepository
+	restaurantRepo ports.RestaurantRepository
 }
 
-func NewCreateDeliveryHandler(deliveryRepo domain.DeliveryRepository, restaurantRepo domain.RestaurantRepository) CreateDeliveryHandler {
+func NewCreateDeliveryHandler(deliveryRepo ports.DeliveryRepository, restaurantRepo ports.RestaurantRepository) CreateDeliveryHandler {
 	return CreateDeliveryHandler{
 		deliveryRepo:   deliveryRepo,
 		restaurantRepo: restaurantRepo,

@@ -3,35 +3,33 @@ package commands
 import (
 	"context"
 
+	"github.com/stackus/ftgogo/order/internal/application/ports"
 	"github.com/stackus/ftgogo/order/internal/domain"
-	"serviceapis/commonapi"
-	"serviceapis/orderapi"
+	"github.com/stackus/ftgogo/serviceapis/orderapi"
 )
 
 type StartReviseOrderSaga struct {
 	OrderID           string
-	RevisedQuantities commonapi.MenuItemQuantities
+	RevisedQuantities map[string]int
 }
 
 type StartReviseOrderSagaHandler struct {
-	repo domain.OrderRepository
-	saga domain.ReviseOrderSaga
+	repo ports.OrderRepository
+	saga ports.ReviseOrderSaga
 }
 
-func NewStartReviseOrderSagaHandler(orderRepo domain.OrderRepository, reviseOrderSaga domain.ReviseOrderSaga) StartReviseOrderSagaHandler {
+func NewStartReviseOrderSagaHandler(orderRepo ports.OrderRepository, reviseOrderSaga ports.ReviseOrderSaga) StartReviseOrderSagaHandler {
 	return StartReviseOrderSagaHandler{
 		repo: orderRepo,
 		saga: reviseOrderSaga,
 	}
 }
 
-func (h StartReviseOrderSagaHandler) Handle(ctx context.Context, cmd StartReviseOrderSaga) (string, error) {
-	root, err := h.repo.Load(ctx, cmd.OrderID)
+func (h StartReviseOrderSagaHandler) Handle(ctx context.Context, cmd StartReviseOrderSaga) (orderapi.OrderState, error) {
+	order, err := h.repo.Load(ctx, cmd.OrderID)
 	if err != nil {
-		return "", err
+		return orderapi.UnknownOrderState, err
 	}
-
-	order := root.Aggregate().(*domain.Order)
 
 	_, err = h.saga.Start(ctx, &domain.ReviseOrderSagaData{
 		OrderID:           cmd.OrderID,
@@ -41,5 +39,5 @@ func (h StartReviseOrderSagaHandler) Handle(ctx context.Context, cmd StartRevise
 		RevisedQuantities: cmd.RevisedQuantities,
 	})
 
-	return orderapi.RevisionPending.String(), err
+	return orderapi.RevisionPending, err
 }

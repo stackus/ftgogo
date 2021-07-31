@@ -1,0 +1,68 @@
+syntax = "proto3";
+
+option go_package = "github.com/stackus/ftgogo/serviceapis/consumerapi/pb;consumerpb";
+
+package consumerpb;
+
+import 'commonapi/pb/service.proto';
+import 'google/protobuf/empty.proto';
+
+service ConsumerService {
+  rpc RegisterConsumer(RegisterConsumerRequest) returns (RegisterConsumerResponse);
+  rpc GetConsumer(GetConsumerRequest) returns (GetConsumerResponse);
+  rpc UpdateConsumer(UpdateConsumerRequest) returns (google.protobuf.Empty);
+  rpc AddAddress(AddAddressRequest) returns (google.protobuf.Empty);
+  rpc GetAddress(GetAddressRequest) returns (GetAddressResponse);
+  rpc UpdateAddress(UpdateAddressRequest) returns (google.protobuf.Empty);
+  rpc RemoveAddress(RemoveAddressRequest) returns (google.protobuf.Empty);
+}
+
+message RegisterConsumerRequest {
+  string Name = 1;
+}
+
+message RegisterConsumerResponse {
+  string ConsumerID = 1;
+}
+
+message GetConsumerRequest {
+  string ConsumerID = 1;
+}
+
+message GetConsumerResponse {
+  string ConsumerID = 1;
+  string Name = 2;
+}
+
+message UpdateConsumerRequest {
+  string ConsumerID = 1;
+  string Name = 2;
+}
+
+message AddAddressRequest {
+  string ConsumerID = 1;
+  string AddressID = 2;
+  commonpb.Address Address = 3;
+}
+
+message GetAddressRequest {
+  string ConsumerID = 1;
+  string AddressID = 2;
+}
+
+message GetAddressResponse {
+  string ConsumerID = 1;
+  string AddressID = 2;
+  commonpb.Address Address = 3;
+}
+
+message UpdateAddressRequest {
+  string ConsumerID = 1;
+  string AddressID = 2;
+  commonpb.Address Address = 3;
+}
+
+message RemoveAddressRequest {
+  string ConsumerID = 1;
+  string AddressID = 2;
+}

@@ -1,0 +1,135 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: stan
+  namespace: ftgogo
+  labels:
+    service: stan
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      service: stan
+  template:
+    metadata:
+      labels:
+        service: stan
+    spec:
+      hostname: stan
+      restartPolicy: Always
+      containers:
+        - name: stan
+          image: nats-streaming:latest
+          imagePullPolicy: ""
+          ports:
+            - containerPort: 8222
+              name: monitor
+            - containerPort: 7777
+              name: metrics
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 8222
+            initialDelaySeconds: 10
+            timeoutSeconds: 5
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: stan
+  namespace: ftgogo
+  labels:
+    service: stan
+spec:
+  selector:
+    service: stan
+  clusterIP: None
+  ports:
+    - name: metrics
+      port: 7777
+#---
+#apiVersion: apps/v1
+#kind: StatefulSet
+#metadata:
+#  name: stan
+#  namespace: ftgogo
+#  labels:
+#    service: stan
+#spec:
+#  selector:
+#    matchLabels:
+#      service: stan
+#  serviceName: stan
+#  replicas: 1
+#  volumeClaimTemplates:
+#    - metadata:
+#        name: stan-sts-vol
+#      spec:
+#        accessModes:
+#          - ReadWriteOnce
+#        volumeMode: "Filesystem"
+#        resources:
+#          requests:
+#            storage: 1Gi
+#  template:
+#    metadata:
+#      labels:
+#        service: stan
+#    spec:
+#      # Prevent NATS Streaming pods running in same host.
+#      affinity:
+#        podAntiAffinity:
+#          requiredDuringSchedulingIgnoredDuringExecution:
+#            - topologyKey: "kubernetes.io/hostname"
+#              labelSelector:
+#                matchExpressions:
+#                  - key: app
+#                    operator: In
+#                    values:
+#                      - stan
+#      # STAN Server
+#      containers:
+#        - name: stan
+#          image: nats-streaming:latest
+#          handlers:
+#            - containerPort: 8222
+#              name: monitor
+#            - containerPort: 7777
+#              name: metrics
+#          args:
+#            - "-sc"
+#            - "/etc/stan-config/stan.conf"
+#
+#          # Required to be able to define an environment variable
+#          # that refers to other environment variables.  This env var
+#          # is later used as part of the configuration file.
+#          env:
+#            - name: POD_NAME
+#              valueFrom:
+#                fieldRef:
+#                  fieldPath: metadata.name
+#            - name: POD_NAMESPACE
+#              valueFrom:
+#                fieldRef:
+#                  fieldPath: metadata.namespace
+#          volumeMounts:
+#            - name: config-volume
+#              mountPath: /etc/stan-config
+#            - name: stan-sts-vol
+#              mountPath: /data/stan
+#
+#          # Disable CPU limits.
+#          resources:
+#            requests:
+#              cpu: 0
+#
+#          livenessProbe:
+#            httpGet:
+#              path: /
+#              port: 8222
+#            initialDelaySeconds: 10
+#            timeoutSeconds: 5
+#      volumes:
+#        - name: config-volume
+#          configMap:
+#            name: stan-config

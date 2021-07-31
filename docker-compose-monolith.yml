@@ -1,0 +1,49 @@
+version: "3.8"
+x-environment: &default-environment
+  GET_HOSTS_FROM: dns
+  ENVIRONMENT: development
+  LOG_LEVEL: TRACE
+  EVENT_DRIVER: inmem
+
+services:
+  postgres:
+    container_name: postgres
+    hostname: postgres
+    image: postgres:alpine
+    restart: always
+    environment:
+      GET_HOST_FROM: dns
+      POSTGRES_PASSWORD: itsasecret
+    networks:
+      - mononet
+    ports:
+      - '5432:5432'
+    volumes:
+      - 'pgdata:/var/lib/postgresql/data'
+      - './config/postgresql/init-postgres.sql:/docker-entrypoint-initdb.d/init-postgres.sql'
+
+  monolith-service:
+    hostname: monolith
+    restart: on-failure
+    build:
+      context: .
+      args:
+        service: monolith
+    environment:
+      <<: *default-environment
+      SERVICE_ID: monolith-service
+      PG_CONN: host=postgres dbname=ftgogo user=ftgogo_user password=ftgogo_pass pool_max_conns=10
+      RPC_SERVER_NETWORK: unix
+      RPC_SERVER_ADDRESS: /tmp/grpc.sock
+    networks:
+      - mononet
+    ports:
+      - '8000:80'
+
+networks:
+  mononet:
+
+volumes:
+  consuldata:
+  pgdata:
+  standata:

@@ -1,23 +1,22 @@
 package domain
 
 import (
-	"fmt"
 	"time"
 
 	"github.com/stackus/edat/core"
 	"github.com/stackus/edat/es"
-	"serviceapis/commonapi"
-	"serviceapis/orderapi"
-	"shared-go/errs"
+	"github.com/stackus/errors"
+
+	"github.com/stackus/ftgogo/serviceapis/commonapi"
+	"github.com/stackus/ftgogo/serviceapis/orderapi"
 )
 
 var (
-	ErrOrderUnhandledCommand  = errs.NewError("unhandled command in order aggregate", errs.ErrServerError)
-	ErrOrderUnhandledEvent    = errs.NewError("unhandled event in order aggregate", errs.ErrServerError)
-	ErrOrderUnhandledSnapshot = errs.NewError("unhandled snapshot in order aggregate", errs.ErrServerError)
-
-	ErrOrderInvalidState  = errs.NewError("order state does not allow action", errs.ErrConflict)
-	ErrOrderMinimumNotMet = errs.NewError("order total does not meet the minimum", errs.ErrUnprocessableEntity)
+	ErrOrderUnhandledCommand  = errors.Wrap(errors.ErrInternal, "unhandled command in order aggregate")
+	ErrOrderUnhandledEvent    = errors.Wrap(errors.ErrInternal, "unhandled event in order aggregate")
+	ErrOrderUnhandledSnapshot = errors.Wrap(errors.ErrInternal, "unhandled snapshot in order aggregate")
+	ErrOrderInvalidState      = errors.Wrap(errors.ErrFailedPrecondition, "order state does not allow action")
+	ErrOrderMinimumNotMet     = errors.Wrap(errors.ErrInvalidArgument, "order total does not meet the minimum")
 )
 
 const orderMinimum = 0
@@ -30,7 +29,7 @@ type Order struct {
 	LineItems    []orderapi.LineItem
 	State        orderapi.OrderState
 	DeliverAt    time.Time
-	DeliverTo    commonapi.Address
+	DeliverTo    *commonapi.Address
 }
 
 var _ es.Aggregate = (*Order)(nil)
@@ -52,12 +51,29 @@ func (o *Order) ProcessCommand(command core.Command) error {
 			return ErrOrderInvalidState
 		}
 
+		total := 0
+		lineItems := make([]orderapi.LineItem, 0, len(cmd.LineItems))
+		for menuItemID, quantity := range cmd.LineItems {
+			menuItem, err := cmd.Restaurant.FindMenuItem(menuItemID)
+			if err != nil {
+				return err
+			}
+			item := orderapi.LineItem{
+				MenuItemID: menuItemID,
+				Name:       menuItem.Name,
+				Price:      menuItem.Price,
+				Quantity:   quantity,
+			}
+			total += item.GetTotal()
+			lineItems = append(lineItems, item)
+		}
+
 		o.AddEvent(&orderapi.OrderCreated{
 			ConsumerID:     cmd.ConsumerID,
-			RestaurantID:   cmd.RestaurantID,
-			RestaurantName: cmd.RestaurantName,
-			LineItems:      cmd.LineItems,
-			OrderTotal:     cmd.OrderTotal,
+			RestaurantID:   cmd.Restaurant.RestaurantID,
+			RestaurantName: cmd.Restaurant.Name,
+			LineItems:      lineItems,
+			OrderTotal:     total,
 			DeliverAt:      cmd.DeliverAt,
 			DeliverTo:      cmd.DeliverTo,
 		})
@@ -131,7 +147,7 @@ func (o *Order) ProcessCommand(command core.Command) error {
 		})
 
 	default:
-		return errs.NewError(fmt.Sprintf("unhandled command `%T`", command), ErrOrderUnhandledCommand)
+		return errors.Wrapf(ErrOrderUnhandledCommand, "unhandled command `%s`", command.CommandName())
 	}
 
 	return nil
@@ -181,7 +197,7 @@ func (o *Order) ApplyEvent(event core.Event) error {
 		}
 
 	default:
-		return errs.NewError(fmt.Sprintf("unhandled event `%T`", event), ErrOrderUnhandledEvent)
+		return errors.Wrapf(ErrOrderUnhandledEvent, "unhandled event `%s`", event.EventName())
 	}
 
 	return nil
@@ -199,7 +215,7 @@ func (o *Order) ApplySnapshot(snapshot core.Snapshot) error {
 		o.State = ss.State
 
 	default:
-		return errs.NewError(fmt.Sprintf("unhandled snapshot `%T`", snapshot), ErrOrderUnhandledSnapshot)
+		return errors.Wrapf(ErrOrderUnhandledSnapshot, "unhandled snapshot `%s`", snapshot.SnapshotName())
 	}
 
 	return nil
@@ -226,7 +242,7 @@ func (o *Order) OrderTotal() int {
 	return total
 }
 
-func (o *Order) RevisedOrderTotal(currentTotal int, revisedQuantities commonapi.MenuItemQuantities) int {
+func (o *Order) RevisedOrderTotal(currentTotal int, revisedQuantities map[string]int) int {
 	delta := 0
 	for menuItemID, quantity := range revisedQuantities {
 		for _, lineItem := range o.LineItems {

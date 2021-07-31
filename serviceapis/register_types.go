@@ -1,11 +1,11 @@
 package serviceapis
 
 import (
-	"serviceapis/accountingapi"
-	"serviceapis/consumerapi"
-	"serviceapis/kitchenapi"
-	"serviceapis/orderapi"
-	"serviceapis/restaurantapi"
+	"github.com/stackus/ftgogo/serviceapis/accountingapi"
+	"github.com/stackus/ftgogo/serviceapis/consumerapi"
+	"github.com/stackus/ftgogo/serviceapis/kitchenapi"
+	"github.com/stackus/ftgogo/serviceapis/orderapi"
+	"github.com/stackus/ftgogo/serviceapis/restaurantapi"
 )
 
 func RegisterTypes() {

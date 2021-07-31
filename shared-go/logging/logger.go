@@ -20,7 +20,7 @@ const (
 	PANIC Level = "PANIC"
 )
 
-//type EnvironmentConfig = func(options []zap.Option) zap.Config
+// type EnvironmentConfig = func(options []zap.Option) zap.Config
 //
 type Config struct {
 	Environment string

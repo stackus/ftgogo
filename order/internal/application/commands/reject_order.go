@@ -3,6 +3,7 @@ package commands
 import (
 	"context"
 
+	"github.com/stackus/ftgogo/order/internal/application/ports"
 	"github.com/stackus/ftgogo/order/internal/domain"
 )
 
@@ -11,22 +12,24 @@ type RejectOrder struct {
 }
 
 type RejectOrderHandler struct {
-	repo      domain.OrderRepository
-	publisher domain.OrderPublisher
+	repo    ports.OrderRepository
+	counter ports.Counter
 }
 
-func NewRejectOrderHandler(orderRepo domain.OrderRepository, orderPublisher domain.OrderPublisher) RejectOrderHandler {
+func NewRejectOrderHandler(repo ports.OrderRepository, counter ports.Counter) RejectOrderHandler {
 	return RejectOrderHandler{
-		repo:      orderRepo,
-		publisher: orderPublisher,
+		repo:    repo,
+		counter: counter,
 	}
 }
 
 func (h RejectOrderHandler) Handle(ctx context.Context, cmd RejectOrder) error {
-	root, err := h.repo.Update(ctx, cmd.OrderID, &domain.RejectOrder{})
+	_, err := h.repo.Update(ctx, cmd.OrderID, &domain.RejectOrder{})
 	if err != nil {
 		return err
 	}
 
-	return h.publisher.PublishEntityEvents(ctx, root)
+	h.counter.Inc()
+
+	return nil
 }

@@ -1,21 +1,22 @@
 package domain
 
 import (
-	"fmt"
 	"time"
 
 	"github.com/stackus/edat/core"
 	"github.com/stackus/edat/es"
-	"serviceapis/kitchenapi"
-	"shared-go/errs"
+	"github.com/stackus/errors"
+
+	"github.com/stackus/ftgogo/serviceapis/kitchenapi"
 )
 
-var ErrTicketUnhandledCommand = errs.NewError("unhandled command in ticket aggregate", errs.ErrServerError)
-var ErrTicketUnhandledEvent = errs.NewError("unhandled event in ticket aggregate", errs.ErrServerError)
-var ErrTicketUnhandledSnapshot = errs.NewError("unhandled snapshot in ticket aggregate", errs.ErrServerError)
-
-var ErrTicketInvalidState = errs.NewError("ticket state does not allow action", errs.ErrConflict)
-var ErrTicketReadyByBeforeNow = errs.NewError("readyBy is not after now", errs.ErrNotAcceptable)
+var (
+	ErrTicketUnhandledCommand  = errors.Wrap(errors.ErrInternal, "unhandled command in ticket aggregate")
+	ErrTicketUnhandledEvent    = errors.Wrap(errors.ErrInternal, "unhandled event in ticket aggregate")
+	ErrTicketUnhandledSnapshot = errors.Wrap(errors.ErrInternal, "unhandled snapshot in ticket aggregate")
+	ErrTicketInvalidState      = errors.Wrap(errors.ErrFailedPrecondition, "ticket state does not allow action")
+	ErrTicketReadyByBeforeNow  = errors.Wrap(errors.ErrInvalidArgument, "readyBy is in the past")
+)
 
 type TicketState int
 
@@ -43,6 +44,31 @@ type Ticket struct {
 	PickedUpAt       time.Time
 	State            TicketState
 	PreviousState    TicketState
+}
+
+func (s TicketState) String() string {
+	switch s {
+	case CreatePending:
+		return "CreatePending"
+	case AwaitingAcceptance:
+		return "AwaitingAcceptance"
+	case Accepted:
+		return "Accepted"
+	case Preparing:
+		return "Preparing"
+	case ReadyForPickup:
+		return "ReadyForPickup"
+	case PickedUp:
+		return "PickedUp"
+	case CancelPending:
+		return "CancelPending"
+	case Cancelled:
+		return "Cancelled"
+	case RevisionPending:
+		return "RevisionPending"
+	default:
+		return "CreatePending"
+	}
 }
 
 func NewTicket() es.Aggregate {
@@ -134,7 +160,7 @@ func (t *Ticket) ProcessCommand(command core.Command) error {
 		})
 
 	default:
-		return errs.NewError(fmt.Sprintf("unhandled command `%T`", command), ErrTicketUnhandledCommand)
+		return errors.Wrapf(ErrTicketUnhandledCommand, "unhandled command `%s`", command.CommandName())
 	}
 
 	return nil
@@ -180,7 +206,7 @@ func (t *Ticket) ApplyEvent(event core.Event) error {
 		t.State = Accepted // assume that this is the case; doesn't appear to be ever set in ftgo-kitchen-service
 
 	default:
-		return errs.NewError(fmt.Sprintf("unhandled event `%T`", event), ErrTicketUnhandledEvent)
+		return errors.Wrapf(ErrTicketUnhandledEvent, "unhandled event `%s`", event.EventName())
 	}
 
 	return nil
@@ -200,7 +226,7 @@ func (t *Ticket) ApplySnapshot(snapshot core.Snapshot) error {
 		t.State = ss.State
 
 	default:
-		return errs.NewError(fmt.Sprintf("unhandled snapshot `%T`", snapshot), ErrTicketUnhandledSnapshot)
+		return errors.Wrapf(ErrTicketUnhandledSnapshot, "unhandled snapshot `%s`", snapshot.SnapshotName())
 	}
 
 	return nil

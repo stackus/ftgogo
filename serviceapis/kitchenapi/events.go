@@ -4,7 +4,6 @@ import (
 	"time"
 
 	"github.com/stackus/edat/core"
-	"serviceapis/commonapi"
 )
 
 func registerEvents() {
@@ -36,7 +35,7 @@ func (TicketCancelled) EventName() string { return "kitchenapi.TicketCancelled" 
 
 type TicketRevised struct {
 	TicketEvent
-	RevisedQuantities commonapi.MenuItemQuantities
+	RevisedQuantities map[string]int
 }
 
 func (TicketRevised) EventName() string { return "kitchenapi.TicketRevised" }

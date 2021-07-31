@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+option go_package = "github.com/stackus/ftgogo/serviceapis/commonapi/pb;commonpb";
+
+package commonpb;
+
+message Address {
+  string Street1 = 1;
+  string Street2 = 2;
+  string City = 3;
+  string State = 4;
+  string Zip = 5;
+}
+
+message MenuItemQuantities {
+  map<string, int64> Items = 1;
+}

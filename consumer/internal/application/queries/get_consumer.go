@@ -3,6 +3,7 @@ package queries
 import (
 	"context"
 
+	"github.com/stackus/ftgogo/consumer/internal/application/ports"
 	"github.com/stackus/ftgogo/consumer/internal/domain"
 )
 
@@ -11,18 +12,13 @@ type GetConsumer struct {
 }
 
 type GetConsumerHandler struct {
-	repo domain.ConsumerRepository
+	repo ports.ConsumerRepository
 }
 
-func NewGetConsumerHandler(consumerRepo domain.ConsumerRepository) GetConsumerHandler {
+func NewGetConsumerHandler(consumerRepo ports.ConsumerRepository) GetConsumerHandler {
 	return GetConsumerHandler{repo: consumerRepo}
 }
 
 func (h GetConsumerHandler) Handle(ctx context.Context, query GetConsumer) (*domain.Consumer, error) {
-	root, err := h.repo.Load(ctx, query.ConsumerID)
-	if err != nil {
-		return nil, err
-	}
-
-	return root.Aggregate().(*domain.Consumer), nil
+	return h.repo.Load(ctx, query.ConsumerID)
 }

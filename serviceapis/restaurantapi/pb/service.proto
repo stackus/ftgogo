@@ -1,0 +1,43 @@
+syntax = "proto3";
+
+option go_package = "github.com/stackus/ftgogo/serviceapis/restaurantapi/pb;restaurantpb";
+
+package restaurantpb;
+
+import 'commonapi/pb/service.proto';
+
+service RestaurantService {
+  rpc CreateRestaurant(CreateRestaurantRequest) returns (CreateRestaurantResponse);
+  rpc GetRestaurant(GetRestaurantRequest) returns (GetRestaurantResponse);
+}
+
+message MenuItem {
+  string ID = 1;
+  string Name = 2;
+  int64 Price = 3;
+}
+
+message Menu {
+  repeated MenuItem MenuItems = 1;
+}
+
+message CreateRestaurantRequest {
+  string Name = 1;
+  commonpb.Address Address = 2;
+  Menu Menu = 3;
+}
+
+message CreateRestaurantResponse {
+  string RestaurantID = 1;
+}
+
+message GetRestaurantRequest {
+  string RestaurantID = 1;
+}
+
+message GetRestaurantResponse {
+  string RestaurantID = 1;
+  string Name = 2;
+  commonpb.Address Address = 3;
+  Menu Menu = 4;
+}

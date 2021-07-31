@@ -5,23 +5,27 @@ import (
 	"database/sql"
 	"encoding/json"
 	"errors"
+	"fmt"
 
 	"github.com/stackus/edat-pgx"
 
+	"github.com/stackus/ftgogo/delivery/internal/application/ports"
 	"github.com/stackus/ftgogo/delivery/internal/domain"
 )
 
 const (
-	findDeliverySQL   = "SELECT restaurant_id, courier_id, pickup_address, delivery_address, pickup_time, ready_by, status FROM deliveries WHERE id = $1"
-	saveDeliverySQL   = "INSERT INTO deliveries (id, restaurant_id, courier_id, pickup_address, delivery_address, pickup_time, ready_by, status) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)"
-	updateDeliverySQL = "UPDATE deliveries SET restaurant_id = $1, courier_id = $2, pickup_address = $3, delivery_address = $4, pickup_time = $5, ready_by = $6, status = $7 WHERE id = $8"
+	findDeliverySQL   = "SELECT restaurant_id, courier_id, pickup_address, delivery_address, pickup_time, ready_by, status FROM %s WHERE id = $1"
+	saveDeliverySQL   = "INSERT INTO %s (id, restaurant_id, courier_id, pickup_address, delivery_address, pickup_time, ready_by, status) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)"
+	updateDeliverySQL = "UPDATE %s SET restaurant_id = $1, courier_id = $2, pickup_address = $3, delivery_address = $4, pickup_time = $5, ready_by = $6, status = $7 WHERE id = $8"
 )
 
 type DeliveryPostgresRepository struct {
 	client edatpgx.Client
 }
 
-var _ domain.DeliveryRepository = (*DeliveryPostgresRepository)(nil)
+var DeliveriesTableName = "deliveries"
+
+var _ ports.DeliveryRepository = (*DeliveryPostgresRepository)(nil)
 
 func NewDeliveryPostgresRepository(client edatpgx.Client) *DeliveryPostgresRepository {
 	return &DeliveryPostgresRepository{
@@ -29,8 +33,8 @@ func NewDeliveryPostgresRepository(client edatpgx.Client) *DeliveryPostgresRepos
 	}
 }
 
-func (s *DeliveryPostgresRepository) Find(ctx context.Context, deliveryID string) (*domain.Delivery, error) {
-	row := s.client.QueryRow(ctx, findDeliverySQL, deliveryID)
+func (r *DeliveryPostgresRepository) Find(ctx context.Context, deliveryID string) (*domain.Delivery, error) {
+	row := r.client.QueryRow(ctx, fmt.Sprintf(findDeliverySQL, DeliveriesTableName), deliveryID)
 
 	var pickupData []byte
 	var deliveryData []byte
@@ -64,7 +68,7 @@ func (s *DeliveryPostgresRepository) Find(ctx context.Context, deliveryID string
 	return delivery, nil
 }
 
-func (s *DeliveryPostgresRepository) Save(ctx context.Context, delivery *domain.Delivery) error {
+func (r *DeliveryPostgresRepository) Save(ctx context.Context, delivery *domain.Delivery) error {
 	var err error
 	var pickupData []byte
 	var deliveryData []byte
@@ -79,7 +83,7 @@ func (s *DeliveryPostgresRepository) Save(ctx context.Context, delivery *domain.
 		return err
 	}
 
-	_, err = s.client.Exec(ctx, saveDeliverySQL, delivery.DeliveryID, delivery.RestaurantID, delivery.AssignedCourierID,
+	_, err = r.client.Exec(ctx, fmt.Sprintf(saveDeliverySQL, DeliveriesTableName), delivery.DeliveryID, delivery.RestaurantID, delivery.AssignedCourierID,
 		pickupData, deliveryData,
 		delivery.PickUpTime, delivery.ReadyBy, delivery.Status.String(),
 	)
@@ -87,7 +91,7 @@ func (s *DeliveryPostgresRepository) Save(ctx context.Context, delivery *domain.
 	return err
 }
 
-func (s *DeliveryPostgresRepository) Update(ctx context.Context, deliveryID string, delivery *domain.Delivery) error {
+func (r *DeliveryPostgresRepository) Update(ctx context.Context, deliveryID string, delivery *domain.Delivery) error {
 	var err error
 	var pickupData []byte
 	var deliveryData []byte
@@ -102,7 +106,7 @@ func (s *DeliveryPostgresRepository) Update(ctx context.Context, deliveryID stri
 		return err
 	}
 
-	_, err = s.client.Exec(ctx, updateDeliverySQL, delivery.RestaurantID, delivery.AssignedCourierID,
+	_, err = r.client.Exec(ctx, fmt.Sprintf(updateDeliverySQL, DeliveriesTableName), delivery.RestaurantID, delivery.AssignedCourierID,
 		pickupData, deliveryData,
 		delivery.PickUpTime, delivery.ReadyBy, delivery.Status.String(), deliveryID,
 	)

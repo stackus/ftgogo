@@ -3,6 +3,7 @@ package commands
 import (
 	"context"
 
+	"github.com/stackus/ftgogo/kitchen/internal/application/ports"
 	"github.com/stackus/ftgogo/kitchen/internal/domain"
 )
 
@@ -12,22 +13,20 @@ type ConfirmCancelTicket struct {
 }
 
 type ConfirmCancelTicketHandler struct {
-	repo      domain.TicketRepository
-	publisher domain.TicketPublisher
+	repo ports.TicketRepository
 }
 
-func NewConfirmCancelTicketHandler(ticketRepo domain.TicketRepository, ticketPublisher domain.TicketPublisher) ConfirmCancelTicketHandler {
+func NewConfirmCancelTicketHandler(repo ports.TicketRepository) ConfirmCancelTicketHandler {
 	return ConfirmCancelTicketHandler{
-		repo:      ticketRepo,
-		publisher: ticketPublisher,
+		repo: repo,
 	}
 }
 
 func (h ConfirmCancelTicketHandler) Handle(ctx context.Context, cmd ConfirmCancelTicket) error {
-	root, err := h.repo.Update(ctx, cmd.TicketID, &domain.ConfirmCancelTicket{})
+	_, err := h.repo.Update(ctx, cmd.TicketID, &domain.ConfirmCancelTicket{})
 	if err != nil {
 		return err
 	}
 
-	return h.publisher.PublishEntityEvents(ctx, root)
+	return nil
 }

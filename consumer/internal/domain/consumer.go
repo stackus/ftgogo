@@ -1,30 +1,37 @@
 package domain
 
 import (
-	"fmt"
-
 	"github.com/stackus/edat/core"
 	"github.com/stackus/edat/es"
-	"serviceapis/consumerapi"
-	"shared-go/errs"
+	"github.com/stackus/errors"
+
+	"github.com/stackus/ftgogo/serviceapis/commonapi"
+	"github.com/stackus/ftgogo/serviceapis/consumerapi"
 )
 
-var ErrConsumerUnhandledCommand = errs.NewError("unhandled command in domain aggregate", errs.ErrServerError)
-var ErrConsumerUnhandledEvent = errs.NewError("unhandled event in domain aggregate", errs.ErrServerError)
-var ErrConsumerUnhandledSnapshot = errs.NewError("unhandled snapshot in domain aggregate", errs.ErrServerError)
-
-var ErrConsumerNotFound = errs.NewError("domain not found", errs.ErrNotFound)
-var ErrOrderNotValidated = errs.NewError("order not validated for domain", errs.ErrBadRequest)
+var (
+	ErrConsumerUnhandledCommand  = errors.Wrap(errors.ErrInternal, "unhandled command in consumer aggregate")
+	ErrConsumerUnhandledEvent    = errors.Wrap(errors.ErrInternal, "unhandled event in consumer aggregate")
+	ErrConsumerUnhandledSnapshot = errors.Wrap(errors.ErrInternal, "unhandled snapshot in consumer aggregate")
+	ErrConsumerNotFound          = errors.Wrap(errors.ErrNotFound, "consumer not found")
+	ErrConsumerNameMissing       = errors.Wrap(errors.ErrInvalidArgument, "cannot register a consumer without a name")
+	ErrOrderNotValidated         = errors.Wrap(errors.ErrBadRequest, "order not validated for consumer")
+	ErrAddressAlreadyExists      = errors.Wrap(errors.ErrConflict, "address with that identifier already exists")
+	ErrAddressDoesNotExist       = errors.Wrap(errors.ErrNotFound, "address with that identifier does not exist")
+)
 
 type Consumer struct {
 	es.AggregateBase
-	name string
+	name      string
+	addresses map[string]*commonapi.Address
 }
 
 var _ es.Aggregate = (*Consumer)(nil)
 
 func NewConsumer() es.Aggregate {
-	return &Consumer{}
+	return &Consumer{
+		addresses: map[string]*commonapi.Address{},
+	}
 }
 
 func (Consumer) EntityName() string {
@@ -33,6 +40,14 @@ func (Consumer) EntityName() string {
 
 func (c *Consumer) Name() string {
 	return c.name
+}
+
+func (c *Consumer) Addresses() map[string]*commonapi.Address {
+	return c.addresses
+}
+
+func (c *Consumer) Address(addressID string) *commonapi.Address {
+	return c.addresses[addressID]
 }
 
 // ValidateOrderByConsumer domain method
@@ -45,12 +60,50 @@ func (c *Consumer) ValidateOrderByConsumer(orderTotal int) error {
 func (c *Consumer) ProcessCommand(command core.Command) error {
 	switch cmd := command.(type) {
 	case *RegisterConsumer:
+		if len([]rune(cmd.Name)) == 0 {
+			return ErrConsumerNameMissing
+		}
+
 		c.AddEvent(&consumerapi.ConsumerRegistered{
 			Name: cmd.Name,
 		})
 
+	case *UpdateConsumer:
+		c.AddEvent(&consumerapi.ConsumerUpdated{
+			Name: cmd.Name,
+		})
+
+	case *AddAddress:
+		if _, exists := c.addresses[cmd.AddressID]; exists {
+			return ErrAddressAlreadyExists
+		}
+
+		c.AddEvent(&consumerapi.AddressAdded{
+			AddressID: cmd.AddressID,
+			Address:   cmd.Address,
+		})
+
+	case *UpdateAddress:
+		if _, exists := c.addresses[cmd.AddressID]; !exists {
+			return ErrAddressDoesNotExist
+		}
+
+		c.AddEvent(&consumerapi.AddressUpdated{
+			AddressID: cmd.AddressID,
+			Address:   cmd.Address,
+		})
+
+	case *RemoveAddress:
+		if _, exists := c.addresses[cmd.AddressID]; !exists {
+			return ErrAddressDoesNotExist
+		}
+
+		c.AddEvent(&consumerapi.AddressRemoved{
+			AddressID: cmd.AddressID,
+		})
+
 	default:
-		return errs.NewError(fmt.Sprintf("unhandled command `%T`", command), ErrConsumerUnhandledCommand)
+		return errors.Wrapf(ErrConsumerUnhandledCommand, "unhandled command `%s`", command.CommandName())
 	}
 
 	return nil
@@ -62,8 +115,20 @@ func (c *Consumer) ApplyEvent(event core.Event) error {
 	case *consumerapi.ConsumerRegistered:
 		c.name = evt.Name
 
+	case *consumerapi.ConsumerUpdated:
+		c.name = evt.Name
+
+	case *consumerapi.AddressAdded:
+		c.addresses[evt.AddressID] = evt.Address
+
+	case *consumerapi.AddressUpdated:
+		c.addresses[evt.AddressID] = evt.Address
+
+	case *consumerapi.AddressRemoved:
+		delete(c.addresses, evt.AddressID)
+
 	default:
-		return errs.NewError(fmt.Sprintf("unhandled event `%T`", event), ErrConsumerUnhandledEvent)
+		return errors.Wrapf(ErrConsumerUnhandledEvent, "unhandled event `%s`", event.EventName())
 	}
 
 	return nil
@@ -74,9 +139,10 @@ func (c *Consumer) ApplySnapshot(snapshot core.Snapshot) error {
 	switch ss := snapshot.(type) {
 	case *ConsumerSnapshot:
 		c.name = ss.Name
+		c.addresses = ss.Addresses
 
 	default:
-		return errs.NewError(fmt.Sprintf("unhandled snapshot `%T`", snapshot), ErrConsumerUnhandledSnapshot)
+		return errors.Wrapf(ErrConsumerUnhandledSnapshot, "unhandled snapshot `%s`", snapshot.SnapshotName())
 	}
 
 	return nil
@@ -85,6 +151,7 @@ func (c *Consumer) ApplySnapshot(snapshot core.Snapshot) error {
 // ToSnapshot aggregate method
 func (c *Consumer) ToSnapshot() (core.Snapshot, error) {
 	return &ConsumerSnapshot{
-		Name: c.name,
+		Name:      c.name,
+		Addresses: c.addresses,
 	}, nil
 }

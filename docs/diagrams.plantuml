@@ -1,0 +1,230 @@
+@startuml
+!include theme.plantuml
+
+title "FTGOGO Microservices Architecture"
+
+cloud "Internet" as net
+node "UI Layer" as ui
+node "Services Layer" as svc
+database "Schemas" <<PostgreSQL>> as db
+queue "Event Bus" <<NATS Streaming>> as events
+node "Change Data Capture" as cdc
+
+note right of ui
+**Microservice UIs:**
+- Customer Web API
+- Store Web API
+end note
+
+note right of svc
+**Microservices:**
+- Accounting Service
+- Consumer Service
+- Delivery Service
+- Kitchen Service
+- Order Service
+- Order History Service
+- Restaurant Service
+end note
+
+note left of cdc
+**Microservice CDCs:**
+- Accounting CDC
+- Consumer CDC
+- Kitchen CDC
+- Order CDC
+- Restaurant CDC
+end note
+
+note left of db
+**Microservice Schemas:**
+- Accounting
+- Consumer
+- Delivery
+- Kitchen
+- Order
+- Order History
+- Restaurant
+end note
+
+net <--> ui: HTTP
+ui <--> svc: GRPC
+svc <--> db
+db <--> cdc
+cdc -> events
+svc <--- events
+
+footer high-level conceptual architecture diagram v1
+
+@enduml
+
+@startuml
+!include theme.plantuml
+
+skinparam responseMessageBelowArrow true
+
+participant "Orchestrator" as saga
+participant "Order Service" as orders
+participant "Consumer Service" as consumers
+participant "Kitchen Service" as kitchens
+participant "Accounting Service" as accounts
+
+title Create Order Saga
+
+saga<-orders: Start
+autonumber 1.1
+saga->consumers: ValidateOrderByConsumer
+saga<--consumers: $success("success")
+autonumber inc A
+saga->kitchens: CreateTicket
+saga<--kitchens: $success("CreateTicketReply")
+note right: Add "TicketID" to saga state
+autonumber inc A
+saga->accounts: AuthorizeOrder
+saga<--accounts: $success("success")
+autonumber inc A
+saga->kitchens: ConfirmTicket
+saga<--kitchens: $success("success")
+autonumber inc A
+saga->orders: ApproveOrder
+saga<--orders: $success("success")
+autonumber stop
+saga->saga: Completed
+
+group Compensation: After Step 1.2
+  autonumber stop
+  saga<--: $failure("failure")
+  saga->orders: RejectOrder
+  saga<--orders: $success("success")
+  saga->saga: Compensated
+end
+
+group Compensation: After Step 2.2
+  autonumber stop
+  saga<--: $failure("failure")
+  saga->kitchens: CancelTicket
+  saga<--kitchens: $success("success")
+  saga->orders: RejectOrder
+  saga<--orders: $success("success")
+  saga->saga: Compensated
+end
+
+footer create order saga sequence v1
+@enduml
+
+@startuml
+!include theme.plantuml
+
+skinparam responseMessageBelowArrow true
+
+participant "Orchestrator" as saga
+participant "Order Service" as orders
+participant "Kitchen Service" as kitchens
+participant "Accounting Service" as accounts
+
+title Cancel Order Saga
+
+saga<-orders: Start
+autonumber 1.1
+saga->orders: BeginCancelOrder
+saga<--orders: $success("success")
+autonumber inc A
+saga->kitchens: BeginCancelTicket
+saga<--kitchens: $success("success")
+autonumber inc A
+saga->accounts: ReverseAuthorization
+saga<--accounts: $success("success")
+autonumber inc A
+saga->kitchens: ConfirmCancelTicket
+saga<--kitchens: $success("success")
+autonumber inc A
+saga->orders: ConfirmCancelOrder
+saga<--orders: $success("success")
+autonumber stop
+saga->saga: Completed
+
+group Compensation: After Step 1.2
+  autonumber stop
+  saga<--: $failure("failure")
+  saga->orders: UndoBeginCancelOrder
+  saga<--orders: $success("success")
+  saga->saga: Compensated
+end
+
+group Compensation: After Step 2.2
+  autonumber stop
+  saga<--: $failure("failure")
+  saga->kitchens: UndoBeginCancelTicket
+  saga<--kitchens: $success("success")
+  saga->orders: UndoBeginCancelOrder
+  saga<--orders: $success("success")
+  saga->saga: Compensated
+end
+
+footer cancel order saga sequence v1
+@enduml
+
+@startuml
+!include theme.plantuml
+
+skinparam responseMessageBelowArrow true
+
+participant "Orchestrator" as saga
+participant "Order Service" as orders
+participant "Kitchen Service" as kitchens
+participant "Accounting Service" as accounts
+
+title Revise Order Saga
+
+saga<-orders: Start
+autonumber 1.1
+saga->orders: BeginReviseOrder
+saga<--orders: $success("BeginReviseOrderReply")
+note right: Update "OrderTotal" in saga state
+autonumber inc A
+saga->kitchens: BeginReviseTicket
+saga<--kitchens: $success("success")
+autonumber inc A
+saga->accounts: ReviseAuthorization
+saga<--accounts: $success("success")
+autonumber inc A
+saga->kitchens: ConfirmReviseTicket
+saga<--kitchens: $success("success")
+autonumber inc A
+saga->orders: ConfirmReviseOrder
+saga<--orders: $success("success")
+autonumber stop
+saga->saga: Completed
+
+group Compensation: After Step 1.2
+  autonumber stop
+  saga<--: $failure("failure")
+  saga->orders: UndoBeginReviseOrder
+  saga<--orders: $success("success")
+  saga->saga: Compensated
+end
+
+group Compensation: After Step 2.2
+  autonumber stop
+  saga<--: $failure("failure")
+  saga->kitchens: UndoBeginReviseTicket
+  saga<--kitchens: $success("success")
+  saga->orders: UndoBeginReviseOrder
+  saga<--orders: $success("success")
+  saga->saga: Compensated
+end
+
+footer revise order saga sequence v1
+@enduml
+
+@startuml
+!include theme.plantuml
+
+skinparam responseMessageBelowArrow true
+
+participant "User" as user
+participant "Customer Web" as web
+participant "Consumer Service" as consumer
+participant "Accounting Service" as accounts
+
+@enduml

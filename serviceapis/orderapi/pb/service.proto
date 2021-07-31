@@ -1,0 +1,71 @@
+syntax = "proto3";
+
+option go_package = "github.com/stackus/ftgogo/serviceapis/orderapi/pb;orderpb";
+
+import "google/protobuf/timestamp.proto";
+
+package orderpb;
+
+import 'commonapi/pb/service.proto';
+
+service OrderService {
+  rpc CreateOrder(CreateOrderRequest) returns (CreateOrderResponse);
+  rpc GetOrder(GetOrderRequest) returns (GetOrderResponse);
+  rpc CancelOrder(CancelOrderRequest) returns (CancelOrderResponse);
+  rpc ReviseOrder(ReviseOrderRequest) returns (ReviseOrderResponse);
+}
+
+enum OrderState {
+  ApprovalPending = 0;
+  Approved = 1;
+  Rejected = 2;
+  CancelPending = 3;
+  Cancelled = 4;
+  RevisionPending = 5;
+  Unknown = 6;
+}
+
+message Order {
+  string OrderID = 1;
+  string ConsumerID = 2;
+  string RestaurantID = 3;
+  int64 OrderTotal = 4;
+  OrderState Status = 5;
+}
+
+message CreateOrderRequest {
+  string ConsumerID = 1;
+  string RestaurantID = 2;
+  google.protobuf.Timestamp DeliverAt = 3;
+  commonpb.Address DeliverTo = 4;
+  commonpb.MenuItemQuantities LineItems = 5;
+}
+
+message CreateOrderResponse {
+  string OrderID = 1;
+}
+
+message GetOrderRequest {
+  string OrderID = 1;
+}
+
+message GetOrderResponse {
+  Order Order = 1;
+}
+
+message CancelOrderRequest {
+  string OrderID = 1;
+}
+
+message CancelOrderResponse {
+  OrderState Status = 1;
+}
+
+message ReviseOrderRequest {
+  string OrderID = 1;
+  commonpb.MenuItemQuantities RevisedQuantities = 2;
+}
+
+message ReviseOrderResponse {
+  OrderState Status = 1;
+}

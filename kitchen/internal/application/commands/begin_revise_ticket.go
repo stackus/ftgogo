@@ -3,21 +3,19 @@ package commands
 import (
 	"context"
 
+	"github.com/stackus/ftgogo/kitchen/internal/application/ports"
 	"github.com/stackus/ftgogo/kitchen/internal/domain"
-	"serviceapis/commonapi"
 )
 
 type BeginReviseTicket struct {
-	TicketID          string
-	RestaurantID      string
-	RevisedQuantities commonapi.MenuItemQuantities
+	TicketID string
 }
 
 type BeginReviseTicketHandler struct {
-	repo domain.TicketRepository
+	repo ports.TicketRepository
 }
 
-func NewBeginReviseTicketHandler(ticketRepo domain.TicketRepository) BeginReviseTicketHandler {
+func NewBeginReviseTicketHandler(ticketRepo ports.TicketRepository) BeginReviseTicketHandler {
 	return BeginReviseTicketHandler{repo: ticketRepo}
 }
 

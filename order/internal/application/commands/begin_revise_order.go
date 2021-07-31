@@ -3,36 +3,32 @@ package commands
 import (
 	"context"
 
+	"github.com/stackus/ftgogo/order/internal/application/ports"
 	"github.com/stackus/ftgogo/order/internal/domain"
-	"serviceapis/commonapi"
 )
 
 type BeginReviseOrder struct {
 	OrderID           string
-	RevisedQuantities commonapi.MenuItemQuantities
+	RevisedQuantities map[string]int
 }
 
 type BeginReviseOrderHandler struct {
-	repo      domain.OrderRepository
-	publisher domain.OrderPublisher
+	repo ports.OrderRepository
 }
 
-func NewBeginReviseOrderHandler(orderRepo domain.OrderRepository, orderPublisher domain.OrderPublisher) BeginReviseOrderHandler {
+func NewBeginReviseOrderHandler(repo ports.OrderRepository) BeginReviseOrderHandler {
 	return BeginReviseOrderHandler{
-		repo:      orderRepo,
-		publisher: orderPublisher,
+		repo: repo,
 	}
 }
 
 func (h BeginReviseOrderHandler) Handle(ctx context.Context, cmd BeginReviseOrder) (int, error) {
-	root, err := h.repo.Update(ctx, cmd.OrderID, &domain.BeginReviseOrder{
+	order, err := h.repo.Update(ctx, cmd.OrderID, &domain.BeginReviseOrder{
 		RevisedQuantities: cmd.RevisedQuantities,
 	})
 	if err != nil {
 		return 0, err
 	}
 
-	order := root.Aggregate().(*domain.Order)
-
-	return order.RevisedOrderTotal(order.OrderTotal(), cmd.RevisedQuantities), h.publisher.PublishEntityEvents(ctx, root)
+	return order.RevisedOrderTotal(order.OrderTotal(), cmd.RevisedQuantities), nil
 }

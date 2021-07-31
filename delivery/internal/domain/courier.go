@@ -3,15 +3,16 @@ package domain
 import (
 	"time"
 
-	"serviceapis/commonapi"
-	"shared-go/errs"
+	"github.com/stackus/errors"
+
+	"github.com/stackus/ftgogo/serviceapis/commonapi"
 )
 
 type ActionType string
 
 const (
 	PickUp  ActionType = "PICKUP"
-	DropOff            = "DROPOFF"
+	DropOff ActionType = "DROPOFF"
 )
 
 type Courier struct {
@@ -25,13 +26,13 @@ type Plan []Action
 type Action struct {
 	DeliveryID string
 	ActionType ActionType
-	Address    commonapi.Address
+	Address    *commonapi.Address
 	When       time.Time
 }
 
 // Courier errors
 var (
-	ErrCourierNotFound = errs.NewError("courier not found", errs.ErrNotFound)
+	ErrCourierNotFound = errors.Wrap(errors.ErrNotFound, "courier not found")
 )
 
 func (a ActionType) String() string {

@@ -5,8 +5,9 @@ import (
 	"strings"
 	"time"
 
+	"github.com/stackus/ftgogo/order-history/internal/adapters"
 	"github.com/stackus/ftgogo/order-history/internal/domain"
-	"serviceapis/orderapi"
+	"github.com/stackus/ftgogo/serviceapis/orderapi"
 )
 
 type CreateOrderHistory struct {
@@ -19,10 +20,10 @@ type CreateOrderHistory struct {
 }
 
 type CreateOrderHistoryHandler struct {
-	repo domain.OrderHistoryRepository
+	repo adapters.OrderHistoryRepository
 }
 
-func NewCreateOrderHistoryHandler(orderHistoryRepo domain.OrderHistoryRepository) CreateOrderHistoryHandler {
+func NewCreateOrderHistoryHandler(orderHistoryRepo adapters.OrderHistoryRepository) CreateOrderHistoryHandler {
 	return CreateOrderHistoryHandler{repo: orderHistoryRepo}
 }
 

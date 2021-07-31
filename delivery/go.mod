@@ -1,19 +1,30 @@
 module github.com/stackus/ftgogo/delivery
 
-go 1.15
+go 1.16
 
-replace serviceapis => ./../serviceapis
+replace github.com/stackus/ftgogo/serviceapis => ./../serviceapis
 
 replace shared-go => ../shared-go
 
+// Development replacements
+//replace github.com/stackus/edat => ../../edat
+//replace github.com/stackus/edat-msgpack => ../../edat-msgpack
+//replace github.com/stackus/edat-pgx => ../../edat-pgx
+
 require (
-	github.com/deepmap/oapi-codegen v1.4.1
-	github.com/getkin/kin-openapi v0.35.0
-	github.com/go-chi/chi v4.1.2+incompatible
-	github.com/go-chi/render v1.0.1
-	github.com/google/uuid v1.1.4
-	github.com/stackus/edat v0.0.3
-	github.com/stackus/edat-pgx v0.0.1
-	serviceapis v0.0.0-00010101000000-000000000000
+	github.com/cucumber/godog v0.11.0
+	github.com/google/uuid v1.3.0
+	github.com/hashicorp/go-immutable-radix v1.3.1 // indirect
+	github.com/hashicorp/go-memdb v1.3.2 // indirect
+	github.com/mattn/go-colorable v0.1.8 // indirect
+	github.com/rdumont/assistdog v0.0.0-20201106100018-168b06230d14
+	github.com/spf13/pflag v1.0.5
+	github.com/stackus/edat v0.0.6
+	github.com/stackus/edat-msgpack v0.0.2
+	github.com/stackus/edat-pgx v0.0.2
+	github.com/stackus/errors v0.0.3
+	github.com/stackus/ftgogo/serviceapis v0.0.0-20210116185538-3dd9fbb69179
+	google.golang.org/grpc v1.39.0
+	google.golang.org/protobuf v1.27.1
 	shared-go v0.0.0-00010101000000-000000000000
 )

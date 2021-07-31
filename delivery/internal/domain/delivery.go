@@ -3,8 +3,9 @@ package domain
 import (
 	"time"
 
-	"serviceapis/commonapi"
-	"shared-go/errs"
+	"github.com/stackus/errors"
+
+	"github.com/stackus/ftgogo/serviceapis/commonapi"
 )
 
 type DeliveryStatus int
@@ -19,8 +20,8 @@ type Delivery struct {
 	DeliveryID        string
 	RestaurantID      string
 	AssignedCourierID string
-	PickUpAddress     commonapi.Address
-	DeliveryAddress   commonapi.Address
+	PickUpAddress     *commonapi.Address
+	DeliveryAddress   *commonapi.Address
 	Status            DeliveryStatus
 	PickUpTime        time.Time
 	ReadyBy           time.Time
@@ -28,7 +29,7 @@ type Delivery struct {
 
 // Delivery errors
 var (
-	ErrDeliveryNotFound = errs.NewError("delivery not found", errs.ErrNotFound)
+	ErrDeliveryNotFound = errors.Wrap(errors.ErrNotFound, "delivery not found")
 )
 
 func (s DeliveryStatus) String() string {

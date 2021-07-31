@@ -5,23 +5,27 @@ import (
 	"database/sql"
 	"encoding/json"
 	"errors"
+	"fmt"
 
 	"github.com/stackus/edat-pgx"
 
+	"github.com/stackus/ftgogo/delivery/internal/application/ports"
 	"github.com/stackus/ftgogo/delivery/internal/domain"
 )
 
 const (
-	findRestaurantSQL   = "SELECT name, address FROM restaurants WHERE id = $1"
-	saveRestaurantSQL   = "INSERT INTO restaurants (id, name, address) VALUES ($1, $2, $3)"
-	updateRestaurantSQL = "UPDATE restaurants SET name = $1, address = $2 WHERE id = $3"
+	findRestaurantSQL   = "SELECT name, address FROM %s WHERE id = $1"
+	saveRestaurantSQL   = "INSERT INTO %s (id, name, address) VALUES ($1, $2, $3)"
+	updateRestaurantSQL = "UPDATE %s SET name = $1, address = $2 WHERE id = $3"
 )
 
 type RestaurantPostgresRepository struct {
 	client edatpgx.Client
 }
 
-var _ domain.RestaurantRepository = (*RestaurantPostgresRepository)(nil)
+var RestaurantsTableName = "restaurants"
+
+var _ ports.RestaurantRepository = (*RestaurantPostgresRepository)(nil)
 
 func NewRestaurantPostgresRepository(client edatpgx.Client) *RestaurantPostgresRepository {
 	return &RestaurantPostgresRepository{
@@ -29,8 +33,8 @@ func NewRestaurantPostgresRepository(client edatpgx.Client) *RestaurantPostgresR
 	}
 }
 
-func (s *RestaurantPostgresRepository) Find(ctx context.Context, restaurantID string) (*domain.Restaurant, error) {
-	row := s.client.QueryRow(ctx, findRestaurantSQL, restaurantID)
+func (r *RestaurantPostgresRepository) Find(ctx context.Context, restaurantID string) (*domain.Restaurant, error) {
+	row := r.client.QueryRow(ctx, fmt.Sprintf(findRestaurantSQL, RestaurantsTableName), restaurantID)
 
 	var name string
 	var addressData []byte
@@ -43,37 +47,37 @@ func (s *RestaurantPostgresRepository) Find(ctx context.Context, restaurantID st
 		return nil, err
 	}
 
-	r := &domain.Restaurant{
+	restaurant := &domain.Restaurant{
 		RestaurantID: restaurantID,
 		Name:         name,
 	}
 
-	err = json.Unmarshal(addressData, &r.Address)
+	err = json.Unmarshal(addressData, &restaurant.Address)
 	if err != nil {
 		return nil, err
 	}
 
-	return r, nil
+	return restaurant, nil
 }
 
-func (s *RestaurantPostgresRepository) Save(ctx context.Context, r *domain.Restaurant) error {
-	addressData, err := json.Marshal(r.Address)
+func (r *RestaurantPostgresRepository) Save(ctx context.Context, restaurant *domain.Restaurant) error {
+	addressData, err := json.Marshal(restaurant.Address)
 	if err != nil {
 		return err
 	}
 
-	_, err = s.client.Exec(ctx, saveRestaurantSQL, r.RestaurantID, r.Name, addressData)
+	_, err = r.client.Exec(ctx, fmt.Sprintf(saveRestaurantSQL, RestaurantsTableName), restaurant.RestaurantID, restaurant.Name, addressData)
 
 	return err
 }
 
-func (s *RestaurantPostgresRepository) Update(ctx context.Context, restaurantID string, r *domain.Restaurant) error {
-	addressData, err := json.Marshal(r.Address)
+func (r *RestaurantPostgresRepository) Update(ctx context.Context, restaurantID string, restaurant *domain.Restaurant) error {
+	addressData, err := json.Marshal(restaurant.Address)
 	if err != nil {
 		return err
 	}
 
-	_, err = s.client.Exec(ctx, updateRestaurantSQL, r.Name, addressData, restaurantID)
+	_, err = r.client.Exec(ctx, fmt.Sprintf(updateRestaurantSQL, RestaurantsTableName), restaurant.Name, addressData, restaurantID)
 
 	return err
 }

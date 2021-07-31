@@ -3,6 +3,7 @@ package commands
 import (
 	"context"
 
+	"github.com/stackus/ftgogo/consumer/internal/application/ports"
 	"github.com/stackus/ftgogo/consumer/internal/domain"
 )
 
@@ -13,20 +14,18 @@ type ValidateOrderByConsumer struct {
 }
 
 type ValidateOrderByConsumerHandler struct {
-	repo domain.ConsumerRepository
+	repo ports.ConsumerRepository
 }
 
-func NewValidateOrderByConsumerHandler(consumerRepo domain.ConsumerRepository) ValidateOrderByConsumerHandler {
+func NewValidateOrderByConsumerHandler(consumerRepo ports.ConsumerRepository) ValidateOrderByConsumerHandler {
 	return ValidateOrderByConsumerHandler{repo: consumerRepo}
 }
 
 func (h ValidateOrderByConsumerHandler) Handle(ctx context.Context, cmd ValidateOrderByConsumer) error {
-	root, err := h.repo.Load(ctx, cmd.ConsumerID)
+	consumer, err := h.repo.Load(ctx, cmd.ConsumerID)
 	if err != nil {
 		return domain.ErrConsumerNotFound
 	}
-
-	consumer := root.Aggregate().(*domain.Consumer)
 
 	err = consumer.ValidateOrderByConsumer(cmd.OrderTotal)
 	if err != nil {

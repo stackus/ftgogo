@@ -1,0 +1,101 @@
+openapi: "3.0.0"
+info:
+  version: "1.0.0"
+  title: Delivery Service API
+  description: The delivery-service API is part of the FTGOGO demonstration application
+  contact:
+    name: FTGOGO Issues
+    url: https://github.com/stackus/ftgogo/issues
+servers:
+  - url: https://{host}:{port}/api
+    variables:
+      host:
+        default: localhost
+      port:
+        default: "8003"
+paths:
+  /couriers/{courierID}/availability:
+    post:
+      summary: Set availability for new or existing couriers
+      operationId: setCourierAvailability
+      parameters:
+        - $ref: '#/components/parameters/CourierID'
+      requestBody:
+        description: courier availability request
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [ available ]
+              properties:
+                available:
+                  type: boolean
+      responses:
+        '201':
+          $ref: '#/components/responses/CourierAvailableResponse'
+        default:
+          $ref: '../../../shared-go/web/spec.yaml#/components/responses/ErrorResponse'
+  /deliveries/{deliveryID}:
+    get:
+      summary: Get delivery status by ID
+      operationId: getDeliveryStatus
+      parameters:
+        - $ref: '#/components/parameters/DeliveryID'
+      responses:
+        '200':
+          $ref: '#/components/responses/DeliveryStatusResponse'
+        default:
+          $ref: '../../../shared-go/web/spec.yaml#/components/responses/ErrorResponse'
+
+components:
+  schemas:
+    DeliveryStatus:
+      type: object
+      required: [ id, status, assigned_courier, courier_actions ]
+      properties:
+        id:
+          type: string
+          format: uuid
+        status:
+          type: string
+        assigned_courier:
+          type: string
+        courier_actions:
+          type: array
+          items:
+            type: string
+  parameters:
+    CourierID:
+      in: path
+      name: courierID
+      description: courier id (uuid)
+      required: true
+      schema:
+        type: string
+        format: uuid
+    DeliveryID:
+      in: path
+      name: deliveryID
+      description: delivery id (uuid)
+      required: true
+      schema:
+        type: string
+        format: uuid
+  responses:
+    CourierAvailableResponse:
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            required: [ available ]
+            properties:
+              available:
+                type: boolean
+    DeliveryStatusResponse:
+      description: OK
+      content:
+        application/json:
+          schema:
+            $ref: '../../internal/application/queries/spec.yaml#/components/schemas/DeliveryStatus'

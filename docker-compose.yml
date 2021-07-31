@@ -22,7 +22,7 @@ services:
       - '5432:5432'
     volumes:
       - 'pgdata:/var/lib/postgresql/data'
-      - './local-data/init-postgres.sql:/docker-entrypoint-initdb.d/init-postgres.sql'
+      - './config/postgresql/init-postgres.sql:/docker-entrypoint-initdb.d/init-postgres.sql'
 
   stan:
     container_name: stan
@@ -38,8 +38,23 @@ services:
     volumes:
       - 'standata:/data'
 
+  customer-web-service:
+    hostname: customer-web
+    restart: on-failure
+    build:
+      context: .
+      args:
+        service: customer-web
+        cmd: gateway
+    environment:
+      <<: *default-environment
+      SERVICE_ID: customer-web-service
+    networks:
+      - mononet
+    ports:
+      - '8000:80'
+
   accounting-service:
-    container_name: accountingservice
     hostname: accountingservice
     restart: on-failure
     build:
@@ -55,8 +70,6 @@ services:
       - stan
     networks:
       - mononet
-    ports:
-      - '8001:80'
   accounting-cdc:
     container_name: accountingcdc
     hostname: accountingcdc
@@ -76,7 +89,6 @@ services:
     networks:
       - mononet
   consumer-service:
-    container_name: consumerservice
     hostname: consumerservice
     restart: on-failure
     build:
@@ -92,8 +104,6 @@ services:
       - stan
     networks:
       - mononet
-    ports:
-      - '8002:80'
   consumer-cdc:
     container_name: consumercdc
     hostname: consumercdc
@@ -113,7 +123,6 @@ services:
     networks:
       - mononet
   delivery-service:
-    container_name: deliveryservice
     hostname: deliveryservice
     restart: on-failure
     build:
@@ -129,10 +138,7 @@ services:
       - stan
     networks:
       - mononet
-    ports:
-      - '8003:80'
   kitchen-service:
-    container_name: kitchenservice
     hostname: kitchenservice
     restart: on-failure
     build:
@@ -148,8 +154,6 @@ services:
       - stan
     networks:
       - mononet
-    ports:
-      - '8004:80'
   kitchen-cdc:
     container_name: kitchencdc
     hostname: kitchencdc
@@ -169,7 +173,6 @@ services:
     networks:
       - mononet
   order-service:
-    container_name: orderservice
     hostname: orderservice
     restart: on-failure
     build:
@@ -185,10 +188,7 @@ services:
       - stan
     networks:
       - mononet
-    ports:
-      - '8005:80'
   order-history-service:
-    container_name: orderhistoryservice
     hostname: orderhistoryservice
     restart: on-failure
     build:
@@ -204,8 +204,6 @@ services:
       - stan
     networks:
       - mononet
-    ports:
-      - '8015:80'
   order-cdc:
     container_name: ordercdc
     hostname: ordercdc
@@ -225,7 +223,6 @@ services:
     networks:
       - mononet
   restaurant-service:
-    container_name: restaurantservice
     hostname: restaurantservice
     restart: on-failure
     build:
@@ -241,8 +238,6 @@ services:
       - stan
     networks:
       - mononet
-    ports:
-      - '8006:80'
   restaurant-cdc:
     container_name: restaurantcdc
     hostname: restaurantcdc
@@ -266,5 +261,6 @@ networks:
   mononet:
 
 volumes:
+  consuldata:
   pgdata:
   standata:
