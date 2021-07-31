@@ -24,11 +24,11 @@ demonstrate additional microservice patterns and techniques.
     1. [Services](#services)
 1. [Design](#design)
     1. [Event-Driven Architecture](#event-driven-architecture)
+        1. [Sagas](#sagas)
         1. [Outbox Pattern](#outbox-pattern)
         1. [Message Deduplication](#message-deduplication)
     1. [CQRS](#cqrs)
     1. [Event Sourcing](#event-sourcing)
-    1. [Sagas](#sagas)
     1. [Backend-For-Frontend](#backend-for-frontend-bff)
     1. [GRPC and Protocol Buffers](#grpc-and-protocol-buffers)
     1. [Testing](#testing)
@@ -193,14 +193,30 @@ consider it perfect or the "one".
 Asynchronous messaging handles all inter-service communication. The exception is the communication from the BFF/UI layer
 to the downstream services.
 
+#### Sagas
+
+The same three sagas found in [FTGO](https://github.com/microservices-patterns/ftgo-application) have been implemented
+here in the [order-service](/order/cmd/service).
+
+- [CreateOrderSaga](/order/internal/adapters/create_order_orchestration_saga.go)
+    - saga responsible for the creation of a new order  
+      ![Steps](docs/createOrderSaga.png)
+- [CancelOrderSaga](/order/internal/adapters/cancel_order_orchestration_saga.go)
+    - saga responsible for the cancelling and releasing of order resources like tickets and accounting reserves  
+      ![Steps](docs/cancelOrderSaga.png)
+- [ReviseOrderSaga](/order/internal/adapters/revise_order_orchestration_saga.go)
+    - saga responsible for the processing the changes made to an open order  
+      ![Steps](docs/reviseOrderSaga.png)
+
 #### Outbox Pattern
 
-An implementation of the outbox pattern is used to ensure all messages arrive at their destinations. It provides the
-solution to the [dual write problem](https://thorben-janssen.com/dual-writes/). Any service that publishes messages is
-actually publishing the message into the database. A CDC sibling service then processes the messages from the database
-and publishes the message into NATS Streaming. This process provides at-least-once delivery.
+An implementation of the [outbox pattern](http://www.kamilgrzybek.com/design/the-outbox-pattern/) can be used to ensure
+all messages arrive at their destinations. It provides the solution to
+the [dual write problem](https://thorben-janssen.com/dual-writes/). Any service that publishes messages is actually
+publishing the message into the database. A CDC sibling service then processes the messages from the database and
+publishes the message into NATS Streaming. This process provides at-least-once delivery.
 
-> Services can be made to publish messages directly without having to use an outbox and CDC. The pattern works best, only?, with backends that provide transactional support.
+![Outbox Pattern Diagram](docs/outbox_pattern_bg.png)
 
 #### Message Deduplication
 
@@ -224,21 +240,6 @@ The [Order History](/order-history) Service provides an order by consumer read-m
 
 Several services use event sourcing and keep track of the changes to aggregates using commands and recorded events.
 Check out the [Order](/order/internal/domain/order.go) aggregate for an example.
-
-### Sagas
-
-The same three sagas found in [FTGO](https://github.com/microservices-patterns/ftgo-application) have been implemented
-here in the [order-service](/order/cmd/service).
-
-- [CreateOrderSaga](/order/internal/adapters/create_order_orchestration_saga.go)
-    - saga responsible for the creation of a new order  
-      ![Steps](docs/createOrderSaga.png)
-- [CancelOrderSaga](/order/internal/adapters/cancel_order_orchestration_saga.go)
-    - saga responsible for the cancelling and releasing of order resources like tickets and accounting reserves  
-      ![Steps](docs/cancelOrderSaga.png)
-- [ReviseOrderSaga](/order/internal/adapters/revise_order_orchestration_saga.go)
-    - saga responsible for the processing the changes made to an open order  
-      ![Steps](docs/reviseOrderSaga.png)
 
 ### Backend-For-Frontend (BFF)
 
