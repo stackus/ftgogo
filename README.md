@@ -231,13 +231,13 @@ example.
 The same three sagas found in [FTGO](https://github.com/microservices-patterns/ftgo-application) have been implemented
 here in the [order-service](https://github.com/stackus/ftgogo/blob/master/order/cmd/service).
 
-- [CreateOrderSaga](https://github.com/stackus/ftgogo/blob/master/order/internal/adapters/create_order_orchestration_saga.go)
+- [CreateOrderSaga](/order/internal/adapters/create_order_orchestration_saga.go)
     - saga responsible for the creation of a new order  
       ![Steps](docs/createOrderSaga.png)
-- [CancelOrderSaga](https://github.com/stackus/ftgogo/blob/master/order/internal/adapters/cancel_order_orchestration_saga.go)
+- [CancelOrderSaga](/order/internal/adapters/cancel_order_orchestration_saga.go)
     - saga responsible for the cancelling and releasing of order resources like tickets and accounting reserves  
       ![Steps](docs/cancelOrderSaga.png)
-- [ReviseOrderSaga](https://github.com/stackus/ftgogo/blob/master/order/internal/adapters/revise_order_orchestration_saga.go)
+- [ReviseOrderSaga](/order/internal/adapters/revise_order_orchestration_saga.go)
     - saga responsible for the processing the changes made to an open order  
       ![Steps](docs/reviseOrderSaga.png)
 
