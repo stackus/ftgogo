@@ -144,13 +144,13 @@ func initService(svc *applications.Service) error {
   | |-/service     - Primary service for this capability
   |-/internal      - Use the special treatment of "internal" to sequester our code from the other services
     |-/adapters    - Driven Adapter implementations.
-    |-/application - CQRS parent folder. Processes under this will implement business rules and logic
-    | |-/commands  - Application commands. Processes that apply some change to the subdomain
-    | |-/ports     - The ports that the Driven Adapters implement.
-    | |-/queries   - Application queries. Processes that request information from the subdomain
-    | |-service.go - The service interface that is used by the handlers, the Driver Adapters.
+    |-/application - Application core folder. Processes under this will implement business rules and logic
+    | |-/commands  - CQRS commands. Processes that apply some change to the subdomain
+    | |-/ports     - Application interfaces that the Driven Adapters implement.
+    | |-/queries   - CQRS queries. Processes that request information from the subdomain
+    | |-service.go - Application interface and implementation that is used by the handlers, the Driver Adapters.
     |-/domain      - The definitions and the domain rules and logic
-    |-/handlers    - "Driver Ports" implementations
+    |-/handlers    - Driver Adapter implementations
   ```
 
 #### Regarding the layout
