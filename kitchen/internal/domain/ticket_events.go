@@ -32,7 +32,7 @@ func (TicketCreateCancelled) EventName() string { return "kitchenservice.TicketC
 
 type TicketCancelling struct{}
 
-func (TicketCancelling) EventName() string { return "ktichenservice.TicketCancelling" }
+func (TicketCancelling) EventName() string { return "kitchenservice.TicketCancelling" }
 
 type TicketCancelConfirmed struct{}
 
@@ -44,7 +44,7 @@ func (TicketCancelUndone) EventName() string { return "kitchenservice.TicketCanc
 
 type TicketRevising struct{}
 
-func (TicketRevising) EventName() string { return "ktichenservice.TicketRevising" }
+func (TicketRevising) EventName() string { return "kitchenservice.TicketRevising" }
 
 type TicketReviseConfirmed struct{}
 
